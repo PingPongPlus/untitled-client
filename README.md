@@ -1,40 +1,26 @@
-# PingPlus client
+# PingPlus UI starter
 
 Fabric client mod for Minecraft 26.2 / Java 25.
 
-## ClickGUI
+This branch contains the ClickGUI shell and one working FPS toggle.
+Press **Right Shift** in a world to open the panel, then click **FPS counter** to
+show or hide the FPS display. Escape, Right Shift, or the close button closes it.
+The opening key can be rebound under Controls → Key Binds → PingPlus Client.
 
-Enter a world and press **Right Shift**. Rebind **Open ClickGUI** under
-Options → Controls → Key Binds → PingPlus Client. Escape or the opening key
-closes the panel. The game continues while the panel is open.
+FPS starts enabled. Its toggle survives reopening the panel but resets when you
+restart Minecraft. There is no config file, search, category navigation, scrolling,
+appearance settings, or other modules. The dark panel and violet styling remain.
 
-- Filter by All modules, HUD, or Player, or type into the search field.
-- Click a module card to toggle its actual HUD display.
-- Scroll or use the arrow buttons when cards do not fit the window.
-- Tab navigates controls; Enter/Space activate cards. The slider supports native
-  keyboard controls (Enter to select, then arrow keys).
-- Appearance includes four accent colors, hover animations, and HUD background
-  opacity with a preview.
-- Settings save to `config/pingplus-client.properties` in the game directory.
+## Branches
 
-Available modules: FPS, coordinates, direction, sprint/sneak status, local clock,
-and current-world session timer. Only FPS is enabled by default. HUD elements are
-hidden while a screen is open and follow Minecraft's F1 visibility setting.
-Session time resets when the client world changes, including dimension changes.
+- `codex/full-clickgui`: preserved full implementation, including settings and docs.
+- `codex/fps-only-ui`: minimal version for you to extend.
 
 ## Development
 
-`./gradlew build` builds the mod; `./gradlew runClient` launches the development client.
+- `./gradlew build` compiles and packages the mod.
+- `./gradlew runClient` launches Minecraft for manual testing.
+- [UI code guide](docs/CLICKGUI.md) explains the remaining classes.
 
-See [the ClickGUI developer guide](docs/CLICKGUI.md) for the screen lifecycle, rendering,
-settings flow, and examples of adding modules.
-
-Client UI code lives in `src/client/java/pingplus/voicechat/client/gui`.
-`ClientModule` defines the catalog, `ClientConfig` stores settings, `ClientHud`
-provides module output, and `ClickGuiScreen` arranges reusable widgets. Add new
-modules to the enum and implement their behavior in the HUD or client event hooks.
-
-Manual checks: open/close and rebind the GUI; toggle all modules; search for a match
-and an empty result; navigate by keyboard; resize and change GUI scale; scroll the
-cards at large GUI scales; change appearance and restart to verify persistence;
-hide the HUD with F1.
+Manual checks: open and close the panel, toggle FPS off and on, reopen the panel,
+use Tab/Enter to activate the button, and resize or change GUI scale.
