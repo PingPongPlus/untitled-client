@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "id": "voicechat",
+  "version": "${version}",
+  "name": "untitled",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/voicechat/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-datagen": [
+      "pingplus.voicechat.client.VoicechatDataGenerator"
+    ],
+    "client": [
+      "pingplus.voicechat.client.VoicechatClient"
+    ],
+    "main": [
+      "pingplus.voicechat.Voicechat"
+    ]
+  },
+  "mixins": [
+    "voicechat.mixins.json",
+    {
+      "config": "voicechat.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "java": ">=25",
+    "minecraft": "${minecraft_version}"
+  }
+}
