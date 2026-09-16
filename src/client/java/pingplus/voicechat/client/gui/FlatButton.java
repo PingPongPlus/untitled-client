@@ -36,8 +36,8 @@ public class FlatButton extends AbstractWidget {
         double accentStrength = (selected ? 0.10 : 0) + hoverProgress * 0.09;
         int background = GuiTheme.blendColors(GuiTheme.CARD, GuiTheme.ACCENT, accentStrength);
 
-        GuiTheme.drawRoundedRect(graphics, getX(), getY(), width, height, 6, borderColor(selected));
-        GuiTheme.drawRoundedRect(graphics, getX() + 1, getY() + 1, width - 2, height - 2, 5, background);
+        GuiTheme.drawRoundedRect(graphics, getX(), getY(), width, height, 20, borderColor(selected));
+        GuiTheme.drawRoundedRect(graphics, getX() + 1, getY() + 1, width - 2, height - 2, 20, background);
         drawContents(graphics, selected);
     }
 
