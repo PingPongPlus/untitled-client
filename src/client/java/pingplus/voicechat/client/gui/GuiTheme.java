@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 /** Shared ARGB colors and drawing helpers. Colors use 0xAARRGGBB. */
 public final class GuiTheme {
+    public static final int ACCENT = 0xFF9C8CFF;
     public static final int TEXT = 0xFFF1F0F7;
     public static final int MUTED = 0xFFA09DB2;
     public static final int PANEL = 0xFF17171F;
