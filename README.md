@@ -2,14 +2,15 @@
 
 Fabric client mod for Minecraft 26.2 / Java 25.
 
-This branch contains the ClickGUI shell and one working FPS toggle.
-Press **Right Shift** in a world to open the panel, then click **FPS counter** to
+The ClickGUI contains one FPS toggle and a Close button. Other client features
+(such as the coordinates HUD and player Mixins) are separate from the menu.
+Press **Right Shift** in a world to open the panel, then click **FPS: ON/OFF** to
 show or hide the FPS display. Escape, Right Shift, or the close button closes it.
 The opening key can be rebound under Controls → Key Binds → PingPlus Client.
 
 FPS starts enabled. Its toggle survives reopening the panel but resets when you
 restart Minecraft. There is no config file, search, category navigation, scrolling,
-appearance settings, or other modules. The dark panel and violet styling remain.
+appearance settings, or other modules. The menu uses a simple dark rectangle and standard Minecraft buttons.
 
 ## Branches
 

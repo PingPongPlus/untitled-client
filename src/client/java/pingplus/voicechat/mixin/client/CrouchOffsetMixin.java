@@ -16,14 +16,12 @@ public abstract class CrouchOffsetMixin {
             at = @At("RETURN"),
             cancellable = true
     )
-    private void changeOffset(
-            AvatarRenderState state,
-            CallbackInfoReturnable<Vec3> cir) {
+    private void changeOffset(AvatarRenderState state, CallbackInfoReturnable<Vec3> cir) {
 
         Vec3 originalOffset = cir.getReturnValue();
 
         // Additional offset: X, Y, Z, measured in blocks.
-        Vec3 newOffset = originalOffset.add(0.0, 1.5, 0.0);
+        Vec3 newOffset = originalOffset.add(1.0, 1.5, 0.0);
 
         cir.setReturnValue(newOffset);
     }

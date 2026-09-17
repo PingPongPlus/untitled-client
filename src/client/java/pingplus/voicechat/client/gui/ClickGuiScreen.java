@@ -2,29 +2,16 @@ package pingplus.voicechat.client.gui;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
-/** The panel shell with one FPS button. Add your own controls in init(). */
+/** A small settings screen opened with Right Shift. */
 public final class ClickGuiScreen extends Screen {
-    private static final int MAX_PANEL_WIDTH = 620;
-    private static final int MAX_PANEL_HEIGHT = 366;
-    private static final int WINDOW_MARGIN = 8;
-    private static final int CONTENT_PADDING = 14;
-    private static final int CARD_WIDTH = 224;
-
     private final FpsHud fpsHud;
     private final KeyMapping openGuiKey;
-
-    // Minecraft supplies GUI-scaled dimensions for drawing and input.
-    private int panelX;
-    private int panelY;
-    private int panelWidth;
-    private int panelHeight;
-    private int sidebarWidth;
-    private int contentX;
 
     public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey) {
         super(Component.literal("PingPlus"));
@@ -32,47 +19,36 @@ public final class ClickGuiScreen extends Screen {
         this.openGuiKey = openGuiKey;
     }
 
+    // Minecraft calls init() when the screen opens or the window is resized.
     @Override
     protected void init() {
-        panelWidth = Math.min(MAX_PANEL_WIDTH, width - WINDOW_MARGIN * 2);
-        panelHeight = Math.min(MAX_PANEL_HEIGHT, height - WINDOW_MARGIN * 2);
-        panelX = (width - panelWidth) / 2;
-        panelY = (height - panelHeight) / 2;
-        sidebarWidth = panelWidth >= 470 ? 116 : 82;
-        contentX = panelX + sidebarWidth + CONTENT_PADDING;
+        int buttonX = width / 2 - 100;
+        int buttonY = height / 2 - 10;
 
-        int availableWidth = panelWidth - sidebarWidth - CONTENT_PADDING * 2;
-        addRenderableWidget(new FpsButton(contentX, panelY + 50, Math.min(CARD_WIDTH, availableWidth), fpsHud));
-        addRenderableWidget(new FlatButton(panelX + panelWidth - 33, panelY + 12,
-                21, 20, "x", () -> false, this::onClose));
+        // The code inside this callback runs when the FPS button is pressed.
+        addRenderableWidget(Button.builder(fpsLabel(), button -> {
+            fpsHud.toggle();
+            button.setMessage(fpsLabel());
+        }).bounds(buttonX, buttonY, 200, 20).build());
+
+        addRenderableWidget(Button.builder(Component.literal("Close"), button -> {
+            onClose();
+        }).bounds(buttonX, buttonY + 30, 200, 20).build());
+    }
+
+    private Component fpsLabel() {
+        return Component.literal("FPS: " + (fpsHud.isEnabled() ? "ON" : "OFF"));
     }
 
     @Override
     public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
-        drawPanel(graphics);
-        drawLabels(graphics);
-    }
+        int centerX = width / 2;
+        int centerY = height / 2;
 
-    private void drawPanel(GuiGraphicsExtractor graphics) {
-        graphics.fill(0, 0, width, height, 0xA0090A10);
-        GuiTheme.drawRoundedRect(graphics, panelX - 3, panelY + 5, panelWidth + 6, panelHeight + 3, 11, 0x55000000);
-        GuiTheme.drawRoundedRect(graphics, panelX, panelY, panelWidth, panelHeight, 9, GuiTheme.BORDER);
-        GuiTheme.drawRoundedRect(graphics, panelX + 1, panelY + 1, panelWidth - 2, panelHeight - 2, 8, GuiTheme.PANEL);
-        graphics.fill(panelX + sidebarWidth, panelY + 12,
-                panelX + sidebarWidth + 1, panelY + panelHeight - 12, GuiTheme.BORDER);
-    }
-
-    private void drawLabels(GuiGraphicsExtractor graphics) {
-        GuiTheme.drawRoundedRect(graphics, panelX + 12, panelY + 15, 23, 23, 6, GuiTheme.ACCENT);
-        graphics.text(font, "P", panelX + 21, panelY + 23, GuiTheme.PANEL, false);
-        if (sidebarWidth > 100) {
-            graphics.text(font, "PINGPLUS", panelX + 41, panelY + 23, GuiTheme.TEXT, false);
-        }
-        graphics.text(font, "PVP CLIENT", panelX + 12, panelY + 46, GuiTheme.MUTED, false);
-        graphics.text(font, "Modules", contentX, panelY + 18, GuiTheme.TEXT, false);
-        graphics.fill(contentX, panelY + panelHeight - 31,
-                panelX + panelWidth - CONTENT_PADDING, panelY + panelHeight - 30, GuiTheme.BORDER);
-        graphics.text(font, "ESC to close", contentX, panelY + panelHeight - 19, GuiTheme.MUTED, false);
+        // Colors use 0xAARRGGBB: alpha, red, green, blue.
+        graphics.fill(0, 0, width, height, 0xA0000000);
+        graphics.fill(centerX - 120, centerY - 50, centerX + 120, centerY + 60, 0xFF17171F);
+        graphics.centeredText(font, title, centerX, centerY - 32, 0xFFFFFFFF);
     }
 
     @Override
@@ -81,11 +57,13 @@ public final class ClickGuiScreen extends Screen {
             onClose();
             return true;
         }
+        // Minecraft handles Escape and keyboard navigation.
         return super.keyPressed(event);
     }
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        // Also support the opening key being rebound to a mouse button.
         if (openGuiKey.matchesMouse(event)) {
             onClose();
             return true;
