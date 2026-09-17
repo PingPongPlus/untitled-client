@@ -9,6 +9,7 @@ import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import pingplus.voicechat.client.gui.ClickGuiScreen;
+import pingplus.voicechat.client.gui.CoordinatesHud;
 import pingplus.voicechat.client.gui.FpsHud;
 
 /** Client entry point: creates the FPS toggle and connects it to Fabric events. */
@@ -16,6 +17,7 @@ public class VoicechatClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         FpsHud fpsHud = new FpsHud();
+        CoordinatesHud coordinatesHud = new CoordinatesHud();
         KeyMapping openGuiKey = registerOpenGuiKey();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -30,6 +32,12 @@ public class VoicechatClient implements ClientModInitializer {
         // Attaching to a vanilla layer inherits the HUD visibility condition (F1).
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT,
                 Identifier.fromNamespaceAndPath("voicechat", "client_hud"), fpsHud::extract);
+        HudElementRegistry.attachElementBefore(
+                VanillaHudElements.CHAT,
+                Identifier.fromNamespaceAndPath("voicechat", "coordinates_hud"),
+                coordinatesHud::extract
+        );
+
     }
 
     private KeyMapping registerOpenGuiKey() {
