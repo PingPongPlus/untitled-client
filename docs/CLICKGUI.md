@@ -1,43 +1,37 @@
-# Minimal ClickGUI code guide
+# Simple ClickGUI
 
-The UI uses Minecraft's native `Screen` and widgets with custom drawing.
-Only the panel shell and FPS feature remain on this branch.
+Start with `src/client/java/pingplus/voicechat/client/gui/ClickGuiScreen.java`.
+It contains the entire menu: a rectangular background, an FPS toggle, and Close.
+Minecraft's standard `Button` handles drawing, hovering, clicking, keyboard focus,
+and narration. There are no custom button subclasses or animations.
 
-## Files
+## What happens when you press Right Shift?
 
-All UI files are in `src/client/java/pingplus/voicechat/client/gui`.
+1. `VoicechatClient` detects the key and opens `ClickGuiScreen`.
+2. Minecraft calls `init()` to create its buttons.
+3. Clicking the FPS button runs the callback inside `Button.builder(...)`:
 
-| File | Purpose |
-| --- | --- |
-| `ClickGuiScreen.java` | Centers and draws the panel; adds the FPS and close buttons. |
-| `FlatButton.java` | Shared button appearance, hover animation, mouse and keyboard input. |
-| `FpsButton.java` | Draws the FPS card and connects it to the FPS toggle. |
-| `FpsHud.java` | Stores one enabled flag and renders the current FPS in the top-left corner. |
-| `GuiTheme.java` | Fixed colors, rounded rectangles, and color blending. |
+   ```java
+   fpsHud.toggle();
+   button.setMessage(fpsLabel());
+   ```
 
-`VoicechatClient.java` creates one `FpsHud`, registers Right Shift, and attaches the
-FPS renderer to Fabric's HUD event. Every new screen receives that same instance.
+4. `FpsHud` uses that flag to show or hide FPS during gameplay.
 
-## Flow
+`extractBackground()` draws the background and title. `onClose()` returns to the
+game. Minecraft handles Escape; the screen also handles the opening key to close.
 
-1. Right Shift opens `ClickGuiScreen` during gameplay.
-2. `init()` calculates the GUI-scaled bounds and registers the two buttons.
-3. Minecraft calls `extractBackground()` for the panel, then renders its widgets.
-4. Clicking `FpsButton` calls `FpsHud.toggle()`.
-5. The HUD callback draws `Minecraft.getInstance().getFps()` when enabled and no
-   screen is open. Attaching to the vanilla chat layer inherits F1 HUD visibility.
+## Add a button
 
-The flag starts enabled and lives only in memory. No settings files are loaded or
-written; any old config file from the full version is ignored and left untouched.
+Inside `init()`, add another native button and choose its position:
 
-## Extend it yourself
+```java
+addRenderableWidget(Button.builder(Component.literal("My feature"), button -> {
+    // Your click action goes here.
+}).bounds(buttonX, buttonY + 60, 200, 20).build());
+```
 
-Add your controls inside `ClickGuiScreen.init()`. Use `FlatButton` for a normal
-button or subclass it and override `drawContents()` for custom contents. Its
-`BooleanSupplier` supplies the selected state; its `Runnable` handles activation.
+The bounds are `x, y, width, height` in GUI coordinates. Move the Close button and
+enlarge the background if needed. No separate button class is required.
 
-Change colors in `GuiTheme`, panel dimensions in `ClickGuiScreen`, or the FPS card
-layout in `FpsButton`. All drawing and mouse bounds use Minecraft GUI coordinates.
-
-The full module system, search, categories, appearance controls, and persistence
-are preserved on the `codex/full-clickgui` branch if you want to refer to them.
+The existing coordinates HUD and player Mixins are independent of this menu.
