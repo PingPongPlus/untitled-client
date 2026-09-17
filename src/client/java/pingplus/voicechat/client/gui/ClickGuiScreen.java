@@ -2,11 +2,14 @@ package pingplus.voicechat.client.gui;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import pingplus.voicechat.client.PlayerSettings;
+import net.minecraft.client.gui.components.EditBox;
 
 import javax.swing.plaf.SliderUI;
 
@@ -28,6 +31,7 @@ public final class ClickGuiScreen extends Screen {
     protected void init() {
         int buttonX = width / 2 - 100;
         int buttonY = height / 2 - 10;
+        buttonY = buttonY - 90;
 
         // The code inside this callback runs when the FPS button is pressed.
         addRenderableWidget(Button.builder(fpsLabel(), button -> {
@@ -35,17 +39,92 @@ public final class ClickGuiScreen extends Screen {
             button.setMessage(fpsLabel());
         }).bounds(buttonX, buttonY, 200, 20).build());
 
-        addRenderableWidget(Button.builder(Component.literal("x"), button -> {
-            onClose();
-        }).bounds(buttonX, buttonY + 60, 200, 20).build());
 
         addRenderableWidget(Button.builder(coordinatesLabel(), button -> {
             coordinatesHud.toggle();
             button.setMessage(coordinatesLabel());
         }).bounds(buttonX, buttonY + 30, 200, 20).build());
 
+        EditBox widthInput = new EditBox(
+                font,
+                buttonX, buttonY + 60,
+                66, 20,
+                Component.literal("Player xScale")
+        );
+
+        widthInput.setValue(Float.toString(PlayerSettings.xScale));
+        widthInput.setMaxLength(1000);
+
+// Runs whenever the text changes.
+        widthInput.setResponder(text -> {
+            try {
+                float number = Float.parseFloat(text);
+
+                if (Float.isFinite(number) && number >= -100000.0F && number <= 100000.0F) {
+                    PlayerSettings.xScale = number;
+                }
+            } catch (NumberFormatException ignored) {
+                // Empty or unfinished input leaves the previous scale unchanged.
+            }
+        });
+        addRenderableWidget(widthInput);
 
 
+
+
+        EditBox yScaleInput = new EditBox(
+                font,
+                buttonX + 66, buttonY + 60,
+                66, 20,
+                Component.literal("Player yScale")
+        );
+
+        yScaleInput.setValue(Float.toString(PlayerSettings.yScale));
+        yScaleInput.setMaxLength(1000);
+
+// Runs whenever the text changes.
+        yScaleInput.setResponder(text -> {
+            try {
+                float number = Float.parseFloat(text);
+
+                if (Float.isFinite(number) && number >= -100000.0F && number <= 100000.0F) {
+                    PlayerSettings.yScale = number;
+                }
+            } catch (NumberFormatException ignored) {
+                // Empty or unfinished input leaves the previous scale unchanged.
+            }
+        });
+        addRenderableWidget(yScaleInput);
+
+
+
+        EditBox zScaleInput = new EditBox(
+                font,
+                buttonX + 132, buttonY + 60,
+                66, 20,
+                Component.literal("Player zScale")
+        );
+
+        zScaleInput.setValue(Float.toString(PlayerSettings.zScale));
+        zScaleInput.setMaxLength(1000);
+
+// Runs whenever the text changes.
+        zScaleInput.setResponder(text -> {
+            try {
+                float number = Float.parseFloat(text);
+
+                if (Float.isFinite(number) && number >= -100000.0F && number <= 100000.0F) {
+                    PlayerSettings.zScale = number;
+                }
+            } catch (NumberFormatException ignored) {
+                // Empty or unfinished input leaves the previous scale unchanged.
+            }
+        });
+        addRenderableWidget(zScaleInput);
+
+        addRenderableWidget(Button.builder(Component.literal("x"), button -> {
+            onClose();
+        }).bounds(buttonX, buttonY + 90, 200, 20).build());
     }
     private Component coordinatesLabel(){
         return Component.literal("Coordinates: " +(coordinatesHud.isEnabled() ? "ON" : "OFF"));
@@ -63,7 +142,7 @@ public final class ClickGuiScreen extends Screen {
 
         // Colors use 0xAARRGGBB: alpha, red, green, blue.
         graphics.fill(0, 0, width, height, 0xA0000000);
-        graphics.fill(centerX - 120, centerY - 50, centerX + 120, centerY + 90, 0xFF17171F);
+        graphics.fill(centerX - 120, centerY - 50, centerX + 120, centerY + 120, 0xFF17171F);
         graphics.centeredText(font, title, centerX, centerY - 32, 0xFFFFFFFF);
     }
 
@@ -91,6 +170,7 @@ public final class ClickGuiScreen extends Screen {
     public boolean isPauseScreen() {
         return false;
     }
+
 
     @Override
     public void onClose() {
