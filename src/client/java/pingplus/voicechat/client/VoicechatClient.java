@@ -24,7 +24,7 @@ public class VoicechatClient implements ClientModInitializer {
             while (openGuiKey.consumeClick()) {
                 // Do not replace inventory, chat, or another mod's screen.
                 if (client.gui.screen() == null && client.player != null) {
-                    client.gui.setScreen(new ClickGuiScreen(fpsHud, openGuiKey));
+                    client.gui.setScreen(new ClickGuiScreen(fpsHud, openGuiKey, coordinatesHud));
                 }
             }
         });
