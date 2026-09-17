@@ -20,6 +20,6 @@ public abstract class AvatarRendererMixin {
             PoseStack poseStack,
             CallbackInfo ci) {
 
-        poseStack.scale(1.4F, 1.0F, 1.4F);
+        poseStack.scale(2.4F, 1.4F, 1.4F);
     }
 }

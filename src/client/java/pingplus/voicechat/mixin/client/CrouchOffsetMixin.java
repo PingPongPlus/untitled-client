@@ -21,7 +21,7 @@ public abstract class CrouchOffsetMixin {
         Vec3 originalOffset = cir.getReturnValue();
 
         // Additional offset: X, Y, Z, measured in blocks.
-        Vec3 newOffset = originalOffset.add(1.0, 1.5, 0.0);
+        Vec3 newOffset = originalOffset.add(0.0, 0.0, 0.0);
 
         cir.setReturnValue(newOffset);
     }

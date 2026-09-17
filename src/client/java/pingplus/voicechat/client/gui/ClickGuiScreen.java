@@ -8,6 +8,8 @@ import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 
+import javax.swing.plaf.SliderUI;
+
 /** A small settings screen opened with Right Shift. */
 public final class ClickGuiScreen extends Screen {
     private final FpsHud fpsHud;
@@ -41,6 +43,9 @@ public final class ClickGuiScreen extends Screen {
             coordinatesHud.toggle();
             button.setMessage(coordinatesLabel());
         }).bounds(buttonX, buttonY + 30, 200, 20).build());
+
+
+
     }
     private Component coordinatesLabel(){
         return Component.literal("Coordinates: " +(coordinatesHud.isEnabled() ? "ON" : "OFF"));
