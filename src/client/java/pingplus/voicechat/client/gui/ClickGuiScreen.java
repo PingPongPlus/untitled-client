@@ -12,11 +12,13 @@ import net.minecraft.network.chat.Component;
 public final class ClickGuiScreen extends Screen {
     private final FpsHud fpsHud;
     private final KeyMapping openGuiKey;
+    private final CoordinatesHud coordinatesHud;
 
-    public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey) {
+    public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey, CoordinatesHud coordinatesHud) {
         super(Component.literal("PingPlus"));
         this.fpsHud = fpsHud;
         this.openGuiKey = openGuiKey;
+        this.coordinatesHud = coordinatesHud;
     }
 
     // Minecraft calls init() when the screen opens or the window is resized.
@@ -31,10 +33,19 @@ public final class ClickGuiScreen extends Screen {
             button.setMessage(fpsLabel());
         }).bounds(buttonX, buttonY, 200, 20).build());
 
-        addRenderableWidget(Button.builder(Component.literal("Close"), button -> {
+        addRenderableWidget(Button.builder(Component.literal("x"), button -> {
             onClose();
+        }).bounds(buttonX, buttonY + 60, 200, 20).build());
+
+        addRenderableWidget(Button.builder(coordinatesLabel(), button -> {
+            coordinatesHud.toggle();
+            button.setMessage(coordinatesLabel());
         }).bounds(buttonX, buttonY + 30, 200, 20).build());
     }
+    private Component coordinatesLabel(){
+        return Component.literal("Coordinates: " +(coordinatesHud.isEnabled() ? "ON" : "OFF"));
+    }
+
 
     private Component fpsLabel() {
         return Component.literal("FPS: " + (fpsHud.isEnabled() ? "ON" : "OFF"));
@@ -47,7 +58,7 @@ public final class ClickGuiScreen extends Screen {
 
         // Colors use 0xAARRGGBB: alpha, red, green, blue.
         graphics.fill(0, 0, width, height, 0xA0000000);
-        graphics.fill(centerX - 120, centerY - 50, centerX + 120, centerY + 60, 0xFF17171F);
+        graphics.fill(centerX - 120, centerY - 50, centerX + 120, centerY + 90, 0xFF17171F);
         graphics.centeredText(font, title, centerX, centerY - 32, 0xFFFFFFFF);
     }
 
