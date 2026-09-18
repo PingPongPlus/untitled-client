@@ -19,6 +19,7 @@ public class VoicechatClient implements ClientModInitializer {
         FpsHud fpsHud = new FpsHud();
         CoordinatesHud coordinatesHud = new CoordinatesHud();
         KeyMapping openGuiKey = registerOpenGuiKey();
+        HandSwapFeature handSwap = new HandSwapFeature();
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (openGuiKey.consumeClick()) {
@@ -27,6 +28,8 @@ public class VoicechatClient implements ClientModInitializer {
                     client.gui.setScreen(new ClickGuiScreen(fpsHud, openGuiKey, coordinatesHud));
                 }
             }
+
+            handSwap.tick(client);
         });
 
         // Attaching to a vanilla layer inherits the HUD visibility condition (F1).
