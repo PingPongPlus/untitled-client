@@ -30,10 +30,4 @@ public class CoordinatesHud {
 // Below the FPS display, without a background.
         graphics.text(client.font, text, 22, 42, GuiTheme.TEXT, false);
     }
-
-
-
-
-
-
 }

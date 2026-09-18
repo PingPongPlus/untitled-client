@@ -5,3 +5,11 @@ public final class PlayerSettings {
     public static float yScale = 0F;
     public static float zScale = 0F;
 }
+
+
+
+
+
+
+
+
