@@ -6,22 +6,32 @@ final class VoiceInputTest implements AutoCloseable {
     private volatile boolean running = true;
     private volatile VoiceCapture line;
     private volatile double peak;
+    private volatile double levelDb = -96;
+    private volatile boolean gatePassing;
+    private final java.util.function.BooleanSupplier gateEnabled;
+    private final java.util.function.DoubleSupplier threshold;
     private volatile String status = "Opening microphone...";
-    VoiceInputTest(String selected) {
+    VoiceInputTest(String selected, java.util.function.BooleanSupplier gateEnabled, java.util.function.DoubleSupplier threshold) {
+        this.gateEnabled = gateEnabled; this.threshold = threshold;
         Thread.ofPlatform().daemon().name("Voice-Input-Test").start(() -> capture(selected));
     }
     double peak() { return peak; }
+    double levelDb() { return levelDb; }
+    boolean gatePassing() { return gatePassing; }
     String status() { return status; }
     private void capture(String selected) {
         try (VoiceCapture input = open(selected)) {
             if (input == null) return;
             status = "Microphone opened — speak to test";
             byte[] pcm = new byte[1920];
+            MicrophoneGate gate = new MicrophoneGate();
             long silentSince = System.nanoTime();
             while (running) {
                 int read = input.read(pcm);
                 if (!running) break;
                 peak = peak(pcm, read);
+                levelDb = MicrophoneGate.levelDb(pcm, read);
+                gatePassing = gate.process(pcm, gateEnabled.getAsBoolean(), threshold.getAsDouble());
                 if (peak > 0.002) {
                     silentSince = System.nanoTime();
                     status = "Input detected (local test only)";

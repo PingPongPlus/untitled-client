@@ -49,3 +49,11 @@ The development client was also launched successfully on Minecraft 26.2 with thi
 **End-to-end verification still required:** join a multiplayer server with this mod and a second signed-in LabyMod client. Confirm mutual voice discovery and two-way speech, then check mute, deafen, player volume, range, reconnect, and server disconnect. Local capture/codec checks cannot establish live service compatibility or two-way remote playback.
 
 This integration provides proximity voice. LabyMod private-channel management, moderation UI, noise suppression, and LabyMod-specific server API controls are not implemented. Native codec platform support is limited to binaries present in the supplied addon; Windows x64 is the locally tested platform.
+
+### Microphone sensitivity / noise gate
+
+In **V → Audio devices**, enable **Noise gate** and adjust **Microphone cutoff** (-60 to -15 dBFS; initial setting -45 dBFS). A higher cutoff (toward -15) blocks more background noise; a lower cutoff admits quieter speech. The gate is off by default and preserves push-to-talk behavior.
+
+Use **Test microphone** while adjusting: the meter shows the raw input level, the white marker shows the cutoff, and the label reports **Noise blocked** or **Gate open**. Set the cutoff above the room noise but below your normal speaking level, then press **Apply**. Cancel discards changes. These settings persist across restarts.
+
+The gate measures RMS before microphone gain, holds open for about 200 ms with 3 dB hysteresis, and fades over 5 ms to avoid abrupt sample changes. Closed frames are not transmitted. This reduces hiss/rushing noise between words; it does not remove noise mixed with speech while the gate is open. Automated tests cover blocked noise, admitted speech, threshold changes, hold/fade behavior, disabled bypass, and reset after push-to-talk release.

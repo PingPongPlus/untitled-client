@@ -49,6 +49,7 @@ public final class VoiceAudio implements AutoCloseable {
     private static OpusCodec codec() { return OpusCodec.newBuilder().withBitrate(48000).build(); }
     private void capture() {
         OpusCodec encoder = codec();
+        MicrophoneGate gate = new MicrophoneGate();
         try (VoiceCapture line = openMicrophone()) {
             if (line == null) return;
             byte[] pcm = new byte[1920];
@@ -57,6 +58,7 @@ public final class VoiceAudio implements AutoCloseable {
                 if (!running) break;
                 inputPeak = VoiceInputTest.peak(pcm, read);
                 if (read == pcm.length && transmit.getAsBoolean() && !settings.muted && !settings.deafened) {
+                    if (!gate.process(pcm, settings.noiseGateEnabled, settings.microphoneThresholdDb)) continue;
                     for (int i = 0; i < pcm.length; i += 2) {
                         int sample = (short)((pcm[i] & 255) | (pcm[i + 1] << 8));
                         int scaled = clip(sample * settings.microphoneGain);
@@ -64,7 +66,7 @@ public final class VoiceAudio implements AutoCloseable {
                     }
                     sender.accept(VoiceFrame.encode(sequence.getAsLong(), encoder.encodeFrame(pcm)));
                     lastTransmission = System.nanoTime();
-                }
+                } else gate.reset();
             }
         } catch (Exception | LinkageError e) {
             if (running) { VoicechatClient.LOG.warn("Voice microphone could not be opened or read", e); error.accept("Microphone unavailable: " + e.getMessage()); }
