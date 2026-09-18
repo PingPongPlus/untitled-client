@@ -1,4 +1,4 @@
-# Laby Voice Chat for Minecraft 26.2
+# Reverse Engineered Laby Voice Chat for Minecraft 26.2
 
 Fabric client integration using the standalone protocol and Opus codec from the supplied LabyMod voicechat.jar. Minecraft stays at **26.2**, Fabric Loader at **0.19.5**, Fabric API at **0.160.0+26.2**, and Java at **25**. The addon UI and Minecraft 1.21.11 classes are not loaded.
 
