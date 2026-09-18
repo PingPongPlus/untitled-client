@@ -16,6 +16,8 @@ public final class VoiceSettings {
     public volatile boolean deafened = false;
     public volatile double volume = 1;
     public volatile double microphoneGain = 1;
+    public volatile boolean noiseGateEnabled = false;
+    public volatile double microphoneThresholdDb = -45;
     public volatile double distance = 32;
     public volatile String inputDevice = "";
     public volatile String outputDevice = "";
@@ -28,6 +30,8 @@ public final class VoiceSettings {
                     if (s.inputDevice == null) s.inputDevice = "";
                     if (s.outputDevice == null) s.outputDevice = "";
                     s.volume = clamp(s.volume, 2); s.microphoneGain = clamp(s.microphoneGain, 2);
+                    s.microphoneThresholdDb = Double.isFinite(s.microphoneThresholdDb)
+                        ? Math.max(-60, Math.min(-15, s.microphoneThresholdDb)) : -45;
                     s.distance = Math.max(8, clamp(s.distance, 64));
                     s.playerVolumes = s.playerVolumes == null ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(s.playerVolumes);
                     s.playerVolumes.replaceAll((key, value) -> value == null ? 1 : clamp(value, 2));
