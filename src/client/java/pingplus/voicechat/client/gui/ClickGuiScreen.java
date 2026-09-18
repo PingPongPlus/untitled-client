@@ -20,7 +20,7 @@ public final class ClickGuiScreen extends Screen {
     private final CoordinatesHud coordinatesHud;
 
     public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey, CoordinatesHud coordinatesHud) {
-        super(Component.literal("PingPlus"));
+        super(Component.literal("Manage Minecraft Rendering like a Boss"));
         this.fpsHud = fpsHud;
         this.openGuiKey = openGuiKey;
         this.coordinatesHud = coordinatesHud;
