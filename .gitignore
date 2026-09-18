@@ -17,3 +17,5 @@ run/
 # Logs
 logs/
 *.log
+.work/
+libs/
