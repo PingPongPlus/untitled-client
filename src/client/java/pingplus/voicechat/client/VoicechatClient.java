@@ -37,7 +37,6 @@ public class VoicechatClient implements ClientModInitializer {
                 Identifier.fromNamespaceAndPath("voicechat", "coordinates_hud"),
                 coordinatesHud::extract
         );
-
     }
 
     private KeyMapping registerOpenGuiKey() {
