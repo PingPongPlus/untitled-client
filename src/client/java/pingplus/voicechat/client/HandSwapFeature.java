@@ -4,8 +4,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.HumanoidArm;
 
 public final class HandSwapFeature {
-    private static final int INTERVAL_TICKS = 1;
-
     private boolean wasEnabled;
     private int ticks;
     private HumanoidArm savedMainArm = HumanoidArm.RIGHT;
@@ -24,7 +22,7 @@ public final class HandSwapFeature {
                 client.player.setMainArm(savedMainArm.getOpposite());
             } else {
                 ticks++;
-                if (ticks >= INTERVAL_TICKS) {
+                if (ticks >= Math.max(1, PlayerSettings.handSwapIntervalTicks)) {
                     ticks = 0;
                     client.player.setMainArm(client.player.getMainArm().getOpposite());
                 }
