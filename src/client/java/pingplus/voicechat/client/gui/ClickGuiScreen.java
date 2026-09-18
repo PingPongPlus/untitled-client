@@ -157,7 +157,27 @@ public final class ClickGuiScreen extends Screen {
         addRenderableWidget(Button.builder(handSwapLabel(), button -> {
             PlayerSettings.handSwap = !PlayerSettings.handSwap;
             button.setMessage(handSwapLabel());
-        }).bounds(buttonX, buttonY + 210, 200, 20).build());
+        }).bounds(buttonX, buttonY + 210, 98, 20).build());
+
+        addRenderableWidget(new AbstractSliderButton(
+                buttonX + 102,
+                buttonY + 210,
+                98,
+                20,
+                handSwapSpeedLabel(),
+                handSwapSpeedValue()
+        ) {
+            @Override
+            protected void updateMessage() {
+                setMessage(handSwapSpeedLabel());
+            }
+
+            @Override
+            protected void applyValue() {
+                PlayerSettings.handSwapIntervalTicks = sliderToTicks(value);
+                setMessage(handSwapSpeedLabel());
+            }
+        });
 
         addRenderableWidget(Button.builder(Component.literal("x"), button -> {
             onClose();
@@ -166,11 +186,27 @@ public final class ClickGuiScreen extends Screen {
 
 
     }
+    private static final int HAND_SWAP_MIN_TICKS = 1;
+    private static final int HAND_SWAP_MAX_TICKS = 20;
+
+    private static double handSwapSpeedValue() {
+        int ticks = Math.max(HAND_SWAP_MIN_TICKS, Math.min(HAND_SWAP_MAX_TICKS, PlayerSettings.handSwapIntervalTicks));
+        return (ticks - HAND_SWAP_MIN_TICKS) / (double) (HAND_SWAP_MAX_TICKS - HAND_SWAP_MIN_TICKS);
+    }
+
+    private static int sliderToTicks(double value) {
+        return HAND_SWAP_MIN_TICKS + (int) Math.round(value * (HAND_SWAP_MAX_TICKS - HAND_SWAP_MIN_TICKS));
+    }
+
     private Component RightArmLabel(){
         return Component.literal("Right Arm: " + (PlayerSettings.rightArm ? "ON" : "OFF"));
     }
     private Component handSwapLabel(){
         return Component.literal("Hand Swap: " + (PlayerSettings.handSwap ? "ON" : "OFF"));
+    }
+    private Component handSwapSpeedLabel(){
+        int ticks = Math.max(HAND_SWAP_MIN_TICKS, Math.min(HAND_SWAP_MAX_TICKS, PlayerSettings.handSwapIntervalTicks));
+        return Component.literal(String.format("Speed: %.2fs", ticks / 20.0));
     }
     private Component LeftArmLabel(){
         return Component.literal("Left Arm: " + (PlayerSettings.leftArm ? "ON" : "OFF"));
