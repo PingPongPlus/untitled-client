@@ -17,20 +17,26 @@ public final class HandSwapFeature {
 
         if (PlayerSettings.handSwap) {
             if (!wasEnabled) {
-                savedMainArm = client.player.getMainArm();
+                savedMainArm = client.options.mainHand().get();
                 ticks = 0;
-                client.player.setMainArm(savedMainArm.getOpposite());
+                applyMainArm(client, savedMainArm.getOpposite());
             } else {
                 ticks++;
                 if (ticks >= Math.max(1, PlayerSettings.handSwapIntervalTicks)) {
                     ticks = 0;
-                    client.player.setMainArm(client.player.getMainArm().getOpposite());
+                    applyMainArm(client, client.options.mainHand().get().getOpposite());
                 }
             }
         } else if (wasEnabled) {
-            client.player.setMainArm(savedMainArm);
+            applyMainArm(client, savedMainArm);
             ticks = 0;
         }
         wasEnabled = PlayerSettings.handSwap;
+    }
+
+    private static void applyMainArm(Minecraft client, HumanoidArm arm) {
+        client.options.mainHand().set(arm);
+        client.player.setMainArm(arm);
+        client.options.broadcastOptions();
     }
 }
