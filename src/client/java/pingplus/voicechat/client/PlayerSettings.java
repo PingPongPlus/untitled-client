@@ -6,6 +6,9 @@ public final class PlayerSettings {
     public static float zScale = 0F;
     public static float xyzHeadscale = 0;
     public static boolean mainBodyPart = true;
+    public static boolean leftArm = true;
+    public static boolean rightArm = true;
+
 }
 
 
