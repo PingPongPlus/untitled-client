@@ -154,15 +154,23 @@ public final class ClickGuiScreen extends Screen {
             button.setMessage(RightArmLabel());
         }).bounds(buttonX, buttonY + 180, 200, 20).build());
 
+        addRenderableWidget(Button.builder(handSwapLabel(), button -> {
+            PlayerSettings.handSwap = !PlayerSettings.handSwap;
+            button.setMessage(handSwapLabel());
+        }).bounds(buttonX, buttonY + 210, 200, 20).build());
+
         addRenderableWidget(Button.builder(Component.literal("x"), button -> {
             onClose();
-        }).bounds(buttonX, buttonY + 210, 200, 20).build());
+        }).bounds(buttonX, buttonY + 240, 200, 20).build());
 
 
 
     }
     private Component RightArmLabel(){
         return Component.literal("Right Arm: " + (PlayerSettings.rightArm ? "ON" : "OFF"));
+    }
+    private Component handSwapLabel(){
+        return Component.literal("Hand Swap: " + (PlayerSettings.handSwap ? "ON" : "OFF"));
     }
     private Component LeftArmLabel(){
         return Component.literal("Left Arm: " + (PlayerSettings.leftArm ? "ON" : "OFF"));
