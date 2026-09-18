@@ -31,7 +31,9 @@ public class VoicechatClient implements ClientModInitializer {
 
         // Attaching to a vanilla layer inherits the HUD visibility condition (F1).
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT,
-                Identifier.fromNamespaceAndPath("voicechat", "client_hud"), fpsHud::extract);
+                Identifier.fromNamespaceAndPath("voicechat", "client_hud"),
+                fpsHud::extract
+        );
         HudElementRegistry.attachElementBefore(
                 VanillaHudElements.CHAT,
                 Identifier.fromNamespaceAndPath("voicechat", "coordinates_hud"),

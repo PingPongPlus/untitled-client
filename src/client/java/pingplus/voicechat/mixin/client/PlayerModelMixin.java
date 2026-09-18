@@ -32,5 +32,16 @@ public abstract class PlayerModelMixin {
             model.body.yScale = 0;
             model.body.zScale = 0;
         }
+        if(!PlayerSettings.leftArm){
+            model.leftArm.zScale = 0;
+            model.leftArm.xScale = 0;
+            model.leftArm.yScale = 0;
+        }
+        if(!PlayerSettings.rightArm){
+            model.rightArm.zScale = 0;
+            model.rightArm.xScale = 0;
+            model.rightArm.yScale = 0;
+        }
+
     }
 }

@@ -138,16 +138,35 @@ public final class ClickGuiScreen extends Screen {
         });
         addRenderableWidget(headScale);
 
-        addRenderableWidget(Button.builder(Component.literal("x"), button -> {
-            onClose();
-        }).bounds(buttonX, buttonY + 150, 200, 20).build());
 
         addRenderableWidget(Button.builder(BodyLabel(), button -> {
             PlayerSettings.mainBodyPart = !PlayerSettings.mainBodyPart;
             button.setMessage(BodyLabel());
         }).bounds(buttonX, buttonY + 120, 200, 20).build());
-    }
 
+        addRenderableWidget(Button.builder(LeftArmLabel(), button -> {
+            PlayerSettings.leftArm = !PlayerSettings.leftArm;
+            button.setMessage(LeftArmLabel());
+        }).bounds(buttonX, buttonY + 150, 200, 20).build());
+
+        addRenderableWidget(Button.builder(RightArmLabel(), button -> {
+            PlayerSettings.rightArm = !PlayerSettings.rightArm;
+            button.setMessage(RightArmLabel());
+        }).bounds(buttonX, buttonY + 180, 200, 20).build());
+
+        addRenderableWidget(Button.builder(Component.literal("x"), button -> {
+            onClose();
+        }).bounds(buttonX, buttonY + 210, 200, 20).build());
+
+
+
+    }
+    private Component RightArmLabel(){
+        return Component.literal("Right Arm: " + (PlayerSettings.rightArm ? "ON" : "OFF"));
+    }
+    private Component LeftArmLabel(){
+        return Component.literal("Left Arm: " + (PlayerSettings.leftArm ? "ON" : "OFF"));
+    }
     private Component BodyLabel(){
         return Component.literal("Main Boddy Part: " + (PlayerSettings.mainBodyPart ? "ON" : "OFF"));
     }
@@ -186,7 +205,6 @@ public final class ClickGuiScreen extends Screen {
     public boolean isPauseScreen() {
         return false;
     }
-
 
     @Override
     public void onClose() {
