@@ -10,7 +10,8 @@
     "TitleScreenMixin",
     "LogoRendererMixin",
     "SplashRendererMixin",
-    "TitleScreenButtonsMixin"
+    "TitleScreenButtonsMixin",
+    "TransparentButtonsMixin"
   ],
   "injectors": {
     "defaultRequire": 1

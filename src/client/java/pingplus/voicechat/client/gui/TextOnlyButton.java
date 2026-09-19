@@ -17,7 +17,20 @@ public class TextOnlyButton extends Button {
             GuiGraphicsExtractor graphics,
             int mouseX, int mouseY, float delta
     ) {
-        // Draw the text, without drawing the gray background.
+        if (active && isHoveredOrFocused()) {
+            // Respect the button's alpha, including the title-screen fade.
+            int opacity = Math.round(40 * getAlpha());
+            int color = (opacity << 24) | 0xFFFFFF;
+
+            graphics.fill(
+                    getX(), getY(),
+                    getX() + getWidth(),
+                    getY() + getHeight(),
+                    color
+            );
+        }
+
+        // Draw the text on top.
         extractDefaultLabel(graphics.textRenderer());
     }
 }
