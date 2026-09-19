@@ -1,0 +1,1 @@
+#### this is a source file of the voice chat addon by labymod(1.16) it is needed for the client to build because it extract some dependencies out of this jar

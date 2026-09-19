@@ -20,6 +20,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import pingplus.voicechat.client.gui.TextOnlyButton;
 
 // Mixin for changing Minecraft starter menu Buttons
+// including singleplayer, multiplayer and Realms
+// Other stuff like options friends etc are not considered here
 @Mixin(TitleScreen.class)
 public abstract class TitleScreenButtonsMixin extends Screen {
 

@@ -3,6 +3,12 @@ package pingplus.voicechat.client;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.HumanoidArm;
 
+
+
+
+//A feature to quickly swap hands
+//When enabled it looks like you are hitting with both hands at the same time
+
 public final class HandSwapFeature {
     private boolean wasEnabled;
     private int ticks;
