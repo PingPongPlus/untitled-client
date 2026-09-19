@@ -6,7 +6,9 @@
   "client": [
     "AvatarRendererMixin",
     "OffSetMixin",
-    "PlayerModelMixin"
+    "PlayerModelMixin",
+    "TitleScreenMixin",
+    "LogoRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
