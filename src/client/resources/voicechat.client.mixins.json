@@ -4,6 +4,13 @@
   "package": "pingplus.voicechat.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "AvatarRendererMixin",
+    "OffSetMixin",
+    "PlayerModelMixin",
+    "TitleScreenMixin",
+    "LogoRendererMixin",
+    "SplashRendererMixin",
+    "TitleScreenButtonsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
