@@ -35,7 +35,21 @@ repositories {
     // for more information about repositories.
 }
 
+// Only the standalone protocol and Opus runtime are reused; no old Minecraft classes.
+def suppliedVoiceJar = providers.gradleProperty('voicechatJar').orElse('libs/voicechat.jar')
+tasks.register('voiceRuntime', Jar) {
+    archiveFileName = 'laby-voice-runtime.jar'
+    destinationDirectory = layout.buildDirectory.dir('voice-runtime')
+    from({
+        def source = file(suppliedVoiceJar.get())
+        if (!source.isFile()) throw new GradleException('Supply the original JAR with -PvoicechatJar=/path/to/voicechat.jar')
+        zipTree(source)
+    }) {
+        include 'net/labymod/voice/**', 'net/labymod/opus/**', 'native-binaries/**'
+    }
+}
 dependencies {
+    implementation files(tasks.named('voiceRuntime'))
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -73,7 +87,23 @@ java {
     withSourcesJar()
 }
 
+sourceSets {
+    voiceTest {
+        compileClasspath += sourceSets.client.output + sourceSets.client.compileClasspath
+        runtimeClasspath += sourceSets.client.output + sourceSets.client.runtimeClasspath
+    }
+}
+tasks.register('voiceSmokeTest', JavaExec) {
+    dependsOn voiceTestClasses, clientClasses
+    classpath = sourceSets.voiceTest.runtimeClasspath
+    mainClass = 'pingplus.voicechat.client.VoiceRuntimeSmokeTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+}
+tasks.named('check') { dependsOn 'voiceSmokeTest' }
+
 jar {
+    from({ zipTree(tasks.named('voiceRuntime').get().archiveFile.get().asFile) })
     from("LICENSE.txt") {
         rename { "${it}_${project.archives_base_name}" }
     }
