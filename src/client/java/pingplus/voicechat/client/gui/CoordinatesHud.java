@@ -21,7 +21,6 @@ public class CoordinatesHud {
             return;
         }
 
-
         String text = "XYZ  "
                 + client.player.getBlockX() + " "
                 + client.player.getBlockY() + " "
