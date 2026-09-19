@@ -2,12 +2,11 @@
   "schemaVersion": 1,
   "id": "voicechat",
   "version": "${version}",
-  "name": "untitled",
-  "description": "",
+  "name": "Laby Voice Chat",
+  "description": "LabyMod-compatible proximity voice chat with push-to-talk and volume controls for Minecraft 26.2.",
   "authors": [],
   "contact": {},
   "license": "All-Rights-Reserved",
-  "icon": "assets/voicechat/icon.png",
   "environment": "client",
   "entrypoints": {
     "fabric-datagen": [
