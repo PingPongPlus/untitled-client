@@ -8,7 +8,9 @@
     "OffSetMixin",
     "PlayerModelMixin",
     "TitleScreenMixin",
-    "LogoRendererMixin"
+    "LogoRendererMixin",
+    "SplashRendererMixin",
+    "TitleScreenButtonsMixin"
   ],
   "injectors": {
     "defaultRequire": 1
