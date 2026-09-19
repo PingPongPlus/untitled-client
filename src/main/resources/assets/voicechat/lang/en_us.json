@@ -2,5 +2,7 @@
   "key.category.voicechat.controls": "LabyMod Voice Chat",
   "key.voicechat.settings": "Voice chat settings",
   "key.voicechat.talk": "Push to talk",
-  "key.voicechat.mute": "Mute microphone"
+  "key.voicechat.mute": "Mute microphone",
+  "key.voicechat.click_gui": "Open ClickGUI",
+  "key.category.voicechat.client": "PingPlus Client"
 }
