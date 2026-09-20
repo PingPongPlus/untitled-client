@@ -11,7 +11,8 @@
     "LogoRendererMixin",
     "SplashRendererMixin",
     "TitleScreenButtonsMixin",
-    "TransparentButtonsMixin"
+    "TransparentButtonsMixin",
+    "JoinMultiplayerScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
