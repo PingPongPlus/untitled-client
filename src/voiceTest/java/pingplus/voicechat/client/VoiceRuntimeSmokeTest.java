@@ -13,6 +13,7 @@ import java.util.Arrays;
 /** Runs without a microphone, Minecraft account, or external network connection. */
 public final class VoiceRuntimeSmokeTest {
     public static void main(String[] args) throws Exception {
+        VoiceStatusTest.run();
         MicrophoneGateTest.run();
         check(VoiceInputTest.peak(new byte[1920], 1920) == 0, "Microphone meter detects silence");
         check(VoiceInputTest.peak(new byte[]{0, (byte)128, 0, 0}, 4) == 1, "Microphone meter handles negative full-scale PCM");

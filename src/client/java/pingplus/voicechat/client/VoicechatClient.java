@@ -21,6 +21,11 @@ import pingplus.voicechat.client.gui.FpsHud;
  * Initializes client GUI features, HUD elements, and voice chat.
  */
 public class VoicechatClient implements ClientModInitializer {
+    private static VoiceConnection voiceConnection;
+
+    public static VoiceStatus voiceStatus(java.util.UUID id) {
+        return voiceConnection == null ? VoiceStatus.NOT_CONNECTED : voiceConnection.statusFor(id);
+    }
 
     public static final Logger LOG =
             LoggerFactory.getLogger("laby-voicechat");
@@ -87,6 +92,7 @@ public class VoicechatClient implements ClientModInitializer {
                 Minecraft.getInstance(),
                 VoiceSettings.load()
         );
+        voiceConnection = voice;
 
         KeyMapping.Category category = KeyMapping.Category.register(
                 Identifier.fromNamespaceAndPath("voicechat", "controls")

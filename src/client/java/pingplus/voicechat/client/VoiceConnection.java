@@ -30,6 +30,14 @@ public final class VoiceConnection {
     private final AtomicLong audioSequence = new AtomicLong();
     public VoiceConnection(Minecraft minecraft, VoiceSettings settings) { this.minecraft = minecraft; this.settings = settings; }
     public boolean connected() { return authenticated; }
+    public VoiceStatus statusFor(UUID id) {
+        if (id.equals(minecraft.getUser().getProfileId())) {
+            return !authenticated ? VoiceStatus.NOT_CONNECTED
+                    : transmitting() ? VoiceStatus.SPEAKING : VoiceStatus.CONNECTED;
+        }
+        return VoiceStatus.resolve(authenticated && players.containsKey(id),
+                talking.get(id), System.currentTimeMillis());
+    }
     public boolean transmitting() { VoiceAudio device = audio; return device != null && device.transmitting(); }
     public double inputPeak() { VoiceAudio device = audio; return device == null ? 0 : device.inputPeak(); }
     public void connect() {
@@ -65,12 +73,25 @@ public final class VoiceConnection {
                 minecraft.execute(() -> { if (client == attempt) { disconnect(); status = "Disconnected: " + type; } });
             }
             @Override public void onPlayerDiscovered(UUID id, JsonObject meta) {
-                if (client == attempt) players.putIfAbsent(id, id.toString().substring(0, 8));
+                minecraft.execute(() -> {
+                    if (client == attempt) players.putIfAbsent(id, id.toString().substring(0, 8));
+                });
             }
-            @Override public void onPlayerDisappeared(UUID id) { if (client == attempt) { players.remove(id); talking.remove(id); } }
+            @Override public void onPlayerDisappeared(UUID id) {
+                minecraft.execute(() -> {
+                    if (client == attempt) { players.remove(id); talking.remove(id); }
+                });
+            }
             @Override public void onAudioReceived(UUID id, byte[] data) {
+                if (client != attempt || !authenticated || VoiceFrame.decode(data) == null) return;
+                long receivedAt = System.currentTimeMillis();
+                minecraft.execute(() -> {
+                    if (client == attempt && authenticated && players.containsKey(id)) {
+                        talking.put(id, receivedAt);
+                    }
+                });
                 VoiceAudio device = audio;
-                if (client == attempt && authenticated && device != null) { talking.put(id, System.currentTimeMillis()); device.receive(id, data); }
+                if (client == attempt && authenticated && device != null) device.receive(id, data);
             }
             @Override public void onWarn(String reason) { if (client == attempt) status = "Voice server: " + reason; }
         });
