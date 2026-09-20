@@ -3,3 +3,4 @@ More features coming soon. Still in development check out a quick demo below!
 
 https://github.com/user-attachments/assets/72898a76-20ae-40f5-bdd9-0f65a5d46cde
 
+<img width="2940" height="1912" alt="image" src="https://github.com/user-attachments/assets/c07f48e1-7cd9-482a-b814-613a1e687909" />
