@@ -14,10 +14,26 @@ public abstract class TransparentButtonsMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void hideButtonBackground(
+    private void drawHoverBackground(
             GuiGraphicsExtractor graphics,
             CallbackInfo ci
     ) {
+        AbstractButton button = (AbstractButton) (Object) this;
+
+        if (button.active && button.isHoveredOrFocused()) {
+            int opacity = Math.round(40 * button.getAlpha());
+            int color = (opacity << 24) | 0xFFFFFF;
+
+            graphics.fill(
+                    button.getX(),
+                    button.getY(),
+                    button.getX() + button.getWidth(),
+                    button.getY() + button.getHeight(),
+                    color
+            );
+        }
+
+        // Skip the original background, including when not hovered.
         ci.cancel();
     }
 }
