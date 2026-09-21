@@ -1,9 +1,9 @@
 # Title-screen wallpaper
 
-The title screen plays the supplied 30-second wallpaper as a silent loop at
-960 × 540 and 24 fps. The original MP4 remains in the project. The runtime uses
-720 preconverted JPEG frames (~85 MB), so it works without FFmpeg or a native
-video decoder on the player's computer.
+The title screen plays `14684159_3840_2160_30fps.mp4` (20.02 seconds) as a silent
+loop at 960 × 540 and 24 fps. The runtime uses 481 preconverted JPEG frames,
+so it works without FFmpeg or a native video decoder on the player's computer.
+The source MP4 stays outside the project; it is not needed at runtime.
 
 Two independently playing layers overlap for a two-second crossfade. The next
 copy plays underneath while the outgoing copy becomes transparent, with opacity
@@ -18,7 +18,7 @@ Each layer decodes JPEGs on a daemon worker with a four-frame prefetch queue and
 its own dynamic GPU texture. The incoming layer preloads one second before the
 fade. Playback uses elapsed time and skips frames if decoding falls behind.
 Leaving the title screen releases both textures and workers; returning
-restarts playback. The existing static background displays while the first frame
+restarts playback. A still from the new video displays while the first frame
 loads, or if animation metadata cannot be loaded. No audio is played.
 
 ## Replace the video
@@ -27,7 +27,7 @@ Changing the MP4 alone does not update the animation. On macOS, regenerate it:
 
 ```sh
 swift -module-cache-path /tmp/wallpaper-swift-cache tools/convert-wallpaper.swift \
-  src/client/resources/assets/voicechat/textures/gui/wallpaper.mp4 \
+  /path/to/your/video.mp4 \
   src/client/resources/assets/voicechat/textures/gui/wallpaper
 ./gradlew build
 ```

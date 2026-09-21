@@ -61,12 +61,12 @@ public final class  AnimatedTitleBackground implements AutoCloseable {
         if (closed) return;
         long now = System.nanoTime();
         if (outgoing == null) {
-            drawTexture(graphics, FALLBACK, width, height, 3878, 2579, 1.0F);
+            drawTexture(graphics, FALLBACK, width, height, 960, 540, 1.0F);
             return;
         }
         outgoing.update(now);
         if (!outgoing.ready()) {
-            drawTexture(graphics, FALLBACK, width, height, 3878, 2579, 1.0F);
+            drawTexture(graphics, FALLBACK, width, height, 960, 540, 1.0F);
             return;
         }
         outgoing.start(now);

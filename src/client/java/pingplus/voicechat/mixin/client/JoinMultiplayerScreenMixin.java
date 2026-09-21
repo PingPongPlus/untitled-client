@@ -38,6 +38,7 @@ public class JoinMultiplayerScreenMixin extends Screen {
                                 return;
                             }
 
+
                             var server = entry.getServerData();
                             var client = this.minecraft;
 
