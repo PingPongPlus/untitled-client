@@ -1,0 +1,23 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "pingplus.voicechat.mixin.client",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "AvatarRendererMixin",
+    "OffSetMixin",
+    "PlayerModelMixin",
+    "TitleScreenMixin",
+    "LogoRendererMixin",
+    "SplashRendererMixin",
+    "TitleScreenButtonsMixin",
+    "TransparentButtonsMixin",
+    "JoinMultiplayerScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

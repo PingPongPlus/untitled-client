@@ -1,0 +1,11 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "file": "voicechat:font/voice_status.png",
+      "ascent": 8,
+      "height": 9,
+      "chars": ["\ue000\ue001\ue002"]
+    }
+  ]
+}
