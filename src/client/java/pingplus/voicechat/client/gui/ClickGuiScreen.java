@@ -43,7 +43,12 @@ public final class ClickGuiScreen extends Screen {
         addRenderableWidget(Button.builder(coordinatesLabel(), button -> {
             coordinatesHud.toggle();
             button.setMessage(coordinatesLabel());
-        }).bounds(buttonX, buttonY + 30, 200, 20).build());
+        }).bounds(buttonX, buttonY + 30, 98, 20).build());
+
+        addRenderableWidget(Button.builder(hitboxesLabel(), button -> {
+            PlayerSettings.hitboxes = !PlayerSettings.hitboxes;
+            button.setMessage(hitboxesLabel());
+        }).bounds(buttonX + 102, buttonY + 30, 98, 20).build());
 
         EditBox widthInput = new EditBox(
                 font,
@@ -216,6 +221,10 @@ public final class ClickGuiScreen extends Screen {
     }
     private Component coordinatesLabel(){
         return Component.literal("Coordinates: " +(coordinatesHud.isEnabled() ? "ON" : "OFF"));
+    }
+
+    private Component hitboxesLabel() {
+        return Component.literal("Hitboxes: " + (PlayerSettings.hitboxes ? "ON" : "OFF"));
     }
 
 

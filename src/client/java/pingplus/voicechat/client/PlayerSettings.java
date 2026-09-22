@@ -9,10 +9,10 @@ public final class PlayerSettings {
     public static boolean leftArm = true;
     public static boolean rightArm = true;
     public static boolean handSwap = false;
+    public static boolean hitboxes = false;
     public static int handSwapIntervalTicks = 6;
 
 }
-
 
 
 
