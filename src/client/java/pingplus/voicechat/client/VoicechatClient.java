@@ -32,6 +32,7 @@ public class VoicechatClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        pingplus.voicechat.client.gui.glass.GlassPipelines.initialize();
         initializeClientFeatures();
         initializeVoiceChat();
     }

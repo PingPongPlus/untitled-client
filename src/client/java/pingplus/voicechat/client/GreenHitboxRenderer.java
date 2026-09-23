@@ -10,9 +10,7 @@ import net.minecraft.util.debug.DebugValueAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
-/** Player bounding boxes with a green outline and a 25% opaque green fill. */
 public final class GreenHitboxRenderer extends EntityHitboxDebugRenderer {
-    // ARGB colors: solid green outline, green fill at 25% opacity.
     private static final GizmoStyle STYLE = GizmoStyle.strokeAndFill(
             0xFF00FF00, 1.0F, 0x4000FF00);
 
@@ -29,7 +27,6 @@ public final class GreenHitboxRenderer extends EntityHitboxDebugRenderer {
         }
 
         for (Player player : minecraft.level.players()) {
-            // Hide the camera player's box in first person.
             if (player == minecraft.getCameraEntity()
                     && minecraft.options.getCameraType() == CameraType.FIRST_PERSON) {
                 continue;

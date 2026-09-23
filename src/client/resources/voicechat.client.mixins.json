@@ -13,6 +13,8 @@
     "SplashRendererMixin",
     "TitleScreenButtonsMixin",
     "TransparentButtonsMixin",
+    "GlassGuiDrawAccessor",
+    "GlassGuiRendererMixin",
     "JoinMultiplayerScreenMixin"
   ],
   "injectors": {
