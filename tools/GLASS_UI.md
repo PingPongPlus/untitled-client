@@ -29,7 +29,9 @@ within the current screen. Closing and reopening starts with the responsive layo
 - Loading/transition mixins retain original status text, progress and connection actions.
 
 During resource reload, glass geometry falls back to built-in solid rendering. The
-startup monogram and progress indicator never depend on the custom font or shaders.
+startup artwork is registered directly from the bundled image before resource packs
+load; its matching progress bar uses built-in geometry. Neither needs custom shaders
+or fonts. The overlay shows only the supplied Minecraft AIR artwork and real progress.
 The Rajdhani font is distributed under its bundled SIL Open Font License. The world
 and vanilla HUD retain their normal Minecraft rendering; only the interface is restyled.
 
