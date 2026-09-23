@@ -13,11 +13,11 @@ float roundedBox(vec2 p, vec2 halfSize, float radius) {
 void main() {
     // Recover size in physical pixels, so GUI scale and high-DPI displays stay crisp.
     vec2 size = 1.0 / max(vec2(length(vec2(dFdx(localUV.x), dFdy(localUV.x))),
-                                    length(vec2(dFdx(localUV.y), dFdy(localUV.y)))), vec2(0.00001));
+            length(vec2(dFdx(localUV.y), dFdy(localUV.y)))), vec2(0.00001));
     vec2 halfSize = size * 0.5;
     vec2 p = (localUV - 0.5) * size;
     float pixelScale = max(size.y / max(glassData.b * 255.0, 1.0), 1.0);
-    float radius = min(min(halfSize.x, halfSize.y) * 0.82, 14.0 * pixelScale);
+    float radius = min(min(halfSize.x, halfSize.y) * 0.82, 2.0 * pixelScale);
     float distance = roundedBox(p, halfSize, radius);
     float aa = max(fwidth(distance), 0.75);
     // Evaluate derivatives before divergent discard/return branches at the silhouette.
@@ -27,10 +27,9 @@ void main() {
     float enabled = glassData.g;
     float opacity = glassData.a;
 
-
     // Soft shadow extends beyond the rounded silhouette.
     float shadowDistance = roundedBox(p - vec2(0.0, pixelScale), halfSize, radius);
-    float shadow = exp(-max(shadowDistance, 0.0) / (1.5  * pixelScale)) * 0.18;
+    float shadow = exp(-max(shadowDistance, 0.0) / (1.1 * pixelScale)) * 0.18;
     if (coverage < 0.001) {
         if (shadow < 0.005) discard;
         fragColor = vec4(0.025, 0.025, 0.025, shadow * opacity);
@@ -50,9 +49,20 @@ void main() {
     vec2 bentUV = screenUV - screenNormal * rim * rim * pixelScale * (2.0 + hover) / texSize;
     vec2 halfTexel = 0.5 / texSize;
     bentUV = clamp(bentUV, halfTexel, 1.0 - halfTexel);
+
     vec3 clear = texture(Sampler0, bentUV).rgb;
-    vec3 frost = texture(Sampler1, bentUV).rgb;
-    vec3 color = mix(clear, frost, 0.32 + (1.0 - enabled) * 0.15);
+
+    // Additional multi-sample blur over Sampler1 (frost texture)
+    vec2 blurOffset = (3.5 * pixelScale) / texSize;
+    vec3 frost = texture(Sampler1, bentUV).rgb * 0.36;
+    frost += texture(Sampler1, bentUV + vec2(blurOffset.x, 0.0)).rgb * 0.16;
+    frost += texture(Sampler1, bentUV - vec2(blurOffset.x, 0.0)).rgb * 0.16;
+    frost += texture(Sampler1, bentUV + vec2(0.0, blurOffset.y)).rgb * 0.16;
+    frost += texture(Sampler1, bentUV - vec2(0.0, blurOffset.y)).rgb * 0.16;
+
+    // Boosted frosted blend ratio (0.82 instead of 0.32)
+    vec3 color = mix(clear, frost, 0.82 + (1.0 - enabled) * 0.10);
+
     // Neutral absorption preserves the backdrop without adding a blue color cast.
     color = mix(color, vec3(0.09), mix(0.18, 0.24, step(60.0, glassData.b * 255.0)) - hover * 0.04);
     color += vec3(0.045) * (1.0 - localUV.y) * (0.6 + hover * 0.4);

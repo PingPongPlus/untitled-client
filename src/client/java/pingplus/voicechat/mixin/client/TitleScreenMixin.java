@@ -55,6 +55,7 @@ public abstract class TitleScreenMixin extends Screen {
             method = "extractRenderState",
             at = @At(value = "INVOKE", target =
                     "Lnet/minecraft/client/gui/screens/TitleScreen;extractPanorama(Lnet/minecraft/client/gui/GuiGraphicsExtractor;F)V")
+
     )
     private void drawCustomBackground(
             TitleScreen screen, GuiGraphicsExtractor graphics, float delta, Operation<Void> original
