@@ -17,7 +17,7 @@ public abstract class LogoRendererMixin {
     @Unique
     private static final Identifier CUSTOM_LOGO =
             Identifier.fromNamespaceAndPath(
-                    "voicechat", "textures/gui/img.png"
+                    "voicechat", "textures/gui/img_2.png"
             );
 
     @Shadow
@@ -36,8 +36,8 @@ public abstract class LogoRendererMixin {
             CallbackInfo ci
     ) {
         // Replace these with your PNG's actual dimensions.
-        int textureWidth = 512;
-        int textureHeight = 200;
+        int textureWidth = 1300;
+        int textureHeight = 600;
 
         // Display width in GUI pixels; height preserves the aspect ratio.
         int logoWidth = 256;
@@ -47,11 +47,11 @@ public abstract class LogoRendererMixin {
 
         int x = (width - logoWidth) / 2;
         float effectiveAlpha = keepLogoThroughFade() ? 1.0F : alpha;
-
+        int y = heightOffset - 30;
         graphics.blit(
                 RenderPipelines.GUI_TEXTURED,
                 CUSTOM_LOGO,
-                x, heightOffset,
+                x, y,
                 0.0F, 0.0F,
                 logoWidth, logoHeight,
                 textureWidth, textureHeight,
