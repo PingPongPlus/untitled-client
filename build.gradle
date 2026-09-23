@@ -25,6 +25,12 @@ fabricApi {
     configureDataGeneration {
         client = true
     }
+    configureTests {
+        createSourceSet = true
+        modId = 'voicechat-glass-test'
+        enableGameTests = false
+        clearRunDirectory = false
+    }
 }
 
 repositories {
