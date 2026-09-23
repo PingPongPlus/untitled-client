@@ -42,7 +42,7 @@ public abstract class TitleScreenRestMixin extends Screen {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void onInit(CallbackInfo ci){
+    private void onInit(CallbackInfo ci) {
 
         if (this.splash == null) {
             this.splash = this.minecraft.gui.splashManager().getSplash();
@@ -50,33 +50,66 @@ public abstract class TitleScreenRestMixin extends Screen {
 
         int copyrightWidth = this.font.width(COPYRIGHT_TEXT);
         int copyrightX = this.width - copyrightWidth - 2;
-        int spacing = 24;
         int topPos = this.height / 4 + 48;
+
         if (this.minecraft.isDemo()) {
             topPos = this.createDemoMenuOptions(topPos, 24);
         } else {
             topPos = this.createNormalMenuOptions(topPos, 24);
         }
 
-        int numberOfButtons = 3;
-        int currentButton = 0;
         topPos += 24;
 
-        this.friends = (FriendsButton)this.addRenderableWidget(CommonButtons.friends(20, (var1) -> OnlineOptionsScreen.confirmFriendsListEnabled(this.minecraft, () -> this.minecraft.gui.setScreen(new FriendsOverlayScreen(this)), this), !this.minecraft.isDemo()));
-        ++currentButton;
-        this.friends.setPosition(this.getHorizontalPosition(currentButton, 3, 20), topPos);
-        SpriteIconButton language = (SpriteIconButton)this.addRenderableWidget(CommonButtons.language(20, (var1) -> this.minecraft.gui.setScreen(new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())), true));
-        ++currentButton;
-        language.setPosition(this.getHorizontalPosition(currentButton, 3, 20), topPos);
-        SpriteIconButton accessibility = (SpriteIconButton)this.addRenderableWidget(CommonButtons.accessibility(20, (var1) -> this.minecraft.gui.setScreen(new AccessibilityOptionsScreen(this, this.minecraft.options)), true));
-        ++currentButton;
-        accessibility.setPosition(this.getHorizontalPosition(currentButton, 3, 20), topPos);
-        Button.Builder var10001 = Button.builder(Component.translatable("menu.options"), (var1) -> this.minecraft.gui.setScreen(new OptionsScreen(this, this.minecraft.options, false)));
-        int var10002 = this.width / 2 - 100;
+        // --- EVENLY DISTRIBUTE 3 BUTTONS ACROSS [-100, +100] RANGE ---
+        int totalWidth = 200;                  // Range from -100 to +100
+        int buttonWidth = 20;                  // Width of each icon button
+        int numButtons = 3;
+        int startX = this.width / 2 - 100;     // Left border (-100 offset)
+
+        // Calculate gap dynamically so buttons touch the outer bounds (-100 and +100 - buttonWidth)
+        // Formula: (Total Area - Combined Width of Buttons) / (Number of Gaps)
+        int gap = (totalWidth - (numButtons * buttonWidth)) / (numButtons - 1); // Gap = (200 - 60) / 2 = 70px
+
+        int x1 = startX;                                    // Left:   -100
+        int x2 = startX + buttonWidth + gap;                // Middle:  -10
+        int x3 = startX + totalWidth - buttonWidth;         // Right:   +80
+
+        this.friends = (FriendsButton) this.addRenderableWidget(
+                CommonButtons.friends(20, (var1) -> OnlineOptionsScreen.confirmFriendsListEnabled(
+                        this.minecraft, () -> this.minecraft.gui.setScreen(new FriendsOverlayScreen(this)), this
+                ), !this.minecraft.isDemo())
+        );
+        this.friends.setPosition(x1, topPos);
+
+        SpriteIconButton language = (SpriteIconButton) this.addRenderableWidget(
+                CommonButtons.language(20, (var1) -> this.minecraft.gui.setScreen(
+                        new LanguageSelectScreen(this, this.minecraft.options, this.minecraft.getLanguageManager())
+                ), true)
+        );
+        language.setPosition(x2, topPos);
+
+        SpriteIconButton accessibility = (SpriteIconButton) this.addRenderableWidget(
+                CommonButtons.accessibility(20, (var1) -> this.minecraft.gui.setScreen(
+                        new AccessibilityOptionsScreen(this, this.minecraft.options)
+                ), true)
+        );
+        accessibility.setPosition(x3, topPos);
+        // -------------------------------------------------------------
+
+        // Bottom row (Options & Quit buttons)
         topPos += 24;
-        this.addRenderableWidget(var10001.bounds(var10002, topPos, 98, 20).build());
-        this.addRenderableWidget(Button.builder(Component.translatable("menu.quit"), (var1) -> this.minecraft.stop()).bounds(this.width / 2 + 2, topPos, 98, 20).build());
-        this.addRenderableWidget(new PlainTextButton(copyrightX, this.height - 10, copyrightWidth, 10, COPYRIGHT_TEXT, (var1) -> this.minecraft.gui.setScreen(new CreditsAndAttributionScreen(this)), this.font));
+        int optionsX = this.width / 2 - 100;
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.options"),
+                        (var1) -> this.minecraft.gui.setScreen(new OptionsScreen(this, this.minecraft.options, false)))
+                .bounds(optionsX, topPos, 98, 20).build());
+
+        this.addRenderableWidget(Button.builder(Component.translatable("menu.quit"),
+                        (var1) -> this.minecraft.stop())
+                .bounds(this.width / 2 + 2, topPos, 98, 20).build());
+
+        this.addRenderableWidget(new PlainTextButton(copyrightX, this.height - 10, copyrightWidth, 10,
+                COPYRIGHT_TEXT, (var1) -> this.minecraft.gui.setScreen(new CreditsAndAttributionScreen(this)), this.font));
+
         if (this.realmsNotificationsScreen == null) {
             this.realmsNotificationsScreen = new RealmsNotificationsScreen();
         }
@@ -85,9 +118,7 @@ public abstract class TitleScreenRestMixin extends Screen {
             this.realmsNotificationsScreen.init(this.width, this.height);
         }
         ci.cancel();
-
     }
-
 }
 
 
