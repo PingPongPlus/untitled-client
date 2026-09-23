@@ -17,7 +17,7 @@ public abstract class LogoRendererMixin {
     @Unique
     private static final Identifier CUSTOM_LOGO =
             Identifier.fromNamespaceAndPath(
-                    "voicechat", "textures/gui/img_2.png"
+                    "voicechat", "textures/gui/img_5.png"
             );
 
     @Shadow
