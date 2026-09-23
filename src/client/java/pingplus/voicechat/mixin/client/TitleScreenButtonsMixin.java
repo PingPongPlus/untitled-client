@@ -77,7 +77,7 @@ public abstract class TitleScreenButtonsMixin extends Screen {
                         This is the original Minecraft Multiplayer warning source i ll remove this cus
                         its annoying af lol
 
-                    if (minecraft.options.skipMultiplayerWarning) {
+                    if (minecraft.optio ns.skipMultiplayerWarning) {
                         screen = new JoinMultiplayerScreen(this);
                     } else {
                         screen = new SafetyScreen(this);
