@@ -31,6 +31,20 @@ public final class GlassButtonRenderer {
     }
 
     public static void drawRect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int data) {
+        drawShape(graphics, x, y, width, height, data, GlassPipelines.BUTTON);
+    }
+
+    public static void control(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
+        drawShape(graphics, x, y, width, height, color, GlassPipelines.CONTROL);
+    }
+
+    private static void drawShape(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int data, RenderPipeline pipeline) {
+        if (width <= 0 || height <= 0) return;
+        if (net.minecraft.client.Minecraft.getInstance().gui.overlay() instanceof net.minecraft.client.gui.screens.LoadingOverlay) {
+            GlassStyle.round(graphics, x, y, width, height, 12, GlassStyle.alpha(0xFF263D54, (data >>> 24) / 255f));
+            return;
+        }
+        if (pipeline == GlassPipelines.BUTTON) data = (data & 0xFFFFFF00) | Math.min(height, 255);
         GlassBackdrop.request();
         Matrix3x2f pose = new Matrix3x2f(graphics.pose());
         ScreenRectangle scissor = graphics.scissorStack.peek();
@@ -38,12 +52,11 @@ public final class GlassButtonRenderer {
                 width + 2 * SHADOW_PADDING, height + 2 * SHADOW_PADDING).transformMaxBounds(pose);
         if (scissor != null) bounds = bounds.intersection(scissor);
         if (bounds == null) return;
-        graphics.guiRenderState.addGuiElement(new GlassState(pose, x, y, width, height, data, scissor, bounds));
+        graphics.guiRenderState.addGuiElement(new GlassState(pipeline, pose, x, y, width, height, data, scissor, bounds));
     }
 
-    private record GlassState(Matrix3x2f pose, int x, int y, int width, int height, int data,
+    private record GlassState(RenderPipeline pipeline, Matrix3x2f pose, int x, int y, int width, int height, int data,
                               ScreenRectangle scissorArea, ScreenRectangle bounds) implements GuiElementRenderState {
-        @Override public RenderPipeline pipeline() { return GlassPipelines.BUTTON; }
         // Resolved during render preparation, after beginFrame() allocates the targets.
         @Override public TextureSetup textureSetup() { return GlassBackdrop.textures(); }
         @Override public void buildVertices(VertexConsumer vertices) {

@@ -15,6 +15,13 @@ public final class GlassPipelines {
                     .withFragmentShader(id("core/glass_button"))
                     .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
                     .withCull(false).build());
+    public static final RenderPipeline CONTROL = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+                    .withLocation(id("pipeline/glass_control"))
+                    .withVertexShader(id("core/glass_button"))
+                    .withFragmentShader(id("core/glass_control"))
+                    .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+                    .withCull(false).build());
     public static final RenderPipeline BLUR_HORIZONTAL = blur("glass_blur_horizontal", "HORIZONTAL");
     public static final RenderPipeline BLUR_VERTICAL = blur("glass_blur_vertical", "VERTICAL");
 

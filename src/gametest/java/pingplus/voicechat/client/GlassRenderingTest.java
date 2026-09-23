@@ -16,10 +16,105 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.setScreen(TitleScreen::new);
         context.waitTicks(30);
         context.takeScreenshot("glass-title");
+        context.runOnClient(client -> {
+            Screen screen = client.gui.screen();
+            var button = screen.children().stream().filter(child -> child instanceof Button)
+                    .map(child -> (Button) child).filter(b -> b.active).findFirst().orElseThrow();
+            screen.setFocused(button);
+        });
+        context.waitTicks(20);
+        context.takeScreenshot("glass-focus");
         context.clickScreenButton("menu.options");
         context.waitForScreen(OptionsScreen.class);
         context.waitTicks(10);
         context.takeScreenshot("glass-options");
+        var fps = new pingplus.voicechat.client.gui.FpsHud();
+        var coords = new pingplus.voicechat.client.gui.CoordinatesHud();
+        var category = net.minecraft.client.KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("voicechat", "glass_test"));
+        var key = new net.minecraft.client.KeyMapping("glass.test", 344, category);
+        context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps, key, coords));
+        context.waitTicks(20);
+        context.runOnClient(client -> {
+            Screen screen=client.gui.screen();
+            for(var child:screen.children()) if(child instanceof net.minecraft.client.gui.components.AbstractWidget w) {
+                if(w.getX()<0 || w.getRight()*0.60f>screen.width || w.getY()<26 || w.getBottom()*0.60f>screen.height-9)
+                    throw new AssertionError("Control outside viewport: "+w.getMessage().getString());
+            }
+        });
+        context.takeScreenshot("clickgui-overview");
+        clickCompactButton(context, "Frame rate");
+        context.runOnClient(client -> { if (fps.isEnabled()) throw new AssertionError("FPS toggle failed"); });
+        context.runOnClient(client -> client.gui.screen().mouseScrolled(100, 100, 0, -6));
+        context.waitTicks(10);
+        context.takeScreenshot("clickgui-scrolled");
+        clickCompactButton(context, "Hand swap");
+        context.runOnClient(client -> {
+            if (!PlayerSettings.handSwap) throw new AssertionError("Hand swap toggle failed");
+            PlayerSettings.handSwap = false;
+            client.gui.screen().mouseScrolled(100, 100, 0, 3);
+            var box = client.gui.screen().children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.EditBox)
+                .map(c -> (net.minecraft.client.gui.components.EditBox)c).findFirst().orElseThrow();
+            box.setValue("1.75");
+            if (PlayerSettings.xScale != 1.75f) throw new AssertionError("Scale input failed");
+            box.setValue("NaN");
+            if (PlayerSettings.xScale != 1.75f) throw new AssertionError("Invalid scale accepted");
+            box.setValue("1.0");
+        });
+        context.runOnClient(client -> client.options.guiScale().set(3));
+        context.waitTicks(15);
+        context.takeScreenshot("clickgui-compact");
+        context.runOnClient(client -> client.options.guiScale().set(2));
+        context.runOnClient(client -> client.getWindow().setWindowed(1440, 900));
+        context.waitTicks(15);
+        context.runOnClient(client -> client.gui.screen().mouseScrolled(100,100,0,100));
+        context.takeScreenshot("clickgui-wide");
+        clickCompactButton(context, "Player scale");
+        context.runOnClient(client -> {
+            if(client.gui.screen().children().stream().anyMatch(c -> c instanceof net.minecraft.client.gui.components.EditBox))
+                throw new AssertionError("Settings did not collapse");
+        });
+        clickCompactButton(context, "Player scale");
+        context.runOnClient(client -> {
+            Screen screen = client.gui.screen();
+            if(screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.EditBox).count()!=4)
+                throw new AssertionError("Settings did not expand");
+            var slider=screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.AbstractSliderButton)
+                .map(c -> (net.minecraft.client.gui.components.AbstractSliderButton)c).findFirst().orElseThrow();
+            var click=new net.minecraft.client.input.MouseButtonEvent((slider.getRight()-5)*0.60,(slider.getY()+20)*0.60,new net.minecraft.client.input.MouseButtonInfo(0,0));
+            screen.mouseClicked(click,false);screen.mouseReleased(click);
+            if(PlayerSettings.handSwapIntervalTicks!=20)throw new AssertionError("Slider maximum failed");
+            PlayerSettings.handSwapIntervalTicks=6;
+            var first=screen.children().stream().filter(c -> c instanceof Button).map(c -> (Button)c).findFirst().orElseThrow();
+            int oldX=first.getX();
+            var down=new net.minecraft.client.input.MouseButtonEvent((oldX+5)*0.60,(first.getY()-15)*0.60,new net.minecraft.client.input.MouseButtonInfo(0,0));
+            screen.mouseClicked(down,false);
+            var moved=new net.minecraft.client.input.MouseButtonEvent(down.x()+7.2,down.y()+9,down.buttonInfo());
+            screen.mouseDragged(moved,7.2,9);screen.mouseReleased(moved);
+            if(Math.abs(first.getX()-oldX-12)>1)throw new AssertionError("Panel drag failed");
+            for(int i=0;i<16;i++)screen.keyPressed(new net.minecraft.client.input.KeyEvent(258,0,0));
+            if(screen.getFocused()==null)throw new AssertionError("Keyboard navigation failed");
+        });
+        context.waitTicks(10);
+        context.takeScreenshot("clickgui-dragged");
+        java.util.concurrent.atomic.AtomicReference<java.util.concurrent.CompletableFuture<Void>> reload = new java.util.concurrent.atomic.AtomicReference<>();
+        context.runOnClient(client -> reload.set(client.reloadResourcePacks()));
+        context.waitTicks(2);
+        context.takeScreenshot("glass-reload");
+        context.waitFor(client -> reload.get().isDone());
+        context.waitTicks(50);
+        context.runOnClient(client -> reload.get().join());
+        context.setScreen(() -> {
+            var progress=new net.minecraft.client.gui.screens.ProgressScreen(false);
+            progress.progressStart(Component.literal("Preparing your world"));
+            progress.progressStage(Component.literal("Loading terrain"));
+            progress.progressStagePercentage(65);
+            return progress;
+        });
+        context.waitTicks(10);
+        context.takeScreenshot("glass-progress");
+        context.setScreen(() -> new net.minecraft.client.gui.screens.GenericMessageScreen(Component.literal("Connecting to your world")));
+        context.waitTicks(10);
+        context.takeScreenshot("glass-transition");
         context.setScreen(GlassTestScreen::new);
         context.waitTicks(10);
         context.takeScreenshot("glass-checkerboard");
@@ -35,6 +130,37 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.runOnClient(client -> client.options.guiScale().set(2));
         context.waitTicks(10);
         context.takeScreenshot("glass-scale-two");
+        context.setScreen(TitleScreen::new);
+        try (var world = context.worldBuilder().create()) {
+            context.waitFor(client -> client.player != null && client.gui.overlay() == null);
+            context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps,key,coords));
+            context.waitTicks(20);
+            context.takeScreenshot("clickgui-world");
+            context.runOnClient(client -> reload.set(client.reloadResourcePacks()));
+            context.waitTicks(12);
+            context.takeScreenshot("glass-world-reload");
+            context.waitFor(client -> reload.get().isDone() && client.gui.overlay() == null);
+            context.runOnClient(client -> reload.get().join());
+            context.waitTicks(10);
+            context.takeScreenshot("clickgui-after-reload");
+            context.runOnClient(client -> client.gui.screen().keyPressed(new net.minecraft.client.input.KeyEvent(344,0,0)));
+            context.waitFor(client -> client.gui.screen() == null);
+        }
+        context.setScreen(TitleScreen::new);
+        context.waitForScreen(TitleScreen.class);
+    }
+
+    private static void clickCompactButton(ClientGameTestContext context, String label) {
+        context.runOnClient(client -> {
+            Screen screen=client.gui.screen();
+            Button button=screen.children().stream().filter(c -> c instanceof Button)
+                    .map(c -> (Button)c).filter(b -> b.getMessage().getString().equals(label)).findFirst().orElseThrow();
+            float scale=pingplus.voicechat.client.gui.ClickGuiScreen.UI_SCALE;
+            var event=new net.minecraft.client.input.MouseButtonEvent((button.getX()+button.getWidth()/2.0)*scale,
+                    (button.getY()+button.getHeight()/2.0)*scale,new net.minecraft.client.input.MouseButtonInfo(0,0));
+            if(!screen.mouseClicked(event,false))throw new AssertionError("Missed scaled button: "+label);
+            screen.mouseReleased(event);
+        });
     }
 
     private static final class GlassTestScreen extends Screen {

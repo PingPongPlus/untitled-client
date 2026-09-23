@@ -2,265 +2,236 @@ package pingplus.voicechat.client.gui;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.gui.components.AbstractSliderButton;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.client.renderer.RenderPipelines;
 import pingplus.voicechat.client.PlayerSettings;
-import net.minecraft.client.gui.components.EditBox;
+import pingplus.voicechat.client.gui.glass.*;
+import java.util.*;
+import java.util.function.*;
 
-import javax.swing.plaf.SliderUI;
-
-/** A small settings screen opened with Right Shift. */
+/** Floating category ClickGUI. All input and narration use native widget semantics. */
 public final class ClickGuiScreen extends Screen {
+    /** Render and hit-test in the same logical space, independently of Minecraft GUI scale. */
+    public static final float UI_SCALE = 0.60f;
+    private int canvasWidth, canvasHeight;
     private final FpsHud fpsHud;
-    private final KeyMapping openGuiKey;
     private final CoordinatesHud coordinatesHud;
+    private final KeyMapping openGuiKey;
+    private final List<Category> categories = new ArrayList<>();
+    private final List<Entry> entries = new ArrayList<>();
+    private final Map<String, Boolean> expanded = new HashMap<>();
+    private final Map<String, int[]> positions = new HashMap<>();
+    private int scroll, maxScroll, panelWidth;
+    private long opened = System.nanoTime(), closing;
+    private float opacity = 1;
+    private Category dragging;
+    private double dragX, dragY;
+    private static final Identifier WALLPAPER = Identifier.fromNamespaceAndPath("voicechat", "textures/gui/title_background.png");
 
     public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey, CoordinatesHud coordinatesHud) {
-        super(Component.literal("Manage Minecraft Rendering like a Boss"));
-        this.fpsHud = fpsHud;
-        this.openGuiKey = openGuiKey;
-        this.coordinatesHud = coordinatesHud;
+        super(Component.literal("Client controls"));
+        this.fpsHud=fpsHud; this.openGuiKey=openGuiKey; this.coordinatesHud=coordinatesHud;
+        expanded.put("Player scale",true); expanded.put("Swap interval",true);
     }
 
-    // Minecraft calls init() when the screen opens or the window is resized.
-    @Override
-    protected void init() {
-        int buttonX = width / 2 - 100;
-        int buttonY = height / 2 - 10;
-        buttonY = buttonY - 90;
-
-        // The code inside this callback runs when the FPS button is pressed.
-        addRenderableWidget(Button.builder(fpsLabel(), button -> {
-            fpsHud.toggle();
-            button.setMessage(fpsLabel());
-        }).bounds(buttonX, buttonY, 200, 20).build());
-
-
-        addRenderableWidget(Button.builder(coordinatesLabel(), button -> {
-            coordinatesHud.toggle();
-            button.setMessage(coordinatesLabel());
-        }).bounds(buttonX, buttonY + 30, 98, 20).build());
-
-        addRenderableWidget(Button.builder(hitboxesLabel(), button -> {
-            PlayerSettings.hitboxes = !PlayerSettings.hitboxes;
-            button.setMessage(hitboxesLabel());
-        }).bounds(buttonX + 102, buttonY + 30, 98, 20).build());
-
-        EditBox widthInput = new EditBox(
-                font,
-                buttonX, buttonY + 60,
-                66, 20,
-                Component.literal("Player xScale")
-        );
-
-        widthInput.setValue(Float.toString(PlayerSettings.xScale));
-        widthInput.setMaxLength(1000);
-
-// Runs whenever the text changes.
-        widthInput.setResponder(text -> {
-            try {
-                float number = Float.parseFloat(text);
-
-                if (Float.isFinite(number) && number >= -100000.0F && number <= 100000.0F) {
-                    PlayerSettings.xScale = number;
-                }
-            } catch (NumberFormatException ignored) {
-                // Empty or unfinished input leaves the previous scale unchanged.
-            }
-        });
-        addRenderableWidget(widthInput);
-
-        EditBox yScaleInput = new EditBox(
-                font,
-                buttonX + 66, buttonY + 60,
-                66, 20,
-                Component.literal("Player yScale")
-        );
-
-        yScaleInput.setValue(Float.toString(PlayerSettings.yScale));
-        yScaleInput.setMaxLength(1000);
-
-// Runs whenever the text changes.
-        yScaleInput.setResponder(text -> {
-            try {
-                float number = Float.parseFloat(text);
-
-                if (Float.isFinite(number) && number >= -100000.0F && number <= 100000.0F) {
-                    PlayerSettings.yScale = number;
-                }
-            } catch (NumberFormatException ignored) {
-                // Empty or unfinished input leaves the previous scale unchanged.
-            }
-        });
-        addRenderableWidget(yScaleInput);
-
-
-
-        EditBox zScaleInput = new EditBox(
-                font,
-                buttonX + 132, buttonY + 60,
-                66, 20,
-                Component.literal("Player zScale")
-        );
-
-        zScaleInput.setValue(Float.toString(PlayerSettings.zScale));
-        zScaleInput.setMaxLength(1000);
-
-// Runs whenever the text changes.
-        zScaleInput.setResponder(text -> {
-            try {
-                float number = Float.parseFloat(text);
-
-                if (Float.isFinite(number) && number >= -100000.0F && number <= 100000.0F) {
-                    PlayerSettings.zScale = number;
-                }
-            } catch (NumberFormatException ignored) {
-                // Empty or unfinished input leaves the previous scale unchanged.
-            }
-        });
-        addRenderableWidget(zScaleInput);
-
-        EditBox headScale = new EditBox(
-                font,
-                buttonX, buttonY + 90, 200, 20, Component.literal("HeadScale")
-        );
-        headScale.setValue(Float.toString(PlayerSettings.xyzHeadscale));
-        headScale.setMaxLength(1000);
-        headScale.setResponder(text -> {
-            try {
-                float number = Float.parseFloat(text);
-
-                if (Float.isFinite(number) && number >= -100000.0F && number <= 100000.0F) {
-                    PlayerSettings.xyzHeadscale = number;
-                }
-            } catch (NumberFormatException ignored) {
-                // Empty or unfinished input leaves the previous scale unchanged.
-            }
-        });
-        addRenderableWidget(headScale);
-
-
-        addRenderableWidget(Button.builder(BodyLabel(), button -> {
-            PlayerSettings.mainBodyPart = !PlayerSettings.mainBodyPart;
-            button.setMessage(BodyLabel());
-        }).bounds(buttonX, buttonY + 120, 200, 20).build());
-
-        addRenderableWidget(Button.builder(LeftArmLabel(), button -> {
-            PlayerSettings.leftArm = !PlayerSettings.leftArm;
-            button.setMessage(LeftArmLabel());
-        }).bounds(buttonX, buttonY + 150, 200, 20).build());
-
-        addRenderableWidget(Button.builder(RightArmLabel(), button -> {
-            PlayerSettings.rightArm = !PlayerSettings.rightArm;
-            button.setMessage(RightArmLabel());
-        }).bounds(buttonX, buttonY + 180, 200, 20).build());
-
-        addRenderableWidget(Button.builder(handSwapLabel(), button -> {
-            PlayerSettings.handSwap = !PlayerSettings.handSwap;
-            button.setMessage(handSwapLabel());
-        }).bounds(buttonX, buttonY + 210, 98, 20).build());
-
-        addRenderableWidget(new AbstractSliderButton(
-                buttonX + 102,
-                buttonY + 210,
-                98,
-                20,
-                handSwapSpeedLabel(),
-                handSwapSpeedValue()
-        ) {
-            @Override
-            protected void updateMessage() {
-                setMessage(handSwapSpeedLabel());
-            }
-
-            @Override
-            protected void applyValue() {
-                PlayerSettings.handSwapIntervalTicks = sliderToTicks(value);
-                setMessage(handSwapSpeedLabel());
-            }
-        });
-
-        addRenderableWidget(Button.builder(Component.literal("x"), button -> {
-            onClose();
-        }).bounds(buttonX, buttonY + 240, 200, 20).build());
-
-
-
-    }
-    private static final int HAND_SWAP_MIN_TICKS = 1;
-    private static final int HAND_SWAP_MAX_TICKS = 20;
-
-    private static double handSwapSpeedValue() {
-        int ticks = Math.max(HAND_SWAP_MIN_TICKS, Math.min(HAND_SWAP_MAX_TICKS, PlayerSettings.handSwapIntervalTicks));
-        return (ticks - HAND_SWAP_MIN_TICKS) / (double) (HAND_SWAP_MAX_TICKS - HAND_SWAP_MIN_TICKS);
-    }
-
-    private static int sliderToTicks(double value) {
-        return HAND_SWAP_MIN_TICKS + (int) Math.round(value * (HAND_SWAP_MAX_TICKS - HAND_SWAP_MIN_TICKS));
-    }
-
-    private Component RightArmLabel(){
-        return Component.literal("Right Arm: " + (PlayerSettings.rightArm ? "ON" : "OFF"));
-    }
-    private Component handSwapLabel(){
-        return Component.literal("Hand Swap: " + (PlayerSettings.handSwap ? "ON" : "OFF"));
-    }
-    private Component handSwapSpeedLabel(){
-        int ticks = Math.max(HAND_SWAP_MIN_TICKS, Math.min(HAND_SWAP_MAX_TICKS, PlayerSettings.handSwapIntervalTicks));
-        return Component.literal(String.format("Speed: %.2fs", ticks / 20.0));
-    }
-    private Component LeftArmLabel(){
-        return Component.literal("Left Arm: " + (PlayerSettings.leftArm ? "ON" : "OFF"));
-    }
-    private Component BodyLabel(){
-        return Component.literal("Main Boddy Part: " + (PlayerSettings.mainBodyPart ? "ON" : "OFF"));
-    }
-    private Component coordinatesLabel(){
-        return Component.literal("Coordinates: " +(coordinatesHud.isEnabled() ? "ON" : "OFF"));
-    }
-
-    private Component hitboxesLabel() {
-        return Component.literal("Hitboxes: " + (PlayerSettings.hitboxes ? "ON" : "OFF"));
-    }
-
-
-    private Component fpsLabel() {
-        return Component.literal("FPS: " + (fpsHud.isEnabled() ? "ON" : "OFF"));
-    }
-
-
-
-    @Override
-    public boolean keyPressed(KeyEvent event) {
-        if (openGuiKey.matches(event)) {
-            onClose();
-            return true;
+    @Override protected void init() {
+        canvasWidth = (int)(width / UI_SCALE);
+        canvasHeight = (int)(height / UI_SCALE);
+        categories.clear(); entries.clear();
+        int columns = Math.clamp((canvasWidth-16)/148,2,4);
+        panelWidth = Math.min(140, (canvasWidth-24-(columns-1)*8)/columns);
+        int startX = 16;
+        Category hud = category("HUD", "On-screen information");
+        toggle(hud,"Frame rate",fpsHud::isEnabled,fpsHud::toggle);
+        toggle(hud,"Coordinates",coordinatesHud::isEnabled,coordinatesHud::toggle);
+        Category render = category("RENDER", "See the details");
+        toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
+        Category player = category("PLAYER", "Shape your presence");
+        toggle(player,"Body",()->PlayerSettings.mainBodyPart,()->PlayerSettings.mainBodyPart=!PlayerSettings.mainBodyPart);
+        toggle(player,"Left arm",()->PlayerSettings.leftArm,()->PlayerSettings.leftArm=!PlayerSettings.leftArm);
+        toggle(player,"Right arm",()->PlayerSettings.rightArm,()->PlayerSettings.rightArm=!PlayerSettings.rightArm);
+        disclosure(player,"Player scale");
+        if (expanded.get("Player scale")) {
+            scale(player,"Width",PlayerSettings.xScale,v->PlayerSettings.xScale=v);
+            scale(player,"Height",PlayerSettings.yScale,v->PlayerSettings.yScale=v);
+            scale(player,"Depth",PlayerSettings.zScale,v->PlayerSettings.zScale=v);
+            scale(player,"Head",PlayerSettings.xyzHeadscale,v->PlayerSettings.xyzHeadscale=v);
         }
-        // Minecraft handles Escape and keyboard navigation.
-        return super.keyPressed(event);
-    }
-
-    @Override
-    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        // Also support the opening key being rebound to a mouse button.
-        if (openGuiKey.matchesMouse(event)) {
-            onClose();
-            return true;
+        Category automation = category("AUTOMATION", "Small actions, effortless");
+        toggle(automation,"Hand swap",()->PlayerSettings.handSwap,()->PlayerSettings.handSwap=!PlayerSettings.handSwap);
+        disclosure(automation,"Swap interval");
+        if (expanded.get("Swap interval")) add(automation,new SpeedSlider(panelWidth-20),26);
+        // Stack shorter categories together, keeping the full Player settings column visible.
+        int[] columnY = new int[columns];
+        Arrays.fill(columnY, 30);
+        int[] columnFor = columns == 2 ? new int[]{0,0,1,0}
+                : columns == 3 ? new int[]{0,0,1,2} : new int[]{0,1,2,3};
+        for (int i=0; i<categories.size(); i++) {
+            Category c=categories.get(i);
+            int col=columnFor[i];
+            c.x=startX+col*(panelWidth+8); c.y=columnY[col];
+            columnY[col]+=c.height()+6;
+            int[] saved=positions.get(c.title);
+            if(saved!=null){
+                c.x=Math.clamp(saved[0],8,Math.max(8,canvasWidth-panelWidth-8));
+                c.y=Math.clamp(saved[1],28,Math.max(28,canvasHeight-18-c.height()));
+            }
         }
-        return super.mouseClicked(event, doubleClick);
+        updateScroll(); layout();
     }
-
-    @Override
-    public boolean isPauseScreen() {
+    private Category category(String name,String subtitle) { Category c=new Category(name,subtitle);categories.add(c);return c; }
+    private void add(Category c,AbstractWidget w,int h) { entries.add(new Entry(c,addRenderableWidget(w),c.content));c.content+=h; }
+    private void toggle(Category c,String name,BooleanSupplier state,Runnable action) { add(c,new Toggle(name,state,action),18); }
+    private void disclosure(Category c,String name) {
+        add(c,new Button(0,0,panelWidth-20,18,Component.literal(name),b->{expanded.put(name,!expanded.getOrDefault(name,false));rebuildWidgets();},supplier->supplier.get()) {
+            @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF505050,opacity*.7f));
+                text(g,name,getX()+4,getY()+4,GlassStyle.MUTED);
+                text(g,expanded.getOrDefault(name,false)?"-":"+",getRight()-13,getY()+4,GlassStyle.ACCENT);
+            }
+        },18);
+    }
+    private void scale(Category c,String label,float value,Consumer<Float> setter) {
+        EditBox box=new EditBox(font,0,0,45,14,Component.literal(label+" scale")) {
+            @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                text(g,label,getX()-(panelWidth-80),getY()+3,GlassStyle.MUTED);
+                GlassButtonRenderer.control(g,getX()-5,getY()-2,getWidth()+10,18,GlassStyle.alpha(isFocused()?0xFF555555:0xFF303030,opacity));
+                g.nextStratum();super.extractWidgetRenderState(g,mx,my,dt);
+            }
+        };
+        box.addFormatter((text,index)->net.minecraft.util.FormattedCharSequence.forward(text,GlassStyle.FONT));
+        box.setBordered(false);box.setTextShadow(false);box.setTextColor(GlassStyle.TEXT);box.setMaxLength(1000);box.setValue(Float.toString(value));
+        box.setResponder(text->{
+            try {float n=Float.parseFloat(text);boolean valid=Float.isFinite(n)&&n>=-100000&&n<=100000;
+                box.setTextColor(valid?GlassStyle.TEXT:0xFFFF9B99);if(valid)setter.accept(n);
+            }catch(NumberFormatException ignored){box.setTextColor(0xFFFF9B99);}
+        });
+        add(c,box,20);
+    }
+    private void updateScroll() {
+        maxScroll=Math.max(0,categories.stream().mapToInt(c->c.y+c.height()).max().orElse(0)-(canvasHeight-16));
+        scroll=Math.clamp(scroll,0,maxScroll);
+    }
+    private void layout() {
+        for(Entry e:entries){
+            e.widget.setX(e.category.x+(e.widget instanceof EditBox?panelWidth-65:10));
+            e.widget.setY(e.category.y+22+e.row-scroll);
+        }
+    }
+    @Override public void extractBackground(GuiGraphicsExtractor g,int mx,int my,float dt) {
+        if(minecraft.level==null){
+            double s=Math.max(width/1672.0,height/941.0);int w=(int)Math.ceil(1672*s),h=(int)Math.ceil(941*s);
+            g.blit(RenderPipelines.GUI_TEXTURED,WALLPAPER,(width-w)/2,(height-h)/2,0,0,w,h,1672,941,1672,941);
+        }
+        g.fill(0,0,width,height,GlassStyle.alpha(0x50000000,opacity));
+    }
+    @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float dt) {
+        opacity=closing==0?Math.clamp((System.nanoTime()-opened)/220_000_000f,0,1):1-Math.clamp((System.nanoTime()-closing)/160_000_000f,0,1);
+        extractBackground(g,mx,my,dt);
+        g.pose().pushMatrix();
+        g.pose().scale(UI_SCALE);
+        mx = (int)(mx / UI_SCALE);
+        my = (int)(my / UI_SCALE);
+        text(g,"UNTITLED",16,13,GlassStyle.TEXT);text(g,"/  CONTROL CENTER",74,13,GlassStyle.MUTED);
+        text(g,"ESC  /  CLOSE",canvasWidth-78,13,GlassStyle.MUTED);
+        g.enableScissor(0,26,canvasWidth,canvasHeight-16);
+        for(Category c:categories){
+            int y=c.y-scroll;
+            float light=.15f+.55f*(1-Math.clamp((float)Math.hypot(mx-c.x-panelWidth*.3,my-y-12)/200,0,1));
+            GlassStyle.surface(g,c.x,y,panelWidth,c.height(),opacity,light);
+        }
+        g.nextStratum();
+        for(Category c:categories){
+            int y=c.y-scroll;
+            text(g,c.title,c.x+10,y+6,GlassStyle.TEXT);
+            GlassButtonRenderer.control(g,c.x+10,y+18,panelWidth-20,1,GlassStyle.alpha(0xFFBBBBBB,opacity*.5f));
+            for(Entry e:entries)if(e.category==c){e.widget.setAlpha(opacity);e.widget.extractRenderState(g,mx,my,dt);}
+        }
+        g.disableScissor();
+        text(g,"DRAG HEADERS  /  EXPAND SETTINGS",16,canvasHeight-13,GlassStyle.MUTED);
+        if(maxScroll>0)text(g,"SCROLL",canvasWidth-48,canvasHeight-13,GlassStyle.ACCENT);
+        g.pose().popMatrix();
+    }
+    private void text(GuiGraphicsExtractor g,String value,int x,int y,int color){g.text(font,GlassStyle.label(value),x,y,GlassStyle.alpha(color,opacity),false);}
+    @Override public boolean mouseScrolled(double x,double y,double horizontal,double vertical){scroll=Math.clamp(scroll-(int)(vertical*28),0,maxScroll);layout();return true;}
+    private MouseButtonEvent logicalMouse(MouseButtonEvent event) {
+        return new MouseButtonEvent(event.x() / UI_SCALE, event.y() / UI_SCALE, event.buttonInfo());
+    }
+    @Override public void mouseMoved(double x, double y) { super.mouseMoved(x / UI_SCALE, y / UI_SCALE); }
+    @Override public boolean mouseClicked(MouseButtonEvent event,boolean twice){
+        MouseButtonEvent e = logicalMouse(event);
+        if(openGuiKey.matchesMouse(e)){onClose();return true;}
+        if(closing!=0)return true;
+        if(e.y()<26){if(e.x()>canvasWidth-85)onClose();return true;}
+        if(e.y()>canvasHeight-16)return true;
+        for(int i=categories.size()-1;i>=0;i--){Category c=categories.get(i);int y=c.y-scroll;
+            if(e.button()==0&&e.x()>=c.x&&e.x()<c.x+panelWidth&&e.y()>=y&&e.y()<y+20){dragging=c;dragX=e.x()-c.x;dragY=e.y()-y;return true;}
+            if(e.x()>=c.x&&e.x()<c.x+panelWidth&&e.y()>=y&&e.y()<y+c.height()){
+                for(Entry entry:entries)if(entry.category==c&&entry.widget.mouseClicked(e,twice)){setFocused(entry.widget);setDragging(true);return true;}
+                return true;
+            }
+        }
         return false;
     }
+    @Override public boolean mouseDragged(MouseButtonEvent event,double dx,double dy){
+        MouseButtonEvent e = logicalMouse(event);
+        dx /= UI_SCALE; dy /= UI_SCALE;
+        if(dragging!=null){dragging.x=Math.clamp((int)(e.x()-dragX),8,Math.max(8,canvasWidth-panelWidth-8));dragging.y=Math.clamp((int)(e.y()-dragY)+scroll,28,Math.max(28,canvasHeight-18-dragging.height()));positions.put(dragging.title,new int[]{dragging.x,dragging.y});updateScroll();layout();return true;}
+        return super.mouseDragged(e,dx,dy);
+    }
+    @Override public boolean mouseReleased(MouseButtonEvent e){if(dragging!=null){dragging=null;return true;}return super.mouseReleased(logicalMouse(e));}
+    @Override public boolean keyPressed(KeyEvent e){
+        if(openGuiKey.matches(e)){onClose();return true;}
+        boolean handled=super.keyPressed(e);
+        if(getFocused() instanceof AbstractWidget w){
+            if(w.getY()<28)scroll=Math.max(0,scroll+w.getY()-30);
+            if(w.getBottom()>canvasHeight-18)scroll=Math.min(maxScroll,scroll+w.getBottom()-(canvasHeight-20));
+            layout();
+        }
+        return handled;
+    }
+    @Override public boolean isPauseScreen(){return false;}
+    @Override public void onClose(){if(closing==0)closing=System.nanoTime();}
+    @Override public void tick(){if(closing!=0&&System.nanoTime()-closing>=160_000_000L)minecraft.gui.setScreen(null);}
 
-    @Override
-    public void onClose() {
-        minecraft.gui.setScreen(null);
+    private static final class Category {
+        final String title,subtitle;int x,y,content;
+        Category(String title,String subtitle){this.title=title;this.subtitle=subtitle;}
+        int height(){return 22+content;}
+    }
+    private record Entry(Category category,AbstractWidget widget,int row){}
+    private final class Toggle extends Button {
+        private final String label;private final BooleanSupplier state;private float position,hover;private long last=System.nanoTime();
+        Toggle(String label,BooleanSupplier state,Runnable action){super(0,0,panelWidth-20,18,Component.literal(label),b->action.run(),DEFAULT_NARRATION);this.label=label;this.state=state;position=state.getAsBoolean()?1:0;}
+        @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt){
+            long now=System.nanoTime();float step=(float)(1-Math.exp(-16*Math.min(.1,(now-last)/1e9)));last=now;
+            position+=((state.getAsBoolean()?1:0)-position)*step;hover+=((isHoveredOrFocused()?1:0)-hover)*step;
+            if(hover>.01)GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF505050,opacity*hover*.6f));
+            text(g,label,getX()+4,getY()+4,state.getAsBoolean()?GlassStyle.TEXT:GlassStyle.MUTED);
+            int x=getRight()-30,y=getY()+3;
+            int r=(int)(55+position*105), green=r,b=r;
+            GlassButtonRenderer.control(g,x,y,26,13,GlassStyle.alpha(0xFF000000|(r<<16)|(green<<8)|b,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,x+2+Math.round(position*13),y+2,9,9,GlassStyle.alpha(0xFFF3F3F3,opacity));
+        }
+        @Override protected net.minecraft.network.chat.MutableComponent createNarrationMessage(){return Component.literal(label+(state.getAsBoolean()?", on":", off"));}
+    }
+    private final class SpeedSlider extends AbstractSliderButton {
+        SpeedSlider(int w){super(0,0,w,26,Component.literal("Hand swap interval"),Math.clamp((PlayerSettings.handSwapIntervalTicks-1)/19.0,0,1));updateMessage();}
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Interval   %.2f s",PlayerSettings.handSwapIntervalTicks/20.0)));}
+        @Override protected void applyValue(){PlayerSettings.handSwapIntervalTicks=1+(int)Math.round(value*19);updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
     }
 }
