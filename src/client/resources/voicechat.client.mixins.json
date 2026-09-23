@@ -15,7 +15,13 @@
     "TransparentButtonsMixin",
     "GlassGuiDrawAccessor",
     "GlassGuiRendererMixin",
-    "JoinMultiplayerScreenMixin"
+    "GlassSliderMixin",
+    "JoinMultiplayerScreenMixin",
+    "GlassLoadingOverlayMixin",
+    "GlassTransitionScreenMixin",
+    "GlassLoadingScreenMixin",
+    "GlassLoadingTextMixin",
+    "GlassMessageTextMixin"
   ],
   "injectors": {
     "defaultRequire": 1
