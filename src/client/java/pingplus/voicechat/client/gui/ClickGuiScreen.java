@@ -92,7 +92,7 @@ public final class ClickGuiScreen extends Screen {
     private void disclosure(Category c,String name) {
         add(c,new Button(0,0,panelWidth-20,18,Component.literal(name),b->{expanded.put(name,!expanded.getOrDefault(name,false));rebuildWidgets();},supplier->supplier.get()) {
             @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
-                if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF505050,opacity*.7f));
+                if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
                 text(g,name,getX()+4,getY()+4,GlassStyle.MUTED);
                 text(g,expanded.getOrDefault(name,false)?"-":"+",getRight()-13,getY()+4,GlassStyle.ACCENT);
             }
@@ -214,7 +214,7 @@ public final class ClickGuiScreen extends Screen {
         @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt){
             long now=System.nanoTime();float step=(float)(1-Math.exp(-16*Math.min(.1,(now-last)/1e9)));last=now;
             position+=((state.getAsBoolean()?1:0)-position)*step;hover+=((isHoveredOrFocused()?1:0)-hover)*step;
-            if(hover>.01)GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF505050,opacity*hover*.6f));
+            if(hover>.01)GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*hover*.85f));
             text(g,label,getX()+4,getY()+4,state.getAsBoolean()?GlassStyle.TEXT:GlassStyle.MUTED);
             int x=getRight()-30,y=getY()+3;
             int r=(int)(55+position*105), green=r,b=r;
