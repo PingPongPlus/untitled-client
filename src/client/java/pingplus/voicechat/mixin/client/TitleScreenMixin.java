@@ -81,5 +81,6 @@ public abstract class TitleScreenMixin extends Screen {
         } finally {
             graphics.pose().popMatrix();
         }
+        pingplus.voicechat.client.gui.glass.GlassRain.draw(graphics);
     }
 }
