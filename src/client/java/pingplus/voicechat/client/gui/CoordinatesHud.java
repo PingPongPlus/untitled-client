@@ -15,6 +15,7 @@ public class CoordinatesHud {
         enabled = !enabled;
     }
 
+
     public void extract(GuiGraphicsExtractor graphics, DeltaTracker delta) {
         Minecraft client = Minecraft.getInstance();
         if (!enabled || client.player == null || client.gui.screen() != null) {
