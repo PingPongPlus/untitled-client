@@ -129,6 +129,7 @@ public final class ClickGuiScreen extends Screen {
             g.blit(RenderPipelines.GUI_TEXTURED,WALLPAPER,(width-w)/2,(height-h)/2,0,0,w,h,1672,941,1672,941);
         }
         g.fill(0,0,width,height,GlassStyle.alpha(0x50000000,opacity));
+        pingplus.voicechat.client.gui.glass.GlassRain.draw(g);
     }
     @Override public void extractRenderState(GuiGraphicsExtractor g,int mx,int my,float dt) {
         opacity=closing==0?Math.clamp((System.nanoTime()-opened)/220_000_000f,0,1):1-Math.clamp((System.nanoTime()-closing)/160_000_000f,0,1);

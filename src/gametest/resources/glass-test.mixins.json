@@ -1,0 +1,1 @@
+{"required":true,"package":"pingplus.voicechat.mixin.test","compatibilityLevel":"JAVA_25","client":["GlassGpuTimingMixin"],"injectors":{"defaultRequire":1}}

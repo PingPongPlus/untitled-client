@@ -22,7 +22,7 @@ public final class GlassBackdrop {
 
     public static void beginFrame(RenderTarget target) {
         captured = false;
-        if (!requested) return;
+        if (!requested) { if (scene != null) close(); return; }
         requested = false;
         if (scene != null && scene.width == target.width && scene.height == target.height
                 && scene.getColorTexture().getFormat() == target.getColorTexture().getFormat()) return;
@@ -41,11 +41,26 @@ public final class GlassBackdrop {
 
     /** Called between GUI render passes, after the backdrop and before the first glass draw. */
     public static void capture(RenderTarget target) {
-        RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(
-                target.getColorTexture(), scene.getColorTexture(), 0, 0, 0, 0, 0, target.width, target.height);
+        captureScene(target);
         blur(scene.getColorTextureView(), blurX, GlassPipelines.BLUR_HORIZONTAL);
         blur(blurX.getColorTextureView(), blurred, GlassPipelines.BLUR_VERTICAL);
         captured = true;
+    }
+
+    /** Rain samples the dry scene. Panels subsequently capture the wet scene and blur it once. */
+    public static void captureScene(RenderTarget target) {
+        RenderSystem.getDevice().createCommandEncoder().copyTextureToTexture(
+                target.getColorTexture(), scene.getColorTexture(), 0, 0, 0, 0, 0, target.width, target.height);
+    }
+
+    public static TextureSetup rainTexture() {
+        return TextureSetup.singleTexture(scene.getColorTextureView(),
+                RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR));
+    }
+
+    public static TextureSetup logoTextures(GpuTextureView mark) {
+        var sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
+        return TextureSetup.doubleTexture(mark, sampler, scene.getColorTextureView(), sampler);
     }
 
     private static void blur(GpuTextureView source, TextureTarget destination, RenderPipeline pipeline) {

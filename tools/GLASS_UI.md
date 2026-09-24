@@ -20,8 +20,9 @@ within the current screen. Closing and reopening starts with the responsive layo
 - `ClickGuiScreen`: category layout, dragging, custom controls, input and animations.
 - `GlassStyle`: palette, UI font, and resource-independent rounded geometry.
 - `GlassButtonRenderer`: extracts antialiased GPU geometry for glass and tinted controls.
-- `GlassBackdrop` / `GlassGuiRendererMixin`: one scene capture and shared separable blur
-  per frame, reused across all panels and controls. Targets resize with the framebuffer.
+- `GlassBackdrop` / `GlassGuiRendererMixin`: capture the dry background for rain, then
+  capture the wet scene for panels. One shared half-resolution separable blur is reused
+  across controls. Targets resize with the framebuffer and are released outside menus.
 - `glass_button.fsh`: rounded glass, screen-space refraction, frosted sampling, rim lighting.
 - `glass_control.fsh`: antialiased switches, slider tracks/thumbs, and input surfaces.
 - `GlassLoadingOverlayMixin`: changes startup/reload visuals while leaving vanilla
@@ -33,7 +34,7 @@ startup artwork is registered directly from the bundled image before resource pa
 load; its matching progress bar uses built-in geometry. Neither needs custom shaders
 or fonts. The overlay shows only the supplied Minecraft AIR artwork and real progress.
 The Rajdhani font is distributed under its bundled SIL Open Font License. The world
-and vanilla HUD retain their normal Minecraft rendering; only the interface is restyled.
+rendering is unchanged; default text in menus, HUD, chat, tooltips and input fields uses Rajdhani.
 
 ## Verification
 
@@ -44,4 +45,45 @@ focus, resizing and GUI scales, and performs a resource reload in a temporary wo
 It also checks the close key and captures screenshots in
 `build/run/clientGameTest/screenshots`. The test mod is not included in the production JAR.
 
-Visual checks performed on macOS/OpenGL. Other GPU backends have not been verified.
+The Mountain Air update is verified on Windows/OpenGL (NVIDIA Quadro P5000), at
+854x480 and 1440x900, including GUI scales 2 and 3, resource reloads and menu transitions.
+The test captures title, options, survival/world selection, multiplayer, pause and ClickGUI
+screens. A default-font assertion checks that measurements match the ClickGUI and differ
+from vanilla. Test-only asynchronous GPU timestamps measure the entire GUI render pass;
+they do not measure the world renderer or whole-frame latency. Other GPU backends remain
+unverified. On this machine, the final 1440x900 run recorded:
+
+| Screen | Samples | Mean GUI GPU time | Maximum |
+| --- | ---: | ---: | ---: |
+| ClickGUI | 235 | 1.002 ms | 1.574 ms |
+| Pause | 237 | 1.007 ms | 1.660 ms |
+
+These are hardware-specific timings for the whole GUI pass, not an isolated rain cost.
+Two pause captures also confirmed rain motion while the world was paused.
+
+## Mountain Air materials
+
+`GlassLogoRenderer` binds the original mark as a silhouette/relief texture and the wet
+scene as a second sampler. `glass_logo.fsh` transmits and refracts that live background
+through the ribbon, with thickness absorption, Fresnel reflection, slight dispersion and
+broad specular highlights. Display-resolution filtering softens the source alpha halo.
+The logo shares the existing scene capture; no additional render target is allocated.
+`LogoRendererMixin` preserves the actual 1707x924 aspect ratio and the title fade.
+
+`GlassRain` and `glass_rain.fsh` render two procedural droplet layers in one full-screen
+pass plus stationary condensation. Moving drops vary in size, asymmetry, aspect and speed;
+long refractive trails follow fixed winding paths and leave smaller pearls behind. Adjacent
+cells overlap their wakes so trails continue across cell boundaries. The material includes
+Fresnel rims and sky highlights. Motion uses wall time so it continues on the pause menu.
+The effect is an optical approximation, not a fluid simulation. Its cost does not increase
+with an accumulating particle count. Text and controls draw in the following stratum;
+glass panels sample the wet background. Rain is skipped while resource packs reload.
+
+`GlassMenuBackgroundMixin` covers the common menu background used by pause, world
+selection/creation, multiplayer and options. Title and ClickGUI have explicit hooks.
+Inventory and chat do not receive the rain overlay during gameplay.
+
+`GlassFontMixin` routes the default font to `voicechat:ui`, keeping both measurement and
+rendering consistent. The existing Rajdhani SemiBold asset, size 11 and oversample 3 are
+shared. Explicit icon fonts and Force Unicode Font remain available. The UI font references
+vanilla include fonts directly for missing glyphs, avoiding a default/UI reference cycle.
