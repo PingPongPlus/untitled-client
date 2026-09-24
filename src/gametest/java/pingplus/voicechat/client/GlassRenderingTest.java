@@ -16,6 +16,28 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.setScreen(TitleScreen::new);
         context.waitTicks(30);
         context.takeScreenshot("glass-title");
+        boolean initialGlass = pingplus.voicechat.client.gui.glass.GlassRainSettings.isEnabled();
+        context.clickScreenButton("Glass drops: " + (initialGlass ? "ON" : "OFF"));
+        context.runOnClient(client -> {
+            if (pingplus.voicechat.client.gui.glass.GlassRainSettings.isEnabled() == initialGlass)
+                throw new AssertionError("Glass toggle did not change state");
+            var saved = new java.util.Properties();
+            try (var reader = java.nio.file.Files.newBufferedReader(net.fabricmc.loader.api.FabricLoader.getInstance()
+                    .getConfigDir().resolve("voicechat-glass-rain.properties"))) { saved.load(reader); }
+            catch (java.io.IOException e) { throw new AssertionError("Cannot read saved glass preference", e); }
+            if (Boolean.parseBoolean(saved.getProperty("enabled")) == initialGlass)
+                throw new AssertionError("Glass preference was not saved");
+        });
+        context.waitTicks(10);
+        context.takeScreenshot("glass-toggled");
+        context.setScreen(TitleScreen::new);
+        context.waitTicks(5);
+        context.clickScreenButton("Glass drops: " + (initialGlass ? "OFF" : "ON"));
+        context.runOnClient(client -> {
+            if (pingplus.voicechat.client.gui.glass.GlassRainSettings.isEnabled() != initialGlass)
+                throw new AssertionError("Glass toggle did not restore state");
+        });
+
         context.runOnClient(client -> {
             String sample = "Mountain Air 0123456789";
             if (client.font.width(sample) != client.font.width(pingplus.voicechat.client.gui.glass.GlassStyle.label(sample)))

@@ -23,7 +23,8 @@
     "GlassTransitionScreenMixin",
     "GlassLoadingScreenMixin",
     "GlassLoadingTextMixin",
-    "GlassMessageTextMixin"
+    "GlassMessageTextMixin",
+    "GlassRainToggleMixin"
   ],
   "injectors": {
     "defaultRequire": 1
