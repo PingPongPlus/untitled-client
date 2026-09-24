@@ -17,6 +17,23 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.waitTicks(30);
         context.takeScreenshot("glass-title");
         context.runOnClient(client -> {
+            String sample = "Mountain Air 0123456789";
+            if (client.font.width(sample) != client.font.width(pingplus.voicechat.client.gui.glass.GlassStyle.label(sample)))
+                throw new AssertionError("Default font differs from ClickGUI font");
+            var vanillaStyle = net.minecraft.network.chat.Style.EMPTY.withFont(new net.minecraft.network.chat.FontDescription.Resource(
+                    net.minecraft.resources.Identifier.fromNamespaceAndPath("minecraft", "include/default")));
+            if (client.font.width(sample) == client.font.width(Component.literal(sample).withStyle(vanillaStyle)))
+                throw new AssertionError("UI font unexpectedly uses vanilla glyph metrics");
+        });
+        context.setScreen(() -> new net.minecraft.client.gui.screens.worldselection.SelectWorldScreen(new TitleScreen()));
+        context.waitTicks(20);
+        context.takeScreenshot("glass-survival");
+        context.setScreen(() -> new net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen(new TitleScreen()));
+        context.waitTicks(20);
+        context.takeScreenshot("glass-multiplayer");
+        context.setScreen(TitleScreen::new);
+        context.waitTicks(20);
+        context.runOnClient(client -> {
             Screen screen = client.gui.screen();
             var button = screen.children().stream().filter(child -> child instanceof Button)
                     .map(child -> (Button) child).filter(b -> b.active).findFirst().orElseThrow();
@@ -68,6 +85,9 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.waitTicks(15);
         context.runOnClient(client -> client.gui.screen().mouseScrolled(100,100,0,100));
         context.takeScreenshot("clickgui-wide");
+        context.runOnClient(client -> GlassGpuTiming.begin());
+        context.waitTicks(80);
+        context.runOnClient(client -> GlassGpuTiming.finish("ClickGUI 1440x900"));
         clickCompactButton(context, "Player scale");
         context.runOnClient(client -> {
             if(client.gui.screen().children().stream().anyMatch(c -> c instanceof net.minecraft.client.gui.components.EditBox))
@@ -133,6 +153,14 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.setScreen(TitleScreen::new);
         try (var world = context.worldBuilder().create()) {
             context.waitFor(client -> client.player != null && client.gui.overlay() == null);
+            context.setScreen(() -> new net.minecraft.client.gui.screens.PauseScreen(true));
+            context.waitTicks(20);
+            context.takeScreenshot("glass-pause");
+            context.runOnClient(client -> GlassGpuTiming.begin());
+            context.waitTicks(80);
+            context.runOnClient(client -> GlassGpuTiming.finish("Pause 1440x900"));
+            context.waitTicks(20);
+            context.takeScreenshot("glass-pause-rain-motion");
             context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps,key,coords));
             context.waitTicks(20);
             context.takeScreenshot("clickgui-world");

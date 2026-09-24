@@ -34,7 +34,15 @@ public abstract class GlassGuiRendererMixin {
         if (GlassBackdrop.needsCapture()) {
             for (int i = start; i < end; i++) {
                 var pipeline = ((GlassGuiDrawAccessor) draws.get(i)).voicechat$getPipeline();
-                if (pipeline == GlassPipelines.BUTTON || pipeline == GlassPipelines.CONTROL) {
+                if (pipeline == GlassPipelines.RAIN) {
+                    if (i > start) original.call(label, target, transforms, start, i);
+                    GlassBackdrop.captureScene(target);
+                    original.call(label, target, transforms, i, i + 1);
+                    // Continue through the wrapper so controls capture the finished rain layer.
+                    voicechat$captureBeforeGlass(label, target, transforms, i + 1, end, original);
+                    return;
+                }
+                if (pipeline == GlassPipelines.BUTTON || pipeline == GlassPipelines.CONTROL || pipeline == GlassPipelines.LOGO) {
                     // Close the background pass before copying: never read from an active color attachment.
                     if (i > start) original.call(label, target, transforms, start, i);
                     GlassBackdrop.capture(target);
