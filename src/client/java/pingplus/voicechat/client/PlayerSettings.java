@@ -11,6 +11,7 @@ public final class PlayerSettings {
     public static boolean handSwap = false;
     public static boolean hitboxes = false;
     public static int handSwapIntervalTicks = 6;
+    public static boolean direction = false;
 
 }
 

@@ -1,5 +1,9 @@
 # Glass client UI
 
+Use **Glass drops: ON/OFF** in the top-right of the main menu to toggle animated
+glass raindrops globally. Glass buttons and panels stay unchanged. The preference
+is saved in `config/voicechat-glass-rain.properties`.
+
 Open the ClickGUI with the existing client-controls key (Right Shift by default).
 The interface renders at 60% of its logical size, including text and hit targets,
 leaving room for more categories. `ClickGuiScreen.UI_SCALE` controls this independently

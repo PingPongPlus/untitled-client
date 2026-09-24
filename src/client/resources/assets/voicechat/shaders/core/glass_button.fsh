@@ -17,7 +17,9 @@ void main() {
     vec2 halfSize = size * 0.5;
     vec2 p = (localUV - 0.5) * size;
     float pixelScale = max(size.y / max(glassData.b * 255.0, 1.0), 1.0);
-    float radius = min(min(halfSize.x, halfSize.y) * 0.82, 2.0 * pixelScale);
+    // Buttons are capsules; larger panels retain practical rounded corners.
+    float radius = min(halfSize.x, halfSize.y);
+    if (glassData.b * 255.0 > 40.0) radius = min(radius, 14.0 * pixelScale);
     float distance = roundedBox(p, halfSize, radius);
     float aa = max(fwidth(distance), 0.75);
     // Evaluate derivatives before divergent discard/return branches at the silhouette.
@@ -26,6 +28,8 @@ void main() {
     float hover = glassData.r;
     float enabled = glassData.g;
     float opacity = glassData.a;
+    // Stronger interaction feedback only for controls, not cursor-lit large panels.
+    float highlight = hover * enabled * (1.0 - step(40.5, glassData.b * 255.0));
 
     // Soft shadow extends beyond the rounded silhouette.
     float shadowDistance = roundedBox(p - vec2(0.0, pixelScale), halfSize, radius);
@@ -50,28 +54,18 @@ void main() {
     vec2 halfTexel = 0.5 / texSize;
     bentUV = clamp(bentUV, halfTexel, 1.0 - halfTexel);
 
-    vec3 clear = texture(Sampler0, bentUV).rgb;
+    // Sample a continuous Gaussian blur rather than distant taps that create ghost edges.
+    vec3 color = texture(Sampler1, bentUV).rgb;
+    // Preserve the scenery's hue; only a little neutral absorption improves label contrast.
+    float absorption = 0.12 + (1.0 - enabled) * 0.08 - hover * 0.035;
+    color *= 1.0 - absorption;
+    color = mix(color, vec3(1.0), highlight * 0.18);
 
-    // Additional multi-sample blur over Sampler1 (frost texture)
-    vec2 blurOffset = (3.5 * pixelScale) / texSize;
-    vec3 frost = texture(Sampler1, bentUV).rgb * 0.36;
-    frost += texture(Sampler1, bentUV + vec2(blurOffset.x, 0.0)).rgb * 0.16;
-    frost += texture(Sampler1, bentUV - vec2(blurOffset.x, 0.0)).rgb * 0.16;
-    frost += texture(Sampler1, bentUV + vec2(0.0, blurOffset.y)).rgb * 0.16;
-    frost += texture(Sampler1, bentUV - vec2(0.0, blurOffset.y)).rgb * 0.16;
-
-    // Boosted frosted blend ratio (0.82 instead of 0.32)
-    vec3 color = mix(clear, frost, 0.82 + (1.0 - enabled) * 0.10);
-
-    // Neutral absorption preserves the backdrop without adding a blue color cast.
-    color = mix(color, vec3(0.09), mix(0.18, 0.24, step(60.0, glassData.b * 255.0)) - hover * 0.04);
-    color += vec3(0.045) * (1.0 - localUV.y) * (0.6 + hover * 0.4);
-
-    float edge = 1.0 - smoothstep(0.0, 1.15 * pixelScale, abs(distance + 0.5 * pixelScale));
+    float edge = 1.0 - smoothstep(0.0, (0.7 + highlight * 0.45) * pixelScale, abs(distance + 0.45 * pixelScale));
     float light = pow(max(dot(normal, normalize(vec2(-0.5, -0.85))), 0.0), 2.0);
     float lowerRim = pow(max(dot(normal, normalize(vec2(0.45, 0.9))), 0.0), 5.0);
-    color = mix(color, vec3(0.96), edge * (0.16 + light * 0.52 + lowerRim * 0.20 + hover * 0.12));
-    float sheen = exp(-pow((localUV.y - 0.08) / 0.20, 2.0)) * (0.035 + hover * 0.025);
+    color = mix(color, vec3(0.96), edge * (0.20 + light * 0.32 + lowerRim * 0.14 + hover * 0.08 + highlight * 0.26));
+    float sheen = exp(-pow((localUV.y - 0.08) / 0.20, 2.0)) * (0.014 + hover * 0.012 + highlight * 0.04);
     color += sheen;
     fragColor = vec4(clamp(color, 0.0, 1.0), coverage * opacity);
 }
