@@ -3,6 +3,7 @@
   "id": "voicechat-glass-test",
   "version": "1.0.0",
   "environment": "client",
+  "mixins": ["glass-test.mixins.json"],
   "entrypoints": {
     "fabric-client-gametest": ["pingplus.voicechat.client.GlassRenderingTest"]
   }

@@ -8,6 +8,19 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
 public final class GlassPipelines {
+    public static final RenderPipeline RAIN = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+                    .withLocation(id("pipeline/glass_rain"))
+                    .withVertexShader(id("core/glass_button"))
+                    .withFragmentShader(id("core/glass_rain"))
+                    .withCull(false).build());
+    public static final RenderPipeline LOGO = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+                    .withLocation(id("pipeline/glass_logo"))
+                    .withVertexShader(id("core/glass_button"))
+                    .withFragmentShader(id("core/glass_logo"))
+                    .withBindGroupLayout(BindGroupLayouts.SAMPLER1)
+                    .withCull(false).build());
     public static final RenderPipeline BUTTON = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
                     .withLocation(id("pipeline/glass_button"))
