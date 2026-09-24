@@ -62,6 +62,7 @@ public final class ClickGuiScreen extends Screen {
             scale(player,"Depth",PlayerSettings.zScale,v->PlayerSettings.zScale=v);
             scale(player,"Head",PlayerSettings.xyzHeadscale,v->PlayerSettings.xyzHeadscale=v);
         }
+
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
         Category automation = category("AUTOMATION", "Small actions, effortless");
         toggle(automation,"Hand swap",()->PlayerSettings.handSwap,()->PlayerSettings.handSwap=!PlayerSettings.handSwap);
