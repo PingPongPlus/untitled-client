@@ -8,20 +8,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(LogoRenderer.class)
-public abstract class LogoRendererMixin {
-    @Shadow
-    public abstract boolean keepLogoThroughFade();
+            @Mixin(LogoRenderer.class)
+            public abstract class LogoRendererMixin {
+        @Shadow
+        public abstract boolean keepLogoThroughFade();
 
-    @Inject(
-            method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IFI)V",
-            at = @At("HEAD"),
-            cancellable = true
-    )
-    private void drawCustomLogo(
-            GuiGraphicsExtractor graphics,
-            int width,
-            float alpha,
+        @Inject(
+                method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IFI)V",
+                at = @At("HEAD"),
+                cancellable = true
+        )
+        private void drawCustomLogo(
+                GuiGraphicsExtractor graphics,
+        int width,
+        float alpha,
             int heightOffset,
             CallbackInfo ci
     ) {
