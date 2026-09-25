@@ -102,6 +102,7 @@ public final class ArraylistHud {
                 new Named("Scoreboard", ScoreboardHud.INSTANCE::isEnabled),
                 new Named("Chat", ChatHud.INSTANCE::isEnabled),
                 new Named("Dock hotbar", () -> PlayerSettings.dockHotbar),
+                new Named("No HUD bars", () -> PlayerSettings.hideHealth || PlayerSettings.hideHunger || PlayerSettings.hideXp || PlayerSettings.hideLocator),
                 new Named("AIR logo", LogoHud.INSTANCE::isEnabled),
                 new Named("Spotify", SpotifySettings::enabled),
                 new Named("Hitboxes", () -> PlayerSettings.hitboxes),

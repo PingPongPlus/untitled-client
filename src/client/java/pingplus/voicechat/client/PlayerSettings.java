@@ -31,6 +31,12 @@ public final class PlayerSettings {
     public static boolean dockShelf = true;
     public static boolean dockFrames = true;
     public static float dockSize = 1f;
+    public static boolean dockAutoHide = false;
+    public static int dockAutoHideSeconds = 20;
+    public static boolean hideHealth = false;
+    public static boolean hideHunger = false;
+    public static boolean hideXp = false;
+    public static boolean hideLocator = false;
 
 }
 

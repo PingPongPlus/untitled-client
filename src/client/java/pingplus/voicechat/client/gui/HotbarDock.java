@@ -30,6 +30,11 @@ public final class HotbarDock {
     private float centerVelocity;
     private float frameAvg = 1f / 60;
     private long last = System.nanoTime();
+    private int heldSlot = -1;
+    private net.minecraft.world.item.Item heldItem;
+    private double heldTime;
+    private float slideY;
+    private float slideVelocity;
 
     public boolean render(GuiGraphicsExtractor g, DeltaTracker dt) {
         Minecraft client = Minecraft.getInstance();
@@ -74,11 +79,26 @@ public final class HotbarDock {
 
         float[] pos = displacedPositions(dockCenter);
 
+        ItemStack held = inventory.getSelectedItem();
+        boolean holding = !held.isEmpty();
+        if (!holding || selected != heldSlot || held.getItem() != heldItem) {
+            heldSlot = selected;
+            heldItem = holding ? held.getItem() : null;
+            heldTime = 0;
+        } else {
+            heldTime += frame;
+        }
+        float hideTarget = PlayerSettings.dockAutoHide && holding && heldTime >= PlayerSettings.dockAutoHideSeconds ? 200f : 0f;
+        slideVelocity += (hideTarget - slideY) * 80 * frame;
+        slideVelocity *= (float) Math.exp(-14 * frame);
+        slideY = Math.max(0, Math.min(200f, slideY + slideVelocity * frame));
+
         int shelfX = Math.round(pos[0] - SLOT / 2f * scale[0] - 1);
         int shelfRight = Math.round(pos[8] + SLOT / 2f * scale[8] + 1);
         float size = Math.max(0.5f, Math.min(2f, PlayerSettings.dockSize));
         float dockMid = (shelfX + shelfRight) / 2f;
         g.pose().pushMatrix();
+        g.pose().translate(0, slideY);
         g.pose().translate(dockMid, height);
         g.pose().scale(size);
         g.pose().translate(-dockMid, -height);

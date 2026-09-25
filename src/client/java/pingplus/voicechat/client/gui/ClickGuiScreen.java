@@ -78,6 +78,13 @@ public final class ClickGuiScreen extends Screen {
             toggle(hud,"Chat glass",ChatHud.INSTANCE::isGlass,ChatHud.INSTANCE::toggleGlass);
             toggle(hud,"Chat edges",ChatHud.INSTANCE::isEdges,ChatHud.INSTANCE::toggleEdges);
         }
+        disclosure(hud,"Bars");
+        if (expanded.getOrDefault("Bars",false)) {
+            toggle(hud,"Health bar",()->!PlayerSettings.hideHealth,()->PlayerSettings.hideHealth=!PlayerSettings.hideHealth);
+            toggle(hud,"Hunger bar",()->!PlayerSettings.hideHunger,()->PlayerSettings.hideHunger=!PlayerSettings.hideHunger);
+            toggle(hud,"XP bar",()->!PlayerSettings.hideXp,()->PlayerSettings.hideXp=!PlayerSettings.hideXp);
+            toggle(hud,"Locator bar",()->!PlayerSettings.hideLocator,()->PlayerSettings.hideLocator=!PlayerSettings.hideLocator);
+        }
         toggle(hud,"Dock hotbar",()->PlayerSettings.dockHotbar,()->PlayerSettings.dockHotbar=!PlayerSettings.dockHotbar);
         disclosure(hud,"Dock options");
         if (expanded.getOrDefault("Dock options",false)) {
@@ -86,6 +93,8 @@ public final class ClickGuiScreen extends Screen {
             add(hud,new DockSizeSlider(panelWidth-20),26);
             toggle(hud,"Dock shelf",()->PlayerSettings.dockShelf,()->PlayerSettings.dockShelf=!PlayerSettings.dockShelf);
             toggle(hud,"Hotbar frame",()->PlayerSettings.dockFrames,()->PlayerSettings.dockFrames=!PlayerSettings.dockFrames);
+            toggle(hud,"Auto hide",()->PlayerSettings.dockAutoHide,()->PlayerSettings.dockAutoHide=!PlayerSettings.dockAutoHide);
+            add(hud,new DockAutoHideSlider(panelWidth-20),26);
         }
         toggle(hud,"AIR logo",LogoHud.INSTANCE::isEnabled,LogoHud.INSTANCE::toggle);
         disclosure(hud,"Logo options");
@@ -417,6 +426,19 @@ public final class ClickGuiScreen extends Screen {
         DockSizeSlider(int w){super(0,0,w,26,Component.literal("Hotbar size"),Math.clamp((PlayerSettings.dockSize-0.5)/1.5,0,1));updateMessage();}
         @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Size   %d %%",Math.round(PlayerSettings.dockSize*100))));}
         @Override protected void applyValue(){PlayerSettings.dockSize=(float)(0.5+value*1.5);updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class DockAutoHideSlider extends AbstractSliderButton {
+        DockAutoHideSlider(int w){super(0,0,w,26,Component.literal("Hide delay"),Math.clamp((PlayerSettings.dockAutoHideSeconds-5)/115.0,0,1));updateMessage();}
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Hide after   %d s",PlayerSettings.dockAutoHideSeconds)));}
+        @Override protected void applyValue(){PlayerSettings.dockAutoHideSeconds=5+(int)Math.round(value*115);updateMessage();}
         @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
             text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
             int x=getX()+4,y=getY()+19,length=width-8;
