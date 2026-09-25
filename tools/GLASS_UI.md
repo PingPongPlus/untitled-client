@@ -117,3 +117,12 @@ The widget appears only when the server supplies a sidebar objective, including
 team-specific sidebars. It preserves styled titles, team prefixes/suffixes, custom
 score names and number formats, hidden entries, and vanilla's 15-entry sort/limit.
 Tab-list and below-name scores are unaffected.
+
+## AIR logo widget
+
+**HUD > AIR logo** toggles the supplied transparent AIR artwork. **Logo options**
+contains **Logo glass** (blurred glass background on/off) and **Logo edges**.
+Glass uses the global Render blur, shadow and corner settings. All three preferences
+persist in `config/voicechat-logo-hud.properties`. Open chat to drag, resize with the
+corner or wheel, or right-click to reset its saved layout. The artwork keeps its
+native proportions and uses smooth filtering. The main-menu logo is separate.

@@ -41,7 +41,7 @@ public final class ClickGuiScreen extends Screen {
     public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey, CoordinatesHud coordinatesHud, ArraylistHud arraylistHud) {
         super(Component.literal("Client controls"));
         this.fpsHud=fpsHud; this.openGuiKey=openGuiKey; this.coordinatesHud=coordinatesHud; this.arraylistHud=arraylistHud;
-        expanded.put("Player scale",true); expanded.put("Swap interval",true); expanded.put("General",true); expanded.put("Arraylist options",true);
+        expanded.put("Player scale",true); expanded.put("Swap interval",true); expanded.put("General",true); expanded.put("Arraylist options",true); expanded.put("Dock options",true);
     }
 
     @Override protected void init() {
@@ -71,6 +71,27 @@ public final class ClickGuiScreen extends Screen {
         if (expanded.getOrDefault("Scoreboard options",false)) {
             toggle(hud,"Liquid glass",ScoreboardHud.INSTANCE::isGlass,ScoreboardHud.INSTANCE::toggleGlass);
             toggle(hud,"Glass edges",ScoreboardHud.INSTANCE::isEdges,ScoreboardHud.INSTANCE::toggleEdges);
+        }
+        toggle(hud,"Chat",ChatHud.INSTANCE::isEnabled,ChatHud.INSTANCE::toggle);
+        disclosure(hud,"Chat options");
+        if (expanded.getOrDefault("Chat options",false)) {
+            toggle(hud,"Chat glass",ChatHud.INSTANCE::isGlass,ChatHud.INSTANCE::toggleGlass);
+            toggle(hud,"Chat edges",ChatHud.INSTANCE::isEdges,ChatHud.INSTANCE::toggleEdges);
+        }
+        toggle(hud,"Dock hotbar",()->PlayerSettings.dockHotbar,()->PlayerSettings.dockHotbar=!PlayerSettings.dockHotbar);
+        disclosure(hud,"Dock options");
+        if (expanded.getOrDefault("Dock options",false)) {
+            add(hud,new DockScaleSlider(panelWidth-20),26);
+            add(hud,new DockRadiusSlider(panelWidth-20),26);
+            add(hud,new DockSizeSlider(panelWidth-20),26);
+            toggle(hud,"Dock shelf",()->PlayerSettings.dockShelf,()->PlayerSettings.dockShelf=!PlayerSettings.dockShelf);
+            toggle(hud,"Hotbar frame",()->PlayerSettings.dockFrames,()->PlayerSettings.dockFrames=!PlayerSettings.dockFrames);
+        }
+        toggle(hud,"AIR logo",LogoHud.INSTANCE::isEnabled,LogoHud.INSTANCE::toggle);
+        disclosure(hud,"Logo options");
+        if (expanded.getOrDefault("Logo options",false)) {
+            toggle(hud,"Logo glass",LogoHud.INSTANCE::isGlass,LogoHud.INSTANCE::toggleGlass);
+            toggle(hud,"Logo edges",LogoHud.INSTANCE::isEdges,LogoHud.INSTANCE::toggleEdges);
         }
         Category render = category("RENDER", "See the details");
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
@@ -138,7 +159,7 @@ public final class ClickGuiScreen extends Screen {
         int[] columnY = new int[columns];
         Arrays.fill(columnY, 30);
         int[] columnFor = columns == 2 ? new int[]{0,0,1,0,1,0}
-                : columns == 3 ? new int[]{0,0,1,2,1,2} : new int[]{0,1,2,3,1,0};
+                : columns == 3 ? new int[]{0,0,1,2,1,2} : new int[]{0,1,2,3,1,3};
         for (int i=0; i<categories.size(); i++) {
             Category c=categories.get(i);
             int col=columnFor[Math.min(i, columnFor.length-1)];
@@ -383,6 +404,45 @@ public final class ClickGuiScreen extends Screen {
         PercentSlider(int w){super(0,0,w,26,Component.literal("Bar opacity"),Math.clamp(PlayerSettings.mobBarOpacity,0,1));updateMessage();}
         @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Bar opacity   %d%%",Math.round(value*100))));}
         @Override protected void applyValue(){PlayerSettings.mobBarOpacity=(float)value;updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class DockSizeSlider extends AbstractSliderButton {
+        DockSizeSlider(int w){super(0,0,w,26,Component.literal("Hotbar size"),Math.clamp((PlayerSettings.dockSize-0.5)/1.5,0,1));updateMessage();}
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Size   %d %%",Math.round(PlayerSettings.dockSize*100))));}
+        @Override protected void applyValue(){PlayerSettings.dockSize=(float)(0.5+value*1.5);updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class DockScaleSlider extends AbstractSliderButton {
+        DockScaleSlider(int w){super(0,0,w,26,Component.literal("Dock magnification"),Math.clamp(PlayerSettings.dockMaxScale/2.5,0,1));updateMessage();}
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Magnification   %d %%",Math.round(PlayerSettings.dockMaxScale*100))));}
+        @Override protected void applyValue(){PlayerSettings.dockMaxScale=(float)(value*2.5);updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class DockRadiusSlider extends AbstractSliderButton {
+        DockRadiusSlider(int w){super(0,0,w,26,Component.literal("Dock falloff"),Math.clamp((PlayerSettings.dockRadius-0.5)/7.5,0,1));updateMessage();}
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Falloff   %.1f slots",PlayerSettings.dockRadius)));}
+        @Override protected void applyValue(){PlayerSettings.dockRadius=(float)(0.5+value*7.5);updateMessage();}
         @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
             text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
             int x=getX()+4,y=getY()+19,length=width-8;

@@ -15,7 +15,7 @@ import org.joml.Matrix3x2f;
 
 /** The existing mark supplies the silhouette and relief; the scene supplies transmitted light. */
 public final class GlassLogoRenderer {
-    private static final Identifier MARK = Identifier.fromNamespaceAndPath("voicechat", "textures/gui/img_5.png");
+    private static final Identifier MARK = Identifier.fromNamespaceAndPath("voicechat", "textures/gui/img_7.png");
 
     public static void draw(GuiGraphicsExtractor graphics, int x, int y, int width, int height, float alpha) {
         if (width <= 0 || height <= 0 || alpha <= 0) return;

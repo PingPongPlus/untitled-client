@@ -5,6 +5,12 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "HudEditorChatMixin",
+    "ChatComponentAccessor",
+    "ChatClickRelocateMixin",
+    "ChatHudCancelMixin",
+    "ChatRelocateMixin",
+    "ChatLineFillMixin",
+    "HotbarDockMixin",
     "ScoreboardHudMixin",
     "DebugRendererMixin",
     "AvatarRendererMixin",

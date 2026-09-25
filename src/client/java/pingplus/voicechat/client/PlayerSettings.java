@@ -25,6 +25,12 @@ public final class PlayerSettings {
     public static float mobBarOpacity = 0.85f;
     public static boolean playerOutline = true;
     public static int playerOutlineColor = 0x7FDBFF;
+    public static boolean dockHotbar = true;
+    public static float dockMaxScale = 1.5f;
+    public static float dockRadius = 4.5f;
+    public static boolean dockShelf = true;
+    public static boolean dockFrames = true;
+    public static float dockSize = 1f;
 
 }
 
