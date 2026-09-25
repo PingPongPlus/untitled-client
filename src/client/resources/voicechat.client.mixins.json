@@ -5,6 +5,13 @@
   "compatibilityLevel": "JAVA_25",
   "client": [
     "HudEditorChatMixin",
+    "ChatComponentAccessor",
+    "ChatClickRelocateMixin",
+    "ChatHudCancelMixin",
+    "ChatRelocateMixin",
+    "ChatLineFillMixin",
+    "HotbarDockMixin",
+    "ScoreboardHudMixin",
     "DebugRendererMixin",
     "AvatarRendererMixin",
     "OffSetMixin",
@@ -25,7 +32,10 @@
     "GlassLoadingScreenMixin",
     "GlassLoadingTextMixin",
     "GlassMessageTextMixin",
-    "GlassRainToggleMixin"
+    "GlassRainToggleMixin",
+    "ParticleHideMixin",
+    "MobNameHideMixin",
+    "SlayerOutlineMixin"
   ],
   "injectors": {
     "defaultRequire": 1

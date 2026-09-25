@@ -31,23 +31,46 @@ public final class GlassButtonRenderer {
     }
 
     public static void drawRect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int data) {
-        drawShape(graphics, x, y, width, height, data, GlassPipelines.BUTTON);
+        drawShape(graphics, x, y, width, height, data, GlassPipelines.button());
+    }
+
+    public static void drawHudRect(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int data,
+                                   boolean square, boolean edges) {
+        drawShape(graphics, x, y, width, height, data, GlassPipelines.hud(edges), square);
     }
 
     public static void control(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
         drawShape(graphics, x, y, width, height, color, GlassPipelines.CONTROL);
     }
 
+    public static void bar(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int color) {
+        drawShape(graphics, x, y, width, height, color, GlassPipelines.BAR);
+    }
+
+    /** Boss health bar piece: alpha=opacity, red channel=fill flag, blue channel=shine phase. */
+    public static void bossBar(GuiGraphicsExtractor graphics, int x, int y, int width, int height,
+                               boolean fill, float phase, float opacity) {
+        int data = (Math.round(Math.clamp(opacity, 0, 1) * 255) << 24)
+                | (fill ? 0x00FF0000 : 0)
+                | (Math.round(Math.clamp(phase, 0, 1) * 255) << 8);
+        drawShape(graphics, x, y, width, height, data, GlassPipelines.BOSS_BAR);
+    }
+
     private static void drawShape(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int data, RenderPipeline pipeline) {
+        drawShape(graphics, x, y, width, height, data, pipeline, false);
+    }
+
+    private static void drawShape(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int data,
+                                  RenderPipeline pipeline, boolean square) {
         if (width <= 0 || height <= 0) return;
         if (net.minecraft.client.Minecraft.getInstance().gui.overlay() instanceof net.minecraft.client.gui.screens.LoadingOverlay) {
-            GlassStyle.round(graphics, x, y, width, height, 12, GlassStyle.alpha(0xFF263D54, (data >>> 24) / 255f));
+            GlassStyle.round(graphics, x, y, width, height, square ? 0 : 12, GlassStyle.alpha(0xFF263D54, (data >>> 24) / 255f));
             return;
         }
-        if (pipeline == GlassPipelines.BUTTON) {
+        if (GlassPipelines.isButton(pipeline)) {
             // Green channel packs the enabled bit (bit 7) plus the global corner-radius scale (bits 0-6).
             boolean enabled = (data & 0x00FF00) != 0;
-            data = (data & 0xFFFF00FF) | (((enabled ? 128 : 0) + GlassCornerSettings.buttonQuant()) << 8);
+            data = (data & 0xFFFF00FF) | (((enabled ? 128 : 0) + (square ? 0 : GlassCornerSettings.buttonQuant())) << 8);
             data = (data & 0xFFFFFF00) | Math.min(height, 255);
         } else {
             // All control colors are grayscale: keep intensity in red/blue, corner scale (8-bit) in green.
@@ -57,19 +80,20 @@ public final class GlassButtonRenderer {
         GlassBackdrop.request();
         Matrix3x2f pose = new Matrix3x2f(graphics.pose());
         ScreenRectangle scissor = graphics.scissorStack.peek();
-        ScreenRectangle bounds = new ScreenRectangle(x - SHADOW_PADDING, y - SHADOW_PADDING,
-                width + 2 * SHADOW_PADDING, height + 2 * SHADOW_PADDING).transformMaxBounds(pose);
+        int padding = GlassPipelines.isButton(pipeline) ? Math.max(1, (int)Math.ceil(SHADOW_PADDING * GlassEffectSettings.shadowScale())) : SHADOW_PADDING;
+        ScreenRectangle bounds = new ScreenRectangle(x - padding, y - padding,
+                width + 2 * padding, height + 2 * padding).transformMaxBounds(pose);
         if (scissor != null) bounds = bounds.intersection(scissor);
         if (bounds == null) return;
-        graphics.guiRenderState.addGuiElement(new GlassState(pipeline, pose, x, y, width, height, data, scissor, bounds));
+        graphics.guiRenderState.addGuiElement(new GlassState(pipeline, pose, x, y, width, height, data, padding, scissor, bounds));
     }
 
-    private record GlassState(RenderPipeline pipeline, Matrix3x2f pose, int x, int y, int width, int height, int data,
+    private record GlassState(RenderPipeline pipeline, Matrix3x2f pose, int x, int y, int width, int height, int data, int padding,
                               ScreenRectangle scissorArea, ScreenRectangle bounds) implements GuiElementRenderState {
         // Resolved during render preparation, after beginFrame() allocates the targets.
         @Override public TextureSetup textureSetup() { return GlassBackdrop.textures(); }
         @Override public void buildVertices(VertexConsumer vertices) {
-            float p = SHADOW_PADDING;
+            float p = padding;
             vertex(vertices, x - p, y - p, -p / width, -p / height);
             vertex(vertices, x - p, y + height + p, -p / width, 1 + p / height);
             vertex(vertices, x + width + p, y + height + p, 1 + p / width, 1 + p / height);

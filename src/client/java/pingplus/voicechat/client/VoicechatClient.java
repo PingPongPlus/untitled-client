@@ -14,9 +14,12 @@ import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pingplus.voicechat.client.gui.ArraylistHud;
+import pingplus.voicechat.client.gui.ChatHud;
 import pingplus.voicechat.client.gui.ClickGuiScreen;
 import pingplus.voicechat.client.gui.CoordinatesHud;
 import pingplus.voicechat.client.gui.FpsHud;
+import pingplus.voicechat.client.gui.LogoHud;
+import pingplus.voicechat.client.gui.ScoreboardHud;
 import pingplus.voicechat.client.gui.hud.HudEditor;
 import pingplus.voicechat.client.spotify.SpotifySettings;
 import pingplus.voicechat.client.spotify.SpotifyWidget;
@@ -26,10 +29,22 @@ import pingplus.voicechat.client.spotify.SpotifyWidget;
  */
 public class VoicechatClient implements ClientModInitializer {
     private static VoiceConnection voiceConnection;
+    private static KeyMapping openGuiKey;
+    private static KeyMapping voiceMenuKey;
+    private static KeyMapping talkKey;
+    private static KeyMapping muteKey;
 
     public static VoiceStatus voiceStatus(java.util.UUID id) {
         return voiceConnection == null ? VoiceStatus.NOT_CONNECTED : voiceConnection.statusFor(id);
     }
+
+    public static KeyMapping openGuiKey() { return openGuiKey; }
+    public static KeyMapping voiceMenuKey() { return voiceMenuKey; }
+    public static KeyMapping talkKey() { return talkKey; }
+    public static KeyMapping muteKey() { return muteKey; }
+
+    public static final pingplus.voicechat.client.slayer.SlayerOutlineConfig SLAYER_CFG =
+        new pingplus.voicechat.client.slayer.SlayerOutlineConfig();
 
     public static final Logger LOG =
             LoggerFactory.getLogger("laby-voicechat");
@@ -37,14 +52,24 @@ public class VoicechatClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         pingplus.voicechat.client.gui.glass.GlassPipelines.initialize();
+        syncSlayerCfg();
+        pingplus.voicechat.client.slayer.SlayerOutlineHook.register(SLAYER_CFG);
         initializeClientFeatures();
         initializeVoiceChat();
+    }
+
+    public static void syncSlayerCfg() {
+        SLAYER_CFG.enabled = PlayerSettings.slayerOutline && PlayerSettings.slayerBossHighlight;
+        SLAYER_CFG.highlightBoss = PlayerSettings.slayerBoss;
+        SLAYER_CFG.highlightMiniboss = PlayerSettings.slayerMiniboss;
+        SLAYER_CFG.bossColor = PlayerSettings.slayerBossColor;
+        SLAYER_CFG.minibossColor = PlayerSettings.slayerMinibossColor;
     }
 
     private void initializeClientFeatures() {
         FpsHud fpsHud = new FpsHud();
         CoordinatesHud coordinatesHud = new CoordinatesHud();
-        KeyMapping openGuiKey = registerOpenGuiKey();
+        openGuiKey = registerOpenGuiKey();
         HandSwapFeature handSwap = new HandSwapFeature();
 
         ArraylistHud arraylistHud = new ArraylistHud(fpsHud, coordinatesHud);
@@ -56,6 +81,17 @@ public class VoicechatClient implements ClientModInitializer {
         HudEditor.register(new HudEditor.Entry("arraylist", "Arraylist", arraylistHud::width, arraylistHud::height,
                 (w,h) -> w - arraylistHud.width() - 8, (w,h) -> 8,
                 arraylistHud::isEnabled, (g,mx,my,dt,editing) -> arraylistHud.render(g), java.util.List::of, true));
+        HudEditor.register(new HudEditor.Entry("logo", "AIR logo", () -> LogoHud.WIDTH, () -> LogoHud.HEIGHT,
+                (w,h) -> 18, (w,h) -> 64,
+                LogoHud.INSTANCE::isEnabled, (g,mx,my,dt,editing) -> LogoHud.INSTANCE.render(g), java.util.List::of));
+        ScoreboardHud scoreboardHud = ScoreboardHud.INSTANCE;
+        HudEditor.register(new HudEditor.Entry("scoreboard", "Scoreboard", scoreboardHud::width, scoreboardHud::height,
+                (w,h) -> w - scoreboardHud.width() - 8, (w,h) -> h / 2 - scoreboardHud.height() * 2 / 3,
+                scoreboardHud::isVisible, (g,mx,my,dt,editing) -> scoreboardHud.render(g), java.util.List::of));
+        ChatHud chatHud = ChatHud.INSTANCE;
+        HudEditor.register(new HudEditor.Entry("chat", "Chat", chatHud::width, chatHud::height,
+                (w,h) -> 8, (w,h) -> h - 40 - chatHud.height(),
+                chatHud::isEnabled, chatHud::render, java.util.List::of));
         HudEditor.register(new HudEditor.Entry("spotify", "Spotify", () -> 240, () -> 100,
                 (w,h) -> SpotifySettings.x(w, 240), (w,h) -> SpotifySettings.y(h, 100),
                 SpotifySettings::enabled, (g,mx,my,dt,editing) -> SpotifyWidget.INSTANCE.render(g,mx,my,dt,editing),
@@ -79,7 +115,7 @@ public class VoicechatClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (openGuiKey.consumeClick()) {
+            while (openGuiKey != null && openGuiKey.consumeClick()) {
                 // Do not replace inventory, chat, or another mod's screen.
                 if (client.gui.screen() == null && client.player != null) {
                     client.gui.setScreen(
@@ -96,6 +132,19 @@ public class VoicechatClient implements ClientModInitializer {
             handSwap.tick(client);
         });
 
+        // Glass health bars above mobs (unlocked with hidden mob names).
+        HudElementRegistry.addLast(
+                Identifier.fromNamespaceAndPath("voicechat", "mob_health_bar"),
+                (graphics, delta) ->
+                        pingplus.voicechat.client.gui.MobHealthBarRenderer.render(graphics)
+        );
+
+        // Screen-space ESP lines to bosses/minibosses.
+        HudElementRegistry.addLast(
+                Identifier.fromNamespaceAndPath("voicechat", "boss_line"),
+                (graphics, delta) ->
+                        pingplus.voicechat.client.gui.BossLineHud.render(graphics)
+        );
     }
 
     private KeyMapping registerOpenGuiKey() {
@@ -123,7 +172,7 @@ public class VoicechatClient implements ClientModInitializer {
                 Identifier.fromNamespaceAndPath("voicechat", "controls")
         );
 
-        KeyMapping menu = KeyMappingHelper.registerKeyMapping(
+        voiceMenuKey = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.voicechat.settings",
                         GLFW.GLFW_KEY_V,
@@ -131,7 +180,7 @@ public class VoicechatClient implements ClientModInitializer {
                 )
         );
 
-        KeyMapping talk = KeyMappingHelper.registerKeyMapping(
+        talkKey = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.voicechat.talk",
                         GLFW.GLFW_KEY_CAPS_LOCK,
@@ -139,13 +188,16 @@ public class VoicechatClient implements ClientModInitializer {
                 )
         );
 
-        KeyMapping mute = KeyMappingHelper.registerKeyMapping(
+        muteKey = KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.voicechat.mute",
                         GLFW.GLFW_KEY_M,
                         category
                 )
         );
+        KeyMapping menu = voiceMenuKey;
+        KeyMapping talk = talkKey;
+        KeyMapping mute = muteKey;
 
         HudEditor.register(new HudEditor.Entry("voice", "Voice status", () -> 300, () -> 78,
                 (w,h) -> 8, (w,h) -> 70, () -> voice.settings.enabled,

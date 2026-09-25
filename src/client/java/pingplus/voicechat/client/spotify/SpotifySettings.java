@@ -9,11 +9,13 @@ import java.util.Properties;
 public final class SpotifySettings {
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("voicechat-spotify-hud.properties");
     private static boolean enabled = true;
+    private static boolean edges = true;
     private static double horizontal = 1, vertical = 0;
     static {
         try (var reader = Files.newBufferedReader(FILE)) {
             Properties p = new Properties(); p.load(reader);
             enabled = Boolean.parseBoolean(p.getProperty("enabled", "true"));
+            edges = Boolean.parseBoolean(p.getProperty("edges", "true"));
             horizontal = fraction(Double.parseDouble(p.getProperty("x", "1")));
             vertical = fraction(Double.parseDouble(p.getProperty("y", "0")));
         } catch (IOException | IllegalArgumentException ignored) {}
@@ -21,6 +23,8 @@ public final class SpotifySettings {
     private static double fraction(double n) { return Double.isFinite(n) ? Math.clamp(n, 0, 1) : 0; }
     public static boolean enabled() { return enabled; }
     public static void toggle() { enabled = !enabled; save(); }
+    public static boolean edges() { return edges; }
+    public static void toggleEdges() { edges = !edges; save(); }
     public static int x(int sw, int pw) { return 8 + (int)Math.round(horizontal * Math.max(0, sw - pw - 16)); }
     public static int y(int sh, int ph) { return 8 + (int)Math.round(vertical * Math.max(0, sh - ph - 36)); }
     public static void position(int x, int y, int sw, int sh, int pw, int ph) {
@@ -29,6 +33,7 @@ public final class SpotifySettings {
     }
     public static void save() {
         Properties p = new Properties(); p.setProperty("enabled", Boolean.toString(enabled));
+        p.setProperty("edges", Boolean.toString(edges));
         p.setProperty("x", Double.toString(horizontal)); p.setProperty("y", Double.toString(vertical));
         try {
             Files.createDirectories(FILE.getParent());

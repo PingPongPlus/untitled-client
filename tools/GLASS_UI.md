@@ -91,3 +91,38 @@ Inventory and chat do not receive the rain overlay during gameplay.
 rendering consistent. The existing Rajdhani SemiBold asset, size 11 and oversample 3 are
 shared. Explicit icon fonts and Force Unicode Font remain available. The UI font references
 vanilla include fonts directly for missing glyphs, avoiding a default/UI reference cycle.
+
+## Arraylist and effect controls
+
+In HUD, open **Arraylist options**. Enable **Glass** and **Per-module boxes** for
+separate square backgrounds sized to each enabled entry. Rows share a right edge,
+use equal padding and center their text vertically. **Edges** toggles the glass
+outline and edge refraction for this HUD only. The single panel and visible edges
+remain the defaults. Arraylist options follow the other HUD toggles' session lifetime.
+
+In RENDER, **Glass blur** and **Glass shadow** range from 0% (off) to 200% in 25%
+steps. Both default to 100%, preserving the existing appearance. Blur changes the
+shared Gaussian radius; shadow changes its spread, offset and opacity. Effect
+preferences are saved in `config/voicechat-glass-effects.properties`.
+
+## Server scoreboard widget
+
+**HUD > Scoreboard** shows or hides the server sidebar. Expand **Scoreboard options**
+to toggle **Liquid glass** and **Glass edges** independently. Glass off shows only
+server text, with a text shadow for readability. These toggles follow the other HUD
+options' session lifetime. Position and scale persist through the shared HUD editor:
+open chat, drag to move, use the corner or mouse wheel to resize, and right-click to reset.
+
+The widget appears only when the server supplies a sidebar objective, including
+team-specific sidebars. It preserves styled titles, team prefixes/suffixes, custom
+score names and number formats, hidden entries, and vanilla's 15-entry sort/limit.
+Tab-list and below-name scores are unaffected.
+
+## AIR logo widget
+
+**HUD > AIR logo** toggles the supplied transparent AIR artwork. **Logo options**
+contains **Logo glass** (blurred glass background on/off) and **Logo edges**.
+Glass uses the global Render blur, shadow and corner settings. All three preferences
+persist in `config/voicechat-logo-hud.properties`. Open chat to drag, resize with the
+corner or wheel, or right-click to reset its saved layout. The artwork keeps its
+native proportions and uses smooth filtering. The main-menu logo is separate.

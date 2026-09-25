@@ -35,8 +35,11 @@ public final class GlassStyle {
         g.pose().popMatrix();
     }
     public static void surface(GuiGraphicsExtractor g, int x, int y, int w, int h, float opacity, float light) {
-        GlassButtonRenderer.drawRect(g, x, y, w, h,
-                (Math.round(opacity * 255) << 24) | (Math.round(light * 255) << 16) | 0xFF00);
+        surface(g, x, y, w, h, opacity, light, true);
+    }
+    public static void surface(GuiGraphicsExtractor g, int x, int y, int w, int h, float opacity, float light, boolean edges) {
+        GlassButtonRenderer.drawHudRect(g, x, y, w, h,
+                (Math.round(opacity * 255) << 24) | (Math.round(light * 255) << 16) | 0xFF00, false, edges);
     }
     /** Liquid glass chrome for HUD widgets. Call from HudEditor; feature code only draws content. */
     public static void widget(GuiGraphicsExtractor g, int w, int h, boolean editing, boolean selected) {
