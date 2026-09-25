@@ -17,6 +17,7 @@ import pingplus.voicechat.client.gui.ArraylistHud;
 import pingplus.voicechat.client.gui.ClickGuiScreen;
 import pingplus.voicechat.client.gui.CoordinatesHud;
 import pingplus.voicechat.client.gui.FpsHud;
+import pingplus.voicechat.client.gui.ScoreboardHud;
 import pingplus.voicechat.client.gui.hud.HudEditor;
 import pingplus.voicechat.client.spotify.SpotifySettings;
 import pingplus.voicechat.client.spotify.SpotifyWidget;
@@ -78,6 +79,10 @@ public class VoicechatClient implements ClientModInitializer {
         HudEditor.register(new HudEditor.Entry("arraylist", "Arraylist", arraylistHud::width, arraylistHud::height,
                 (w,h) -> w - arraylistHud.width() - 8, (w,h) -> 8,
                 arraylistHud::isEnabled, (g,mx,my,dt,editing) -> arraylistHud.render(g), java.util.List::of, true));
+        ScoreboardHud scoreboardHud = ScoreboardHud.INSTANCE;
+        HudEditor.register(new HudEditor.Entry("scoreboard", "Scoreboard", scoreboardHud::width, scoreboardHud::height,
+                (w,h) -> w - scoreboardHud.width() - 8, (w,h) -> h / 2 - scoreboardHud.height() * 2 / 3,
+                scoreboardHud::isVisible, (g,mx,my,dt,editing) -> scoreboardHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("spotify", "Spotify", () -> 240, () -> 100,
                 (w,h) -> SpotifySettings.x(w, 240), (w,h) -> SpotifySettings.y(h, 100),
                 SpotifySettings::enabled, (g,mx,my,dt,editing) -> SpotifyWidget.INSTANCE.render(g,mx,my,dt,editing),

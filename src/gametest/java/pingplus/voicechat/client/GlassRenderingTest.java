@@ -8,6 +8,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.scores.*;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import net.minecraft.network.chat.numbers.BlankFormat;
+import pingplus.voicechat.client.gui.ScoreboardHud;
 
 /** Opt-in GPU smoke test: ./gradlew runClientGameTest. Never included in the mod JAR. */
 public final class GlassRenderingTest implements FabricClientGameTest {
@@ -122,7 +126,8 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             if(screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.EditBox).count()!=4)
                 throw new AssertionError("Settings did not expand");
             var slider=screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.AbstractSliderButton)
-                .map(c -> (net.minecraft.client.gui.components.AbstractSliderButton)c).findFirst().orElseThrow();
+                .map(c -> (net.minecraft.client.gui.components.AbstractSliderButton)c)
+                .filter(c -> c.getMessage().getString().startsWith("Interval")).findFirst().orElseThrow();
             var click=new net.minecraft.client.input.MouseButtonEvent((slider.getRight()-5)*0.60,(slider.getY()+20)*0.60,new net.minecraft.client.input.MouseButtonInfo(0,0));
             screen.mouseClicked(click,false);screen.mouseReleased(click);
             if(PlayerSettings.handSwapIntervalTicks!=20)throw new AssertionError("Slider maximum failed");
@@ -161,6 +166,24 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.setScreen(GlassTestScreen::new);
         context.waitTicks(10);
         context.takeScreenshot("glass-checkerboard");
+        int initialBlur = pingplus.voicechat.client.gui.glass.GlassEffectSettings.blurStep();
+        int initialShadow = pingplus.voicechat.client.gui.glass.GlassEffectSettings.shadowStep();
+        try {
+            for (int step : new int[]{0, 4, 8}) {
+                context.runOnClient(client -> {
+                    pingplus.voicechat.client.gui.glass.GlassEffectSettings.setBlur(step);
+                    pingplus.voicechat.client.gui.glass.GlassEffectSettings.setShadow(step);
+                });
+                context.waitTicks(5);
+                context.takeScreenshot("glass-effects-" + step);
+            }
+        } finally {
+            context.runOnClient(client -> {
+                pingplus.voicechat.client.gui.glass.GlassEffectSettings.setBlur(initialBlur);
+                pingplus.voicechat.client.gui.glass.GlassEffectSettings.setShadow(initialShadow);
+            });
+        }
+
         context.clickScreenButton("Glass test button");
         context.runOnClient(client -> {
             if (!((GlassTestScreen) client.gui.screen()).clicked) {
@@ -176,6 +199,78 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.setScreen(TitleScreen::new);
         try (var world = context.worldBuilder().create()) {
             context.waitFor(client -> client.player != null && client.gui.overlay() == null);
+            context.runOnClient(client -> {
+                var board = client.level.getScoreboard();
+                var objective = board.addObjective("widget-test", ObjectiveCriteria.DUMMY,
+                        Component.literal("SERVER SCOREBOARD").withStyle(net.minecraft.ChatFormatting.GOLD),
+                        ObjectiveCriteria.RenderType.INTEGER, false, null);
+                for (int i = 1; i <= 17; i++)
+                    board.getOrCreatePlayerScore(ScoreHolder.forNameOnly("Line " + i), objective).set(i);
+                board.getOrCreatePlayerScore(ScoreHolder.forNameOnly("#hidden"), objective).set(100);
+                var team = board.addPlayerTeam("widget-team");
+                team.setPlayerPrefix(Component.literal("[VIP] ").withStyle(net.minecraft.ChatFormatting.GREEN));
+                board.addPlayerToTeam("Line 17", team);
+                board.getOrCreatePlayerScore(ScoreHolder.forNameOnly("Line 17"), objective).numberFormatOverride(BlankFormat.INSTANCE);
+                board.setDisplayObjective(DisplaySlot.SIDEBAR, objective);
+                var view = ScoreboardHud.createView(objective);
+                if (view.rows().size() != 15 || !view.rows().getFirst().name().getString().equals("[VIP] Line 17")
+                        || view.rows().getFirst().scoreWidth() != 0)
+                    throw new AssertionError("Scoreboard ordering, hidden entries, team prefix or number format lost");
+                if (!ScoreboardHud.INSTANCE.isVisible()) throw new AssertionError("Sidebar widget missing");
+            });
+            context.setScreen(() -> new net.minecraft.client.gui.screens.ChatScreen("scoreboard widget", false));
+            context.waitTicks(5);
+            context.takeScreenshot("scoreboard-glass");
+            context.runOnClient(client -> {
+                Screen chat = client.gui.screen();
+                var before = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", chat.width, chat.height);
+                var down = new net.minecraft.client.input.MouseButtonEvent(before.x()+10, before.y()+10,
+                        new net.minecraft.client.input.MouseButtonInfo(0,0));
+                chat.mouseClicked(down,false);
+                var moved = new net.minecraft.client.input.MouseButtonEvent(before.x()<150 ? 220 : 100, 140, down.buttonInfo());
+                if (!chat.mouseDragged(moved,moved.x()-down.x(),moved.y()-down.y()))
+                    throw new AssertionError("Scoreboard drag failed");
+                chat.mouseReleased(moved);
+                var after = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", chat.width, chat.height);
+                if (before.x()==after.x() && before.y()==after.y()) throw new AssertionError("Scoreboard did not move");
+                chat.mouseScrolled(after.x()+10,after.y()+10,0,1);
+                var scaled = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", chat.width, chat.height);
+                if (scaled.scale()<=after.scale()) throw new AssertionError("Scoreboard resize failed");
+                // Restore default placement so later runs start consistently.
+                chat.mouseClicked(new net.minecraft.client.input.MouseButtonEvent(scaled.x()+10,scaled.y()+10,
+                        new net.minecraft.client.input.MouseButtonInfo(1,0)),false);
+            });
+            context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps,key,coords,arraylist));
+            clickCompactButton(context,"Scoreboard options");
+            clickCompactButton(context,"Liquid glass");
+            context.runOnClient(client -> {
+                if (ScoreboardHud.INSTANCE.isGlass()) throw new AssertionError("Scoreboard glass toggle failed");
+            });
+            context.setScreen(() -> new net.minecraft.client.gui.screens.ChatScreen("plain scoreboard",false));
+            context.waitTicks(5);
+            context.takeScreenshot("scoreboard-plain");
+            context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps,key,coords,arraylist));
+            clickCompactButton(context,"Scoreboard");
+            context.runOnClient(client -> {
+                if (ScoreboardHud.INSTANCE.isVisible()) throw new AssertionError("Disabled scoreboard still visible");
+                ScoreboardHud.INSTANCE.toggle();
+                ScoreboardHud.INSTANCE.toggleGlass();
+                var board=client.level.getScoreboard();
+                var objective=board.getObjective("widget-test");
+                var teamObjective=board.addObjective("widget-team-test",ObjectiveCriteria.DUMMY,Component.literal("Team sidebar"),
+                        ObjectiveCriteria.RenderType.INTEGER,false,null);
+                var team=board.getPlayerTeam("widget-team");
+                team.setColor(java.util.Optional.of(TeamColor.RED));
+                board.addPlayerToTeam(client.player.getScoreboardName(),team);
+                board.setDisplayObjective(TeamColor.RED.displaySlot(),teamObjective);
+                if (ScoreboardHud.objective()!=teamObjective) throw new AssertionError("Team sidebar not selected");
+                board.removeObjective(teamObjective);
+                if (ScoreboardHud.objective()!=objective) throw new AssertionError("Sidebar fallback failed");
+                board.removePlayerTeam(team);
+                board.removeObjective(objective);
+                if (ScoreboardHud.INSTANCE.isVisible()) throw new AssertionError("Removed sidebar left a stale widget");
+            });
+            context.setScreen(() -> null);
             // Slayer outline end-to-end: spawn a named boss and check the glow pipeline.
             var bossId = new java.util.concurrent.atomic.AtomicInteger(-1);
             var plainId = new java.util.concurrent.atomic.AtomicInteger(-1);
@@ -363,8 +458,8 @@ public final class GlassRenderingTest implements FabricClientGameTest {
                 int oldX = (int)Math.round(widget.x()), oldY = (int)Math.round(widget.y());
                 var down = new net.minecraft.client.input.MouseButtonEvent(oldX + 20, oldY + 12, new net.minecraft.client.input.MouseButtonInfo(0, 0));
                 chat.mouseClicked(down, false);
-                var move = new net.minecraft.client.input.MouseButtonEvent(60, 180, new net.minecraft.client.input.MouseButtonInfo(0, 0));
-                if (!chat.mouseDragged(move, 60 - down.x(), 180 - down.y())) throw new AssertionError("HUD drag not handled");
+                var move = new net.minecraft.client.input.MouseButtonEvent(oldX < 100 ? 160 : 60, 180, new net.minecraft.client.input.MouseButtonInfo(0, 0));
+                if (!chat.mouseDragged(move, move.x() - down.x(), move.y() - down.y())) throw new AssertionError("HUD drag not handled");
                 chat.mouseReleased(move);
                 var moved = pingplus.voicechat.client.gui.hud.HudEditor.bounds("spotify", chat.width, chat.height);
                 if (Math.round(moved.x()) == oldX && Math.round(moved.y()) == oldY) throw new AssertionError("HUD did not move");
@@ -394,6 +489,27 @@ public final class GlassRenderingTest implements FabricClientGameTest {
                         client.gui.screen().width, client.gui.screen().height, 240, 100);
                 pingplus.voicechat.client.spotify.SpotifySettings.save();
             });
+            clickCompactButton(context, "Per-module boxes");
+            clickCompactButton(context, "Edges");
+            context.runOnClient(client -> {
+                if (!arraylist.isRectangles() || arraylist.isEdges())
+                    throw new AssertionError("Arraylist options did not toggle");
+            });
+            context.setScreen(() -> new Screen(Component.literal("Arraylist alignment test")) {
+                @Override public void extractBackground(GuiGraphicsExtractor g, int mx, int my, float dt) {
+                    g.pose().pushMatrix();
+                    g.pose().translate(width / 2f, 30f);
+                    g.pose().scale(2f);
+                    arraylist.render(g);
+                    g.pose().popMatrix();
+                }
+            });
+            context.waitTicks(5);
+            context.takeScreenshot("arraylist-no-edges");
+            context.runOnClient(client -> arraylist.toggleEdges());
+            context.waitTicks(5);
+            context.takeScreenshot("arraylist-edges");
+            context.runOnClient(client -> arraylist.toggleRectangles());
             context.setScreen(() -> new net.minecraft.client.gui.screens.PauseScreen(true));
             context.waitTicks(20);
             context.takeScreenshot("glass-pause");
@@ -402,7 +518,7 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             context.runOnClient(client -> GlassGpuTiming.finish("Pause 1440x900"));
             context.waitTicks(20);
             context.takeScreenshot("glass-pause-rain-motion");
-            context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps,key,coords));
+            context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps,key,coords,new pingplus.voicechat.client.gui.ArraylistHud(fps,coords)));
             context.waitTicks(20);
             context.takeScreenshot("clickgui-world");
             context.runOnClient(client -> reload.set(client.reloadResourcePacks()));

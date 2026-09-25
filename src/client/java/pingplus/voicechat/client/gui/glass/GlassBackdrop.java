@@ -42,8 +42,9 @@ public final class GlassBackdrop {
     /** Called between GUI render passes, after the backdrop and before the first glass draw. */
     public static void capture(RenderTarget target) {
         captureScene(target);
-        blur(scene.getColorTextureView(), blurX, GlassPipelines.BLUR_HORIZONTAL);
-        blur(blurX.getColorTextureView(), blurred, GlassPipelines.BLUR_VERTICAL);
+        if (GlassEffectSettings.blurStep() == 0) { captured = true; return; }
+        blur(scene.getColorTextureView(), blurX, GlassPipelines.blurHorizontal());
+        blur(blurX.getColorTextureView(), blurred, GlassPipelines.blurVertical());
         captured = true;
     }
 
@@ -74,7 +75,7 @@ public final class GlassBackdrop {
 
     public static TextureSetup textures() {
         var sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.LINEAR);
-        return TextureSetup.doubleTexture(scene.getColorTextureView(), sampler, blurred.getColorTextureView(), sampler);
+        return TextureSetup.doubleTexture(scene.getColorTextureView(), sampler, GlassEffectSettings.blurStep() == 0 ? scene.getColorTextureView() : blurred.getColorTextureView(), sampler);
     }
 
     public static void close() {

@@ -47,7 +47,7 @@ public final class SpotifyWidget {
             String wanted = track == null ? "" : track.image();
             if (!wanted.equals(image)) loadArt(wanted);
         }
-        g.nextStratum(); GlassStyle.surface(g, x, y, width, HEIGHT, .92f, .1f); g.nextStratum();
+        g.nextStratum(); GlassStyle.surface(g, x, y, width, HEIGHT, .92f, .1f, SpotifySettings.edges()); g.nextStratum();
         text(g, "SPOTIFY", x + 10, y + 8, 80, GlassStyle.STATUS);
         GlassStyle.round(g, x + 10, y + 26, 32, 32, 5, 0x553D685B);
         if (hasArt) g.blit(RenderPipelines.GUI_TEXTURED, ART, x + 10, y + 26, 0, 0, 32, 32, imageWidth, imageHeight, imageWidth, imageHeight);

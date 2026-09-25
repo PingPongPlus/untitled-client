@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import pingplus.voicechat.client.PlayerSettings;
 import pingplus.voicechat.client.gui.glass.GlassStyle;
+import pingplus.voicechat.client.gui.glass.GlassButtonRenderer;
 import pingplus.voicechat.client.spotify.SpotifySettings;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ public final class ArraylistHud {
     private static final int PAD = 4;
     private boolean enabled = true;
     private boolean glass = true;
+    private boolean rectangles;
+    private boolean edges = true;
     private final FpsHud fpsHud;
     private final CoordinatesHud coordinatesHud;
 
@@ -41,6 +44,16 @@ public final class ArraylistHud {
         glass = !glass;
     }
 
+    public boolean isRectangles() { return rectangles; }
+
+    public void toggleRectangles() { rectangles = !rectangles; }
+
+    public boolean isEdges() { return edges; }
+
+    public void toggleEdges() { edges = !edges; }
+
+    private int rowHeight() { return Minecraft.getInstance().font.lineHeight + 4; }
+
     public int width() {
         var font = Minecraft.getInstance().font;
         int max = 48;
@@ -50,7 +63,7 @@ public final class ArraylistHud {
 
     public int height() {
         int rows = Math.max(1, active().size());
-        return rows * LINE + PAD * 2;
+        return rectangles ? rows * rowHeight() : rows * LINE + PAD * 2;
     }
 
     public void render(GuiGraphicsExtractor graphics) {
@@ -59,16 +72,26 @@ public final class ArraylistHud {
             return;
         }
         int box = width();
+        List<String> names = active();
         if (glass) {
             graphics.nextStratum();
-            GlassStyle.surface(graphics, 0, 0, box, height(), .88f, .12f);
+            if (rectangles) {
+                for (int i = 0; i < names.size(); i++) {
+                    int rowWidth = client.font.width(GlassStyle.label(names.get(i))) + PAD * 2;
+                    int top = i * rowHeight();
+                    GlassButtonRenderer.drawHudRect(
+                            graphics, box - rowWidth, top, rowWidth, rowHeight(), 0xE01FFF00, true, edges);
+                }
+            } else {
+                GlassButtonRenderer.drawHudRect(graphics, 0, 0, box, height(), 0xE01FFF00, false, edges);
+            }
             graphics.nextStratum();
         }
-        int y = PAD;
-        for (String name : active()) {
+        int y = rectangles ? (rowHeight() - client.font.lineHeight) / 2 : PAD;
+        for (String name : names) {
             var label = GlassStyle.label(name);
             graphics.text(client.font, label, box - client.font.width(label) - PAD, y, GuiTheme.TEXT, false);
-            y += LINE;
+            y += rectangles ? rowHeight() : LINE;
         }
     }
 
@@ -76,6 +99,7 @@ public final class ArraylistHud {
         return List.of(
                 new Named("Frame rate", fpsHud::isEnabled),
                 new Named("Coordinates", coordinatesHud::isEnabled),
+                new Named("Scoreboard", ScoreboardHud.INSTANCE::isEnabled),
                 new Named("Spotify", SpotifySettings::enabled),
                 new Named("Hitboxes", () -> PlayerSettings.hitboxes),
                 new Named("Body", () -> PlayerSettings.mainBodyPart),

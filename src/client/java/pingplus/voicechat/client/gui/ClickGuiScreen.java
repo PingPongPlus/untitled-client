@@ -41,7 +41,7 @@ public final class ClickGuiScreen extends Screen {
     public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey, CoordinatesHud coordinatesHud, ArraylistHud arraylistHud) {
         super(Component.literal("Client controls"));
         this.fpsHud=fpsHud; this.openGuiKey=openGuiKey; this.coordinatesHud=coordinatesHud; this.arraylistHud=arraylistHud;
-        expanded.put("Player scale",true); expanded.put("Swap interval",true); expanded.put("General",true);
+        expanded.put("Player scale",true); expanded.put("Swap interval",true); expanded.put("General",true); expanded.put("Arraylist options",true);
     }
 
     @Override protected void init() {
@@ -55,11 +55,28 @@ public final class ClickGuiScreen extends Screen {
         toggle(hud,"Frame rate",fpsHud::isEnabled,fpsHud::toggle);
         toggle(hud,"Coordinates",coordinatesHud::isEnabled,coordinatesHud::toggle);
         toggle(hud,"Spotify",pingplus.voicechat.client.spotify.SpotifySettings::enabled,pingplus.voicechat.client.spotify.SpotifySettings::toggle);
+        disclosure(hud,"Spotify options");
+        if (expanded.getOrDefault("Spotify options",false)) {
+            toggle(hud,"Spotify edges",pingplus.voicechat.client.spotify.SpotifySettings::edges,pingplus.voicechat.client.spotify.SpotifySettings::toggleEdges);
+        }
         toggle(hud,"Arraylist",arraylistHud::isEnabled,arraylistHud::toggle);
-        toggle(hud,"Arraylist glass",arraylistHud::isGlass,arraylistHud::toggleGlass);
+        disclosure(hud,"Arraylist options");
+        if (expanded.get("Arraylist options")) {
+            toggle(hud,"Glass",arraylistHud::isGlass,arraylistHud::toggleGlass);
+            toggle(hud,"Per-module boxes",arraylistHud::isRectangles,arraylistHud::toggleRectangles);
+            toggle(hud,"Edges",arraylistHud::isEdges,arraylistHud::toggleEdges);
+        }
+        toggle(hud,"Scoreboard",ScoreboardHud.INSTANCE::isEnabled,ScoreboardHud.INSTANCE::toggle);
+        disclosure(hud,"Scoreboard options");
+        if (expanded.getOrDefault("Scoreboard options",false)) {
+            toggle(hud,"Liquid glass",ScoreboardHud.INSTANCE::isGlass,ScoreboardHud.INSTANCE::toggleGlass);
+            toggle(hud,"Glass edges",ScoreboardHud.INSTANCE::isEdges,ScoreboardHud.INSTANCE::toggleEdges);
+        }
         Category render = category("RENDER", "See the details");
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
         add(render,new CornerSlider(panelWidth-20),26);
+        add(render,new EffectSlider(panelWidth-20,"Glass blur",GlassEffectSettings::blurStep,GlassEffectSettings::setBlur),26);
+        add(render,new EffectSlider(panelWidth-20,"Glass shadow",GlassEffectSettings::shadowStep,GlassEffectSettings::setShadow),26);
         Category player = category("PLAYER", "Shape your presence");
         toggle(player,"Body",()->PlayerSettings.mainBodyPart,()->PlayerSettings.mainBodyPart=!PlayerSettings.mainBodyPart);
         toggle(player,"Left arm",()->PlayerSettings.leftArm,()->PlayerSettings.leftArm=!PlayerSettings.leftArm);
@@ -321,6 +338,25 @@ public final class ClickGuiScreen extends Screen {
         CornerSlider(int w){super(0,0,w,26,Component.literal("Corner radius"),GlassCornerSettings.getScale()/GlassCornerSettings.MAX);updateMessage();}
         @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Corners   %d %%",Math.round(GlassCornerSettings.getScale()*100))));}
         @Override protected void applyValue(){GlassCornerSettings.setScale((float)(value*GlassCornerSettings.MAX));updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class EffectSlider extends AbstractSliderButton {
+        private final String label;
+        private final IntSupplier getter;
+        private final IntConsumer setter;
+        EffectSlider(int w,String label,IntSupplier getter,IntConsumer setter){
+            super(0,0,w,26,Component.literal(label),getter.getAsInt()/(double)GlassEffectSettings.STEPS);
+            this.label=label;this.getter=getter;this.setter=setter;updateMessage();
+        }
+        @Override protected void updateMessage(){setMessage(Component.literal(label+"   "+(getter.getAsInt()*25)+" %"));}
+        @Override protected void applyValue(){setter.accept((int)Math.round(value*GlassEffectSettings.STEPS));updateMessage();}
         @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
             text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
             int x=getX()+4,y=getY()+19,length=width-8;

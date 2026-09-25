@@ -35,8 +35,8 @@ void main() {
     float highlight = hover * enabled * (1.0 - step(40.5, glassData.b * 255.0));
 
     // Soft shadow extends beyond the rounded silhouette.
-    float shadowDistance = roundedBox(p - vec2(0.0, pixelScale), halfSize, radius);
-    float shadow = exp(-max(shadowDistance, 0.0) / (1.1 * pixelScale)) * 0.18;
+    float shadowDistance = roundedBox(p - vec2(0.0, pixelScale * SHADOW_SCALE), halfSize, radius);
+    float shadow = exp(-max(shadowDistance, 0.0) / (1.1 * pixelScale * max(SHADOW_SCALE, 0.001))) * 0.18 * SHADOW_SCALE;
     if (coverage < 0.001) {
         if (shadow < 0.005) discard;
         fragColor = vec4(0.025, 0.025, 0.025, shadow * opacity);
@@ -52,6 +52,9 @@ void main() {
         normal = q.x > q.y ? vec2(sign(p.x), 0.0) : vec2(0.0, sign(p.y));
     }
     float rim = 1.0 - smoothstep(0.0, max(radius, 1.0), max(-distance, 0.0));
+#ifdef NO_EDGES
+    rim = 0.0;
+#endif
     // UV derivatives carry the proper screen orientation for the active GPU backend.
     vec2 bentUV = screenUV - screenNormal * rim * rim * pixelScale * (2.0 + hover) / texSize;
     vec2 halfTexel = 0.5 / texSize;
@@ -65,6 +68,9 @@ void main() {
     color = mix(color, vec3(1.0), highlight * 0.18);
 
     float edge = 1.0 - smoothstep(0.0, (0.7 + highlight * 0.45) * pixelScale, abs(distance + 0.45 * pixelScale));
+#ifdef NO_EDGES
+    edge = 0.0;
+#endif
     float light = pow(max(dot(normal, normalize(vec2(-0.5, -0.85))), 0.0), 2.0);
     float lowerRim = pow(max(dot(normal, normalize(vec2(0.45, 0.9))), 0.0), 5.0);
     color = mix(color, vec3(0.96), edge * (0.20 + light * 0.32 + lowerRim * 0.14 + hover * 0.08 + highlight * 0.26));

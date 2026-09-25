@@ -42,7 +42,7 @@ public abstract class GlassGuiRendererMixin {
                     voicechat$captureBeforeGlass(label, target, transforms, i + 1, end, original);
                     return;
                 }
-                if (pipeline == GlassPipelines.BUTTON || pipeline == GlassPipelines.CONTROL || pipeline == GlassPipelines.LOGO) {
+                if (GlassPipelines.isButton(pipeline) || pipeline == GlassPipelines.CONTROL || pipeline == GlassPipelines.LOGO) {
                     // Close the background pass before copying: never read from an active color attachment.
                     if (i > start) original.call(label, target, transforms, start, i);
                     GlassBackdrop.capture(target);
