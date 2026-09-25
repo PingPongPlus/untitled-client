@@ -13,7 +13,7 @@ run/
 
 # OS files
 .DS_Store
-
+opencode.json
 # Logs
 logs/
 *.log
