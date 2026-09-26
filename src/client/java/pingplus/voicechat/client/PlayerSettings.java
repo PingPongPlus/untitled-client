@@ -37,6 +37,7 @@ public final class PlayerSettings {
     public static boolean hideHunger = false;
     public static boolean hideXp = false;
     public static boolean hideLocator = false;
+    public static boolean fullbright = false;
 
 }
 

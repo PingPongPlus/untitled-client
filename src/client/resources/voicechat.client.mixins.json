@@ -13,6 +13,8 @@
     "ExperienceBarMixin",
     "LocatorBarMixin",
     "VanillaBarsMixin",
+    "FullbrightMixin",
+    "DockBarsScaleMixin",
     "HotbarDockMixin",
     "ScoreboardHudMixin",
     "DebugRendererMixin",

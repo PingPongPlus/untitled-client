@@ -35,6 +35,7 @@ public final class HotbarDock {
     private double heldTime;
     private float slideY;
     private float slideVelocity;
+    private static float barLift;
 
     public boolean render(GuiGraphicsExtractor g, DeltaTracker dt) {
         Minecraft client = Minecraft.getInstance();
@@ -96,12 +97,17 @@ public final class HotbarDock {
         int shelfX = Math.round(pos[0] - SLOT / 2f * scale[0] - 1);
         int shelfRight = Math.round(pos[8] + SLOT / 2f * scale[8] + 1);
         float size = Math.max(0.5f, Math.min(2f, PlayerSettings.dockSize));
-        float dockMid = (shelfX + shelfRight) / 2f;
+        float dockMidX = (shelfX + shelfRight) / 2f;
+        float maxItem = 0;
+        for (int i = 0; i < 10; i++) maxItem = Math.max(maxItem, scale[i]);
+        float liftTarget = Math.max(0, 16 * maxItem - 19) * size * (1 - slideY / 200f);
+        barLift += (liftTarget - barLift) * (float) (1 - Math.exp(-12 * frame));
+
         g.pose().pushMatrix();
         g.pose().translate(0, slideY);
-        g.pose().translate(dockMid, height);
+        g.pose().translate(dockMidX, height);
         g.pose().scale(size);
-        g.pose().translate(-dockMid, -height);
+        g.pose().translate(-dockMidX, -height);
 
         if (PlayerSettings.dockShelf) {
             g.nextStratum();
@@ -126,6 +132,11 @@ public final class HotbarDock {
         }
         g.pose().popMatrix();
         return true;
+    }
+
+    public static float barLift() { return barLift; }
+    public static boolean shifting() {
+        return PlayerSettings.dockHotbar && Minecraft.getInstance().getCameraEntity() instanceof Player;
     }
 
     /** Continuous-center dock layout: every slot keeps its order with zero gaps, anchored so the bulge slides through positions. */

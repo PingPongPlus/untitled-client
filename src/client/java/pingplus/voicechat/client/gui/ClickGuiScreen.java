@@ -104,6 +104,7 @@ public final class ClickGuiScreen extends Screen {
         }
         Category render = category("RENDER", "See the details");
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
+        toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
         add(render,new CornerSlider(panelWidth-20),26);
         add(render,new EffectSlider(panelWidth-20,"Glass blur",GlassEffectSettings::blurStep,GlassEffectSettings::setBlur),26);
         add(render,new EffectSlider(panelWidth-20,"Glass shadow",GlassEffectSettings::shadowStep,GlassEffectSettings::setShadow),26);

@@ -106,6 +106,7 @@ public final class ArraylistHud {
                 new Named("AIR logo", LogoHud.INSTANCE::isEnabled),
                 new Named("Spotify", SpotifySettings::enabled),
                 new Named("Hitboxes", () -> PlayerSettings.hitboxes),
+                new Named("Fullbright", () -> PlayerSettings.fullbright),
                 new Named("Body", () -> PlayerSettings.mainBodyPart),
                 new Named("Left arm", () -> PlayerSettings.leftArm),
                 new Named("Right arm", () -> PlayerSettings.rightArm),
