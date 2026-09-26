@@ -1,4 +1,4 @@
-Minecraft Client with Reverse-Engineered LabyMod Voice Chat.
+Minecraft Client with Reverse-Engineered LabyMod Voice Chat, Skyblock Mods etc.
 Some features are already available like PlayerRendering modifications.
 More features coming soon. 
 Still in development check out a quick demo below!
