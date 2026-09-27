@@ -5,5 +5,6 @@
   "key.voicechat.mute": "Mute microphone",
   "key.voicechat.click_gui": "Open ClickGUI",
   "key.voicechat.zoom": "Zoom",
+  "key.voicechat.shoulder_cam": "Shoulder cam (hold)",
   "key.category.voicechat.client": "PingPlus Client"
 }

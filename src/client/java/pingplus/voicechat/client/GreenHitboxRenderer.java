@@ -12,7 +12,7 @@ import net.minecraft.world.phys.Vec3;
 
 public final class GreenHitboxRenderer extends EntityHitboxDebugRenderer {
     private static final GizmoStyle STYLE = GizmoStyle.strokeAndFill(
-            0xFF00FF00, 1.0F, 0x4000FF00);
+            0xFF00FF00, 1.0F, 0x5000FF00);
 
     public GreenHitboxRenderer() {
         super(Minecraft.getInstance());

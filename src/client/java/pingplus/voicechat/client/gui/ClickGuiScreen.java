@@ -107,6 +107,7 @@ public final class ClickGuiScreen extends Screen {
         toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
         toggle(render,"Zoom",()->PlayerSettings.zoom,()->PlayerSettings.zoom=!PlayerSettings.zoom);
         add(render,new ZoomStrengthSlider(panelWidth-20),26);
+        toggle(render,"Shoulder cam",()->PlayerSettings.shoulderCam,()->PlayerSettings.shoulderCam=!PlayerSettings.shoulderCam);
         add(render,new CornerSlider(panelWidth-20),26);
         add(render,new EffectSlider(panelWidth-20,"Glass blur",GlassEffectSettings::blurStep,GlassEffectSettings::setBlur),26);
         add(render,new EffectSlider(panelWidth-20,"Glass shadow",GlassEffectSettings::shadowStep,GlassEffectSettings::setShadow),26);
@@ -162,6 +163,7 @@ public final class ClickGuiScreen extends Screen {
         keyButton(keys, "Talk", VoicechatClient.talkKey());
         keyButton(keys, "Mute", VoicechatClient.muteKey());
         keyButton(keys, "Zoom", VoicechatClient.zoomKey());
+        keyButton(keys, "Shoulder cam", VoicechatClient.shoulderCamKey());
         add(keys, new Button(0,0,panelWidth-20,18,Component.literal("Reset keys"),b->{resetKeys();rebuildWidgets();},supplier->supplier.get()) {
             @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
                 if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
@@ -231,6 +233,7 @@ public final class ClickGuiScreen extends Screen {
         if (VoicechatClient.talkKey() != null) VoicechatClient.talkKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_CAPS_LOCK));
         if (VoicechatClient.muteKey() != null) VoicechatClient.muteKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_M));
         if (VoicechatClient.zoomKey() != null) VoicechatClient.zoomKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_C));
+        if (VoicechatClient.shoulderCamKey() != null) VoicechatClient.shoulderCamKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_R));
         pendingKey = null;
         saveKeys();
     }

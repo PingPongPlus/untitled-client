@@ -42,7 +42,9 @@
     "GlassRainToggleMixin",
     "ParticleHideMixin",
     "MobNameHideMixin",
-    "SlayerOutlineMixin"
+    "SlayerOutlineMixin",
+    "ShoulderCamEntityMixin",
+    "ShoulderCamCameraMixin"
   ],
   "injectors": {
     "defaultRequire": 1

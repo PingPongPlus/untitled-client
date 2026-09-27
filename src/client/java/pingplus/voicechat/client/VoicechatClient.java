@@ -34,6 +34,7 @@ public class VoicechatClient implements ClientModInitializer {
     private static KeyMapping talkKey;
     private static KeyMapping muteKey;
     private static KeyMapping zoomKey;
+    private static KeyMapping shoulderCamKey;
     private static final KeyMapping.Category CLIENT_CATEGORY = KeyMapping.Category.register(
             Identifier.fromNamespaceAndPath("voicechat", "client")
     );
@@ -47,6 +48,7 @@ public class VoicechatClient implements ClientModInitializer {
     public static KeyMapping talkKey() { return talkKey; }
     public static KeyMapping muteKey() { return muteKey; }
     public static KeyMapping zoomKey() { return zoomKey; }
+    public static KeyMapping shoulderCamKey() { return shoulderCamKey; }
 
     public static final pingplus.voicechat.client.slayer.SlayerOutlineConfig SLAYER_CFG =
         new pingplus.voicechat.client.slayer.SlayerOutlineConfig();
@@ -76,6 +78,7 @@ public class VoicechatClient implements ClientModInitializer {
         CoordinatesHud coordinatesHud = new CoordinatesHud();
         openGuiKey = registerOpenGuiKey();
         zoomKey = registerZoomKey();
+        shoulderCamKey = registerShoulderCamKey();
         HandSwapFeature handSwap = new HandSwapFeature();
 
         ArraylistHud arraylistHud = new ArraylistHud(fpsHud, coordinatesHud);
@@ -137,6 +140,7 @@ public class VoicechatClient implements ClientModInitializer {
 
             handSwap.tick(client);
             pingplus.voicechat.client.ZoomFeature.tick(client, zoomKey != null && zoomKey.isDown());
+            pingplus.voicechat.client.ShoulderCamFeature.tick(client, shoulderCamKey != null && shoulderCamKey.isDown());
         });
 
         // Glass health bars above mobs (unlocked with hidden mob names).
@@ -169,6 +173,16 @@ public class VoicechatClient implements ClientModInitializer {
                 new KeyMapping(
                         "key.voicechat.zoom",
                         GLFW.GLFW_KEY_C,
+                        CLIENT_CATEGORY
+                )
+        );
+    }
+
+    private KeyMapping registerShoulderCamKey() {
+        return KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
+                        "key.voicechat.shoulder_cam",
+                        GLFW.GLFW_KEY_R,
                         CLIENT_CATEGORY
                 )
         );

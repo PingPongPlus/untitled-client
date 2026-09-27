@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
         private static final Identifier VOICECHAT_LOGO = Identifier.fromNamespaceAndPath("voicechat", "textures/gui/img_7.png");
         @Shadow
         public abstract boolean keepLogoThroughFade();
-
         @Inject(
                 method = "extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IFI)V",
                 at = @At("HEAD"),

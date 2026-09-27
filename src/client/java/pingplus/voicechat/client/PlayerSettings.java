@@ -40,6 +40,7 @@ public final class PlayerSettings {
     public static boolean fullbright = false;
     public static boolean zoom = true;
     public static float zoomStrength = 3f;
+    public static boolean shoulderCam = true;
 
 }
 
