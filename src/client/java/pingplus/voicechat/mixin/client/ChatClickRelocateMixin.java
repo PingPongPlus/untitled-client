@@ -26,7 +26,12 @@ public abstract class ChatClickRelocateMixin {
         var pose = new Matrix3x2f(params.pose());
         pose.translate((float) bounds.x(), (float) bounds.y());
         pose.scale((float) bounds.scale());
+        pose.translate(ChatHud.INSTANCE.textOffsetX(), 0);
         collector.defaultParameters(params.withPose(pose));
-        chat.captureClickableText(collector, ChatHud.INSTANCE.height() + 40, tickCount, mode);
+        try {
+            chat.captureClickableText(collector, ChatHud.INSTANCE.renderAnchor(), tickCount, mode);
+        } finally {
+            collector.defaultParameters(params);
+        }
     }
 }

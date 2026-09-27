@@ -22,6 +22,7 @@ public final class PlayerSettings {
     public static boolean hideParticles = false;
     public static boolean hideMobNames = false;
     public static boolean mobHealthBar = false;
+    public static boolean playerHealthBar = true;
     public static float mobBarOpacity = 0.85f;
     public static boolean playerOutline = true;
     public static int playerOutlineColor = 0x7FDBFF;

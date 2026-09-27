@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import pingplus.voicechat.client.gui.ChatHud;
-import pingplus.voicechat.client.gui.glass.GlassButtonRenderer;
 
 /**
  * Routes every vanilla chat draw into the movable Chat widget.
@@ -23,13 +22,10 @@ public abstract class ChatRelocateMixin {
         if (logical != null) return logical; // Gameplay render: the widget pose is already applied.
         if (!ChatHud.INSTANCE.isActive()) return g.guiHeight();
         var bounds = ChatHud.screenBounds();
-        if (ChatHud.INSTANCE.isGlass() && ChatHud.INSTANCE.hasMessages()) {
-            GlassButtonRenderer.drawHudRect(g, (int) bounds.x(), (int) bounds.y(),
-                    (int) Math.ceil(bounds.width()), (int) Math.ceil(bounds.height()),
-                    0xE01FFF00, false, ChatHud.INSTANCE.isEdges());
-        }
         g.pose().translate((float) bounds.x(), (float) bounds.y());
         g.pose().scale((float) bounds.scale());
-        return ChatHud.INSTANCE.height() + 40;
+        ChatHud.INSTANCE.renderPanel(g);
+        g.pose().translate(ChatHud.INSTANCE.textOffsetX(), 0);
+        return ChatHud.INSTANCE.renderAnchor();
     }
 }

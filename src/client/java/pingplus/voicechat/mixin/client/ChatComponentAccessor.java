@@ -11,4 +11,7 @@ import java.util.List;
 public interface ChatComponentAccessor {
     @Accessor("trimmedMessages")
     List<GuiMessage.Line> voicechat$trimmedMessages();
+
+    @Accessor("chatScrollbarPos")
+    int voicechat$scrollbarPos();
 }

@@ -134,6 +134,14 @@ tasks.register('spotifySmokeTest', JavaExec) {
 }
 tasks.named('check') { dependsOn 'spotifySmokeTest' }
 
+tasks.register('damageGlassSmokeTest', JavaExec) {
+    dependsOn voiceTestClasses, clientClasses
+    classpath = sourceSets.voiceTest.runtimeClasspath
+    mainClass = 'pingplus.voicechat.client.DamageGlassTimingTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+tasks.named('check') { dependsOn 'damageGlassSmokeTest' }
+
 jar {
     from({ zipTree(tasks.named('voiceRuntime').get().archiveFile.get().asFile) })
     from("LICENSE.txt") {

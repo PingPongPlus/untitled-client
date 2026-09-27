@@ -59,6 +59,7 @@ public class VoicechatClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         pingplus.voicechat.client.gui.glass.GlassPipelines.initialize();
+        pingplus.voicechat.client.damageglass.DamageGlassRenderer.initialize();
         syncSlayerCfg();
         pingplus.voicechat.client.slayer.SlayerOutlineHook.register(SLAYER_CFG);
         initializeClientFeatures();
@@ -83,9 +84,9 @@ public class VoicechatClient implements ClientModInitializer {
 
         ArraylistHud arraylistHud = new ArraylistHud(fpsHud, coordinatesHud);
 
-        HudEditor.register(new HudEditor.Entry("fps", "FPS", () -> 112, () -> 18, (w,h) -> 18, (w,h) -> 13,
+        HudEditor.register(new HudEditor.Entry("fps", "FPS", fpsHud::width, fpsHud::height, (w,h) -> 18, (w,h) -> 13,
                 fpsHud::isEnabled, (g,mx,my,dt,editing) -> fpsHud.render(g), java.util.List::of));
-        HudEditor.register(new HudEditor.Entry("coordinates", "Coordinates", () -> 200, () -> 18, (w,h) -> 18, (w,h) -> 38,
+        HudEditor.register(new HudEditor.Entry("coordinates", "Coordinates", coordinatesHud::width, coordinatesHud::height, (w,h) -> 18, (w,h) -> 38,
                 coordinatesHud::isEnabled, (g,mx,my,dt,editing) -> coordinatesHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("arraylist", "Arraylist", arraylistHud::width, arraylistHud::height,
                 (w,h) -> w - arraylistHud.width() - 8, (w,h) -> 8,
@@ -142,6 +143,12 @@ public class VoicechatClient implements ClientModInitializer {
             pingplus.voicechat.client.ZoomFeature.tick(client, zoomKey != null && zoomKey.isDown());
             pingplus.voicechat.client.ShoulderCamFeature.tick(client, shoulderCamKey != null && shoulderCamKey.isDown());
         });
+
+        // Vertical liquid-glass health bars beside visible players.
+        HudElementRegistry.addLast(
+                Identifier.fromNamespaceAndPath("voicechat", "player_health_bars"),
+                (graphics, delta) -> pingplus.voicechat.client.gui.PlayerHealthBarRenderer.render(graphics)
+        );
 
         // Glass health bars above mobs (unlocked with hidden mob names).
         HudElementRegistry.addLast(

@@ -99,6 +99,7 @@ public final class ArraylistHud {
         return List.of(
                 new Named("Frame rate", fpsHud::isEnabled),
                 new Named("Coordinates", coordinatesHud::isEnabled),
+                new Named("Player HP bars", () -> PlayerSettings.playerHealthBar),
                 new Named("Scoreboard", ScoreboardHud.INSTANCE::isEnabled),
                 new Named("Chat", ChatHud.INSTANCE::isEnabled),
                 new Named("Dock hotbar", () -> PlayerSettings.dockHotbar),

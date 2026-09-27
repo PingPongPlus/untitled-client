@@ -17,6 +17,10 @@ import pingplus.voicechat.client.gui.ScoreboardHud;
 public final class GlassRenderingTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
+        if (Boolean.getBoolean("voicechat.damageGlassTest")) {
+            new DamageGlassRenderingTest().runTest(context);
+            return;
+        }
         context.setScreen(TitleScreen::new);
         context.waitTicks(30);
         context.takeScreenshot("glass-title");

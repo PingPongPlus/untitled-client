@@ -53,7 +53,18 @@ public final class ClickGuiScreen extends Screen {
         int startX = 16;
         Category hud = category("HUD", "On-screen information");
         toggle(hud,"Frame rate",fpsHud::isEnabled,fpsHud::toggle);
+        disclosure(hud,"FPS options");
+        if (expanded.getOrDefault("FPS options",false)) {
+            toggle(hud,"FPS glass",fpsHud::isGlass,fpsHud::toggleGlass);
+            toggle(hud,"FPS edges",fpsHud::isEdges,fpsHud::toggleEdges);
+        }
         toggle(hud,"Coordinates",coordinatesHud::isEnabled,coordinatesHud::toggle);
+        disclosure(hud,"XYZ options");
+        if (expanded.getOrDefault("XYZ options",false)) {
+            toggle(hud,"XYZ glass",coordinatesHud::isGlass,coordinatesHud::toggleGlass);
+            toggle(hud,"XYZ edges",coordinatesHud::isEdges,coordinatesHud::toggleEdges);
+        }
+        toggle(hud,"Player HP bars",()->PlayerSettings.playerHealthBar,()->PlayerSettings.playerHealthBar=!PlayerSettings.playerHealthBar);
         toggle(hud,"Spotify",pingplus.voicechat.client.spotify.SpotifySettings::enabled,pingplus.voicechat.client.spotify.SpotifySettings::toggle);
         disclosure(hud,"Spotify options");
         if (expanded.getOrDefault("Spotify options",false)) {
@@ -103,6 +114,15 @@ public final class ClickGuiScreen extends Screen {
             toggle(hud,"Logo edges",LogoHud.INSTANCE::isEdges,LogoHud.INSTANCE::toggleEdges);
         }
         Category render = category("RENDER", "See the details");
+        toggle(render,"Glass damage effect",pingplus.voicechat.client.damageglass.DamageGlassSettings::enabled,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleEnabled);
+        disclosure(render,"Damage glass options");
+        if (expanded.getOrDefault("Damage glass options",false)) {
+            add(render,new EffectSlider(panelWidth-20,"Reflectivity",
+                    pingplus.voicechat.client.damageglass.DamageGlassSettings::reflectivity,
+                    pingplus.voicechat.client.damageglass.DamageGlassSettings::setReflectivity,100,1),26);
+            toggle(render,"Players",pingplus.voicechat.client.damageglass.DamageGlassSettings::players,pingplus.voicechat.client.damageglass.DamageGlassSettings::togglePlayers);
+            toggle(render,"Mobs",pingplus.voicechat.client.damageglass.DamageGlassSettings::mobs,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleMobs);
+        }
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
         toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
         toggle(render,"Zoom",()->PlayerSettings.zoom,()->PlayerSettings.zoom=!PlayerSettings.zoom);
@@ -389,12 +409,16 @@ public final class ClickGuiScreen extends Screen {
         private final String label;
         private final IntSupplier getter;
         private final IntConsumer setter;
+        private final int steps, percentPerStep;
         EffectSlider(int w,String label,IntSupplier getter,IntConsumer setter){
-            super(0,0,w,26,Component.literal(label),getter.getAsInt()/(double)GlassEffectSettings.STEPS);
-            this.label=label;this.getter=getter;this.setter=setter;updateMessage();
+            this(w,label,getter,setter,GlassEffectSettings.STEPS,25);
         }
-        @Override protected void updateMessage(){setMessage(Component.literal(label+"   "+(getter.getAsInt()*25)+" %"));}
-        @Override protected void applyValue(){setter.accept((int)Math.round(value*GlassEffectSettings.STEPS));updateMessage();}
+        EffectSlider(int w,String label,IntSupplier getter,IntConsumer setter,int steps,int percentPerStep){
+            super(0,0,w,26,Component.literal(label),getter.getAsInt()/(double)steps);
+            this.label=label;this.getter=getter;this.setter=setter;this.steps=steps;this.percentPerStep=percentPerStep;updateMessage();
+        }
+        @Override protected void updateMessage(){setMessage(Component.literal(label+"   "+(getter.getAsInt()*percentPerStep)+" %"));}
+        @Override protected void applyValue(){setter.accept((int)Math.round(value*steps));updateMessage();}
         @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
             text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
             int x=getX()+4,y=getY()+19,length=width-8;
