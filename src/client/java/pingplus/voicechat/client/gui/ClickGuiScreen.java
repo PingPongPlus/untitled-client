@@ -105,6 +105,8 @@ public final class ClickGuiScreen extends Screen {
         Category render = category("RENDER", "See the details");
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
         toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
+        toggle(render,"Zoom",()->PlayerSettings.zoom,()->PlayerSettings.zoom=!PlayerSettings.zoom);
+        add(render,new ZoomStrengthSlider(panelWidth-20),26);
         add(render,new CornerSlider(panelWidth-20),26);
         add(render,new EffectSlider(panelWidth-20,"Glass blur",GlassEffectSettings::blurStep,GlassEffectSettings::setBlur),26);
         add(render,new EffectSlider(panelWidth-20,"Glass shadow",GlassEffectSettings::shadowStep,GlassEffectSettings::setShadow),26);
@@ -159,6 +161,7 @@ public final class ClickGuiScreen extends Screen {
         keyButton(keys, "Voice", VoicechatClient.voiceMenuKey());
         keyButton(keys, "Talk", VoicechatClient.talkKey());
         keyButton(keys, "Mute", VoicechatClient.muteKey());
+        keyButton(keys, "Zoom", VoicechatClient.zoomKey());
         add(keys, new Button(0,0,panelWidth-20,18,Component.literal("Reset keys"),b->{resetKeys();rebuildWidgets();},supplier->supplier.get()) {
             @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
                 if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
@@ -227,6 +230,7 @@ public final class ClickGuiScreen extends Screen {
         if (VoicechatClient.voiceMenuKey() != null) VoicechatClient.voiceMenuKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_V));
         if (VoicechatClient.talkKey() != null) VoicechatClient.talkKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_CAPS_LOCK));
         if (VoicechatClient.muteKey() != null) VoicechatClient.muteKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_M));
+        if (VoicechatClient.zoomKey() != null) VoicechatClient.zoomKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_C));
         pendingKey = null;
         saveKeys();
     }
@@ -440,6 +444,19 @@ public final class ClickGuiScreen extends Screen {
         DockAutoHideSlider(int w){super(0,0,w,26,Component.literal("Hide delay"),Math.clamp((PlayerSettings.dockAutoHideSeconds-5)/115.0,0,1));updateMessage();}
         @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Hide after   %d s",PlayerSettings.dockAutoHideSeconds)));}
         @Override protected void applyValue(){PlayerSettings.dockAutoHideSeconds=5+(int)Math.round(value*115);updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class ZoomStrengthSlider extends AbstractSliderButton {
+        ZoomStrengthSlider(int w){super(0,0,w,26,Component.literal("Zoom strength"),Math.clamp((PlayerSettings.zoomStrength-1)/7.0,0,1));updateMessage();}
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Zoom   %.1fx",1+PlayerSettings.zoomStrength)));}
+        @Override protected void applyValue(){PlayerSettings.zoomStrength=(float)(1+value*7);updateMessage();}
         @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
             text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
             int x=getX()+4,y=getY()+19,length=width-8;

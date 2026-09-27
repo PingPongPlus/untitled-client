@@ -33,6 +33,10 @@ public class VoicechatClient implements ClientModInitializer {
     private static KeyMapping voiceMenuKey;
     private static KeyMapping talkKey;
     private static KeyMapping muteKey;
+    private static KeyMapping zoomKey;
+    private static final KeyMapping.Category CLIENT_CATEGORY = KeyMapping.Category.register(
+            Identifier.fromNamespaceAndPath("voicechat", "client")
+    );
 
     public static VoiceStatus voiceStatus(java.util.UUID id) {
         return voiceConnection == null ? VoiceStatus.NOT_CONNECTED : voiceConnection.statusFor(id);
@@ -42,6 +46,7 @@ public class VoicechatClient implements ClientModInitializer {
     public static KeyMapping voiceMenuKey() { return voiceMenuKey; }
     public static KeyMapping talkKey() { return talkKey; }
     public static KeyMapping muteKey() { return muteKey; }
+    public static KeyMapping zoomKey() { return zoomKey; }
 
     public static final pingplus.voicechat.client.slayer.SlayerOutlineConfig SLAYER_CFG =
         new pingplus.voicechat.client.slayer.SlayerOutlineConfig();
@@ -70,6 +75,7 @@ public class VoicechatClient implements ClientModInitializer {
         FpsHud fpsHud = new FpsHud();
         CoordinatesHud coordinatesHud = new CoordinatesHud();
         openGuiKey = registerOpenGuiKey();
+        zoomKey = registerZoomKey();
         HandSwapFeature handSwap = new HandSwapFeature();
 
         ArraylistHud arraylistHud = new ArraylistHud(fpsHud, coordinatesHud);
@@ -130,6 +136,7 @@ public class VoicechatClient implements ClientModInitializer {
             }
 
             handSwap.tick(client);
+            pingplus.voicechat.client.ZoomFeature.tick(client, zoomKey != null && zoomKey.isDown());
         });
 
         // Glass health bars above mobs (unlocked with hidden mob names).
@@ -148,15 +155,21 @@ public class VoicechatClient implements ClientModInitializer {
     }
 
     private KeyMapping registerOpenGuiKey() {
-        KeyMapping.Category category = KeyMapping.Category.register(
-                Identifier.fromNamespaceAndPath("voicechat", "client")
-        );
-
         return KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(
                         "key.voicechat.click_gui",
                         GLFW.GLFW_KEY_RIGHT_SHIFT,
-                        category
+                        CLIENT_CATEGORY
+                )
+        );
+    }
+
+    private KeyMapping registerZoomKey() {
+        return KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
+                        "key.voicechat.zoom",
+                        GLFW.GLFW_KEY_C,
+                        CLIENT_CATEGORY
                 )
         );
     }

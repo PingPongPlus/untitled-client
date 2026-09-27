@@ -4,5 +4,6 @@
   "key.voicechat.talk": "Push to talk",
   "key.voicechat.mute": "Mute microphone",
   "key.voicechat.click_gui": "Open ClickGUI",
+  "key.voicechat.zoom": "Zoom",
   "key.category.voicechat.client": "PingPlus Client"
 }

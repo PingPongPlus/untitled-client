@@ -38,6 +38,8 @@ public final class PlayerSettings {
     public static boolean hideXp = false;
     public static boolean hideLocator = false;
     public static boolean fullbright = false;
+    public static boolean zoom = true;
+    public static float zoomStrength = 3f;
 
 }
 
