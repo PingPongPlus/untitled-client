@@ -17,6 +17,11 @@ import pingplus.voicechat.client.damageglass.DamageGlassRenderer;
 
 @Mixin(LevelRenderer.class)
 public abstract class DamageGlassLevelMixin {
+    @Inject(method = "submitFeatures", at = @At("TAIL"))
+    private void voicechat$deathWaves(net.minecraft.client.renderer.state.level.LevelRenderState state,
+            net.minecraft.client.renderer.SubmitNodeCollector collector, boolean outline, CallbackInfo ci) {
+        pingplus.voicechat.client.damageglass.DeathGlassWave.submit(state.cameraRenderState, collector);
+    }
     @WrapMethod(method = "render")
     private void voicechat$worldScope(GraphicsResourceAllocator allocator, DeltaTracker delta, boolean outline,
                                       CameraRenderState camera, Matrix4fc view, GpuBufferSlice fog, Vector4f color,

@@ -19,11 +19,22 @@ public abstract class DamageGlassSubmitMixin {
                                          int light, int overlay, int tint, TextureAtlasSprite sprite, int outline,
                                          ModelFeatureRenderer.CrumblingOverlay crumbling, Operation<Void> original) {
         if (DamageGlassRenderer.current != 0) {
-            RenderType glass = DamageGlassRenderer.material(type);
+            boolean rippleOnly = !DamageGlassSettings.enabled();
+            RenderType glass = DamageGlassRenderer.material(type, rippleOnly);
             if (glass != type) {
+                if (rippleOnly) {
+                    // Keep the complete vanilla draw, including hurt tint, lighting, armor and outlines.
+                    original.call(model, state, pose, type, light, overlay, tint, sprite, outline, crumbling);
+                    outline = 0;
+                    crumbling = null;
+                }
                 type = glass;
                 // Strength uses the low byte; the remaining UV1.x bits carry 0–100% reflectivity.
                 overlay = DamageGlassRenderer.current | DamageGlassSettings.reflectivity() << 8;
+                overlay |= (rippleOnly ? 7 : DamageGlassSettings.preset().shaderId) << 24;
+                if (DamageGlassSettings.impactRipple()) overlay |= 1 << 27;
+                // Vanilla light occupies the low byte of each coordinate; pack screen-space origin above it.
+                light = (light & 0x00FF00FF) | DamageGlassRenderer.impactCenter;
             }
         }
         original.call(model, state, pose, type, light, overlay, tint, sprite, outline, crumbling);

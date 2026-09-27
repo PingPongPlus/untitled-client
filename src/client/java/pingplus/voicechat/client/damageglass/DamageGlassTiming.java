@@ -1,6 +1,8 @@
 package pingplus.voicechat.client.damageglass;
 
 public final class DamageGlassTiming {
+    /** Full material strength with the impact ripple finished. */
+    public static final int ALWAYS_ON = 255 | (255 << 16);
     public static boolean eligible(boolean enabled, boolean players, boolean mobs,
                                    boolean player, boolean mob, boolean invisible, boolean firstPersonSelf) {
         return enabled && !invisible && !firstPersonSelf && ((player && players) || (mob && mobs));

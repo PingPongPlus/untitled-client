@@ -23,9 +23,11 @@ import pingplus.voicechat.mixin.client.DamageGlassTextureAccessor;
 public final class DamageGlassRenderer {
     public static boolean inWorld;
     public static int current;
+    public static int impactCenter;
     private static boolean requested;
     private static TextureTarget scene;
     private static final Map<RenderType, RenderType> TYPES = new IdentityHashMap<>();
+    private static final Map<RenderType, RenderType> RIPPLES = new IdentityHashMap<>();
     private static final RenderPipeline[] PIPELINES = new RenderPipeline[4];
     static {
         for (int i = 0; i < PIPELINES.length; i++) {
@@ -39,13 +41,15 @@ public final class DamageGlassRenderer {
                     .build());
         }
     }
-    public static void initialize() {}
+    public static void initialize() { DeathGlassWave.initialize(); }
+    public static void requestScene() { requested = true; }
     private static Identifier id(String path) { return Identifier.fromNamespaceAndPath("voicechat", path); }
     public static boolean isGlass(RenderPipeline pipeline) {
+        if (pipeline == DeathGlassWave.PIPELINE) return true;
         for (var candidate : PIPELINES) if (candidate == pipeline) return true;
         return false;
     }
-    public static RenderType material(RenderType original) {
+    public static RenderType material(RenderType original, boolean rippleOnly) {
         if (original.isOutline() || original.format() != DefaultVertexFormat.ENTITY) return original;
         // Glints and special beam/eye passes retain their native pipeline; only textured model surfaces change.
         var setup = (DamageGlassSetupAccessor) (Object) ((DamageGlassRenderTypeAccessor) original).voicechat$setup();
@@ -53,8 +57,8 @@ public final class DamageGlassRenderer {
         String shader = original.pipeline().getFragmentShader().getPath();
         if (texture == null || !shader.equals("core/entity")) return original;
         requested = true;
-        return TYPES.computeIfAbsent(original, type -> RenderType.create("voicechat_damage_glass",
-                RenderSetup.builder(PIPELINES[(type.pipeline().isCull() ? 1 : 0) | (type.hasBlending() ? 2 : 0)])
+        return (rippleOnly ? RIPPLES : TYPES).computeIfAbsent(original, type -> RenderType.create(rippleOnly ? "voicechat_impact_ripple" : "voicechat_damage_glass",
+                RenderSetup.builder(PIPELINES[(type.pipeline().isCull() ? 1 : 0) | (rippleOnly || type.hasBlending() ? 2 : 0)])
                         .withTexture("Sampler0", texture.voicechat$location()).useLightmap()
                         .setLayeringTransform(setup.voicechat$layering()).createRenderSetup()));
     }
@@ -95,6 +99,6 @@ public final class DamageGlassRenderer {
         if (scene != null) scene.destroyBuffers();
         scene = null;
     }
-    public static void close() { closeScene(); TYPES.clear(); }
+    public static void close() { closeScene(); TYPES.clear(); RIPPLES.clear(); }
     private DamageGlassRenderer() {}
 }

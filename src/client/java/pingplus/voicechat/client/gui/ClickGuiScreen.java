@@ -115,8 +115,18 @@ public final class ClickGuiScreen extends Screen {
         }
         Category render = category("RENDER", "See the details");
         toggle(render,"Glass damage effect",pingplus.voicechat.client.damageglass.DamageGlassSettings::enabled,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleEnabled);
+        toggle(render,"Impact ripple",pingplus.voicechat.client.damageglass.DamageGlassSettings::impactRipple,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleImpactRipple);
+        toggle(render,"Glass death wave",pingplus.voicechat.client.damageglass.DamageGlassSettings::deathWave,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleDeathWave);
         disclosure(render,"Damage glass options");
         if (expanded.getOrDefault("Damage glass options",false)) {
+            add(render,new Button(0,0,panelWidth-20,18,Component.literal("Preset: "+pingplus.voicechat.client.damageglass.DamageGlassSettings.preset().label),
+                    b->{pingplus.voicechat.client.damageglass.DamageGlassSettings.cyclePreset();rebuildWidgets();},supplier->supplier.get()) {
+                @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                    if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
+                    text(g,getMessage().getString(),getX()+4,getY()+4,GlassStyle.MUTED);
+                }
+            },18);
+            toggle(render,"Always-on glass",pingplus.voicechat.client.damageglass.DamageGlassSettings::alwaysOn,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleAlwaysOn);
             add(render,new EffectSlider(panelWidth-20,"Reflectivity",
                     pingplus.voicechat.client.damageglass.DamageGlassSettings::reflectivity,
                     pingplus.voicechat.client.damageglass.DamageGlassSettings::setReflectivity,100,1),26);

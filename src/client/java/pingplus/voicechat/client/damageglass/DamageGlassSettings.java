@@ -13,6 +13,23 @@ public final class DamageGlassSettings {
     private static final Properties VALUES = load();
     private static boolean enabled = read("enabled"), players = read("players"), mobs = read("mobs");
     private static int reflectivity = readReflectivity();
+    private static boolean impactRipple = read("impactRipple");
+    private static boolean deathWave = Boolean.parseBoolean(VALUES.getProperty("deathWave", "false"));
+    public static boolean deathWave() { return deathWave; }
+    public static void toggleDeathWave() { deathWave = !deathWave; save(); }
+    private static GlassPreset preset = GlassPreset.parse(VALUES.getProperty("preset"));
+    public static boolean impactRipple() { return impactRipple; }
+    public static void toggleImpactRipple() { impactRipple = !impactRipple; save(); }
+    public static GlassPreset preset() { return preset; }
+    public static void setPreset(GlassPreset value) {
+        preset = java.util.Objects.requireNonNull(value);
+        reflectivity = value.reflectivity;
+        save();
+    }
+    public static void cyclePreset() { setPreset(GlassPreset.values()[(preset.ordinal() + 1) % GlassPreset.values().length]); }
+    private static boolean alwaysOn = Boolean.parseBoolean(VALUES.getProperty("alwaysOn", "false"));
+    public static boolean alwaysOn() { return alwaysOn; }
+    public static void toggleAlwaysOn() { alwaysOn = !alwaysOn; save(); }
     public static int reflectivity() { return reflectivity; }
     public static void setReflectivity(int value) {
         int next = Math.clamp(value, 0, 100);
@@ -46,6 +63,10 @@ public final class DamageGlassSettings {
         p.setProperty("players", Boolean.toString(players));
         p.setProperty("mobs", Boolean.toString(mobs));
         p.setProperty("reflectivity", Integer.toString(reflectivity));
+        p.setProperty("alwaysOn", Boolean.toString(alwaysOn));
+        p.setProperty("impactRipple", Boolean.toString(impactRipple));
+        p.setProperty("deathWave", Boolean.toString(deathWave));
+        p.setProperty("preset", preset.name());
         Path temp = null;
         try {
             Files.createDirectories(FILE.getParent());

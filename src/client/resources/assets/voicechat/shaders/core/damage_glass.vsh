@@ -18,6 +18,10 @@ out vec3 viewNormal;
 out vec3 viewPosition;
 out vec2 damage;
 out float reflectivity;
+out vec2 impactCenter;
+out float impactRadius;
+flat out int glassPreset;
+flat out int rippleEnabled;
 out float sphericalDistance;
 out float cylindricalDistance;
 
@@ -27,9 +31,13 @@ void main() {
     viewPosition = view.xyz;
     viewNormal = normalize(mat3(ModelViewMat) * Normal);
     texCoord = (TextureMat * vec4(UV0, 0.0, 1.0)).xy;
-    litColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color) * sample_lightmap(Sampler2, UV2);
-    damage = vec2(UV1.x & 255, UV1.y) / 255.0;
+    litColor = minecraft_mix_light(Light0_Direction, Light1_Direction, Normal, Color) * sample_lightmap(Sampler2, UV2 & ivec2(255));
+    damage = vec2(UV1.x & 255, UV1.y & 255) / 255.0;
     reflectivity = clamp(float(UV1.x >> 8) / 100.0, 0.0, 1.0);
+    glassPreset = (UV1.y >> 8) & 7;
+    rippleEnabled = (UV1.y >> 11) & 1;
+    impactRadius = float(((UV1.y >> 12) & 7) + 1) * 0.05;
+    impactCenter = vec2((UV2.x >> 8) & 255, (UV2.y >> 8) & 255) / 255.0;
     sphericalDistance = fog_spherical_distance(Position);
     cylindricalDistance = fog_cylindrical_distance(Position);
 }

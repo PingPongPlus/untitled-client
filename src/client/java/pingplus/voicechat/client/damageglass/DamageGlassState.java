@@ -4,4 +4,6 @@ package pingplus.voicechat.client.damageglass;
 public interface DamageGlassState {
     int voicechat$damageGlass();
     void voicechat$damageGlass(int packed);
+    int voicechat$impactCenter();
+    void voicechat$impactCenter(int packed);
 }
