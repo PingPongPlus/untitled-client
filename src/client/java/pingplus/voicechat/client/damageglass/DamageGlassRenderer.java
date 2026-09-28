@@ -41,11 +41,11 @@ public final class DamageGlassRenderer {
                     .build());
         }
     }
-    public static void initialize() { DeathGlassWave.initialize(); }
+    public static void initialize() { DeathGlassMelt.initialize(); }
     public static void requestScene() { requested = true; }
     private static Identifier id(String path) { return Identifier.fromNamespaceAndPath("voicechat", path); }
     public static boolean isGlass(RenderPipeline pipeline) {
-        if (pipeline == DeathGlassWave.PIPELINE) return true;
+        if (pipeline == DeathGlassMelt.PIPELINE) return true;
         for (var candidate : PIPELINES) if (candidate == pipeline) return true;
         return false;
     }

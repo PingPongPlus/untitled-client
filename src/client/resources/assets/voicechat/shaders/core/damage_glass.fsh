@@ -71,6 +71,14 @@ void main() {
     material += vec3(0.65, 0.90, 1.0) * max(wave, 0.0) * 0.35;
     float replacement = damage.x * mix(0.94, 1.0, reflectivity);
     vec4 color = vec4(mix(normalColor.rgb, material, replacement), normalColor.a);
+    if (glassPreset == 6) {
+        // Death melt: reflectivity is forced to 1.0 via UV1, so the statue is pure mirror;
+        // it condenses into a falling blob, splashes into a puddle, then the puddle dissolves.
+        float melt = damage.y;
+        float drip = 0.5 + 0.5 * sin(texCoord.y * 40.0 - melt * 60.0);
+        color.rgb += vec3(0.75, 0.92, 1.0) * melt * drip * 0.14;
+        color.a *= 1.0 - smoothstep(0.72, 1.0, melt);
+    }
     fragColor = apply_fog(color, sphericalDistance, cylindricalDistance,
         FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
 }

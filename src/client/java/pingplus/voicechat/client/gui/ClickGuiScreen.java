@@ -116,7 +116,7 @@ public final class ClickGuiScreen extends Screen {
         Category render = category("RENDER", "See the details");
         toggle(render,"Glass damage effect",pingplus.voicechat.client.damageglass.DamageGlassSettings::enabled,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleEnabled);
         toggle(render,"Impact ripple",pingplus.voicechat.client.damageglass.DamageGlassSettings::impactRipple,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleImpactRipple);
-        toggle(render,"Glass death wave",pingplus.voicechat.client.damageglass.DamageGlassSettings::deathWave,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleDeathWave);
+        toggle(render,"Death melt glass",pingplus.voicechat.client.damageglass.DamageGlassSettings::deathWave,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleDeathWave);
         disclosure(render,"Damage glass options");
         if (expanded.getOrDefault("Damage glass options",false)) {
             add(render,new Button(0,0,panelWidth-20,18,Component.literal("Preset: "+pingplus.voicechat.client.damageglass.DamageGlassSettings.preset().label),

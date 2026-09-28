@@ -39,6 +39,14 @@ public abstract class DamageGlassLivingMixin {
         } else voicechat$envelopes.remove(entity);
         var glassState = (DamageGlassState) state;
         glassState.voicechat$impactCenter(0);
+        if (!entity.isAlive()) {
+            // Dead entities: mirror statue first, then the model is hidden while the liquid blob takes over.
+            int phase = DeathGlassMelt.phase(entity);
+            if (phase >= 0) {
+                packed = 255 | DeathGlassMelt.DEATH_FLAG | (phase == 1 ? DeathGlassMelt.HIDE_FLAG : 0);
+                state.deathTime = 0;
+            }
+        }
         if (packed != 0) {
             var base = entity.getPosition(partial);
             var center = client.gameRenderer.projectPointToScreen(base.add(0, entity.getBbHeight() * .55, 0));
@@ -63,8 +71,17 @@ public abstract class DamageGlassLivingMixin {
         DamageGlassRenderer.current = packed;
         DamageGlassRenderer.impactCenter = ((DamageGlassState) state).voicechat$impactCenter();
         boolean red = state.hasRedOverlay;
+        boolean death = (packed & DeathGlassMelt.DEATH_FLAG) != 0;
+        boolean hide = (packed & DeathGlassMelt.HIDE_FLAG) != 0;
         // The material carries its own blend. Do not mutate extracted state after submission.
-        if (packed != 0 && DamageGlassSettings.enabled()) state.hasRedOverlay = false;
+        if (packed != 0 && (DamageGlassSettings.enabled() || death)) state.hasRedOverlay = false;
+        if (hide) {
+            // The simulated liquid blob replaces the corpse entirely.
+            state.hasRedOverlay = red;
+            DamageGlassRenderer.current = previous;
+            DamageGlassRenderer.impactCenter = previousCenter;
+            return;
+        }
         try { original.call(state, pose, collector, camera); }
         finally { state.hasRedOverlay = red; DamageGlassRenderer.current = previous; DamageGlassRenderer.impactCenter = previousCenter; }
     }
