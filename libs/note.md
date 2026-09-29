@@ -1,1 +1,3 @@
-#### this is a source file of the voice chat addon by labymod(1.16) it is needed for the client to build because it extract some dependencies out of this jar
+VoiceChat.jar is no longer needed to build or run the client. The voice protocol,
+Opus JNI wrapper, and native audio libraries live in the client source/resources.
+See [the voice runtime documentation](../docs/VOICE.md).

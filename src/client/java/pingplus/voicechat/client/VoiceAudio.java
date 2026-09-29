@@ -6,7 +6,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.*;
 
-/** 48 kHz mono, 20 ms Opus frames, matching the supplied LabyMod runtime. */
+/** 48 kHz mono, 20 ms Opus frames, matching LabyMod voice protocol 6. */
 public final class VoiceAudio implements AutoCloseable {
     private static final AudioFormat FORMAT = VoiceDevices.FORMAT;
     private final String inputDevice;
@@ -50,15 +50,24 @@ public final class VoiceAudio implements AutoCloseable {
     private void capture() {
         OpusCodec encoder = codec();
         MicrophoneGate gate = new MicrophoneGate();
-        try (VoiceCapture line = openMicrophone()) {
+        boolean suppressionFailed = false;
+        try (NoiseSuppression suppression = new NoiseSuppression(); VoiceCapture line = openMicrophone()) {
             if (line == null) return;
             byte[] pcm = new byte[1920];
             while (running) {
                 int read = line.read(pcm);
                 if (!running) break;
                 inputPeak = VoiceInputTest.peak(pcm, read);
+                if (read == pcm.length && !suppressionFailed) {
+                    try { suppression.process(pcm, settings.noiseSuppressionEnabled); }
+                    catch (Exception | LinkageError e) {
+                        suppressionFailed = true; suppression.close();
+                        VoicechatClient.LOG.warn("RNNoise unavailable; microphone will continue without suppression", e);
+                        error.accept("Noise suppression unavailable; microphone still active");
+                    }
+                }
                 if (read == pcm.length && transmit.getAsBoolean() && !settings.muted && !settings.deafened) {
-                    if (!gate.process(pcm, settings.noiseGateEnabled, settings.microphoneThresholdDb)) continue;
+                    if (!gate.process(pcm, settings.activation.usesGate(settings.noiseGateEnabled), settings.microphoneThresholdDb)) continue;
                     for (int i = 0; i < pcm.length; i += 2) {
                         int sample = (short)((pcm[i] & 255) | (pcm[i + 1] << 8));
                         int scaled = clip(sample * settings.microphoneGain);

@@ -56,21 +56,7 @@ repositories {
     }
 }
 
-// Only the standalone protocol and Opus runtime are reused; no old Minecraft classes.
-def suppliedVoiceJar = providers.gradleProperty('voicechatJar').orElse('libs/voicechat.jar')
-tasks.register('voiceRuntime', Jar) {
-    archiveFileName = 'laby-voice-runtime.jar'
-    destinationDirectory = layout.buildDirectory.dir('voice-runtime')
-    from({
-        def source = file(suppliedVoiceJar.get())
-        if (!source.isFile()) throw new GradleException('Supply the original JAR with -PvoicechatJar=/path/to/voicechat.jar')
-        zipTree(source)
-    }) {
-        include 'net/labymod/voice/**', 'net/labymod/opus/**', 'native-binaries/**'
-    }
-}
 dependencies {
-    implementation files(tasks.named('voiceRuntime'))
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -143,7 +129,6 @@ tasks.register('damageGlassSmokeTest', JavaExec) {
 tasks.named('check') { dependsOn 'damageGlassSmokeTest' }
 
 jar {
-    from({ zipTree(tasks.named('voiceRuntime').get().archiveFile.get().asFile) })
     from("LICENSE.txt") {
         rename { "${it}_${project.archives_base_name}" }
     }

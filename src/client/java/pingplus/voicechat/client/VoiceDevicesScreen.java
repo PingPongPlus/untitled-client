@@ -19,12 +19,14 @@ final class VoiceDevicesScreen extends Screen {
     private VoiceInputTest inputTest;
     private boolean audioSuspended;
     private volatile boolean noiseGateEnabled;
+    private volatile boolean noiseSuppressionEnabled;
     private volatile double thresholdDb;
     VoiceDevicesScreen(Screen parent, VoiceConnection voice) {
         super(Component.literal("Voice audio devices"));
         this.parent = parent; this.voice = voice;
         input = VoiceDevices.normalizeInput(voice.settings.inputDevice); output = voice.settings.outputDevice;
         noiseGateEnabled = voice.settings.noiseGateEnabled;
+        noiseSuppressionEnabled = voice.settings.noiseSuppressionEnabled;
         thresholdDb = voice.settings.microphoneThresholdDb;
     }
     @Override protected void init() {
@@ -39,24 +41,28 @@ final class VoiceDevicesScreen extends Screen {
         }).bounds(x, 68, 300, 20).tooltip(Tooltip.create(Component.literal(name(outputs, output) + " — click to cycle speakers"))).build());
         addRenderableWidget(Button.builder(Component.literal("Noise gate: " + (noiseGateEnabled ? "On" : "Off")), b -> {
             noiseGateEnabled = !noiseGateEnabled; rebuildWidgets();
-        }).bounds(x, 92, 300, 20).build());
-        addRenderableWidget(new AbstractSliderButton(x, 116, 300, 20, Component.empty(), (thresholdDb + 60) / 45) {
+        }).bounds(x, 116, 300, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Noise suppression (RNNoise): " + (noiseSuppressionEnabled ? "On" : "Off")), b -> {
+            noiseSuppressionEnabled = !noiseSuppressionEnabled; rebuildWidgets();
+        }).bounds(x, 92, 300, 20).tooltip(Tooltip.create(Component.literal("Reduces background noise while speaking. Runs locally before the noise gate and Opus encoding."))).build());
+        addRenderableWidget(new AbstractSliderButton(x, 140, 300, 20, Component.empty(), (thresholdDb + 60) / 45) {
             { updateMessage(); setTooltip(Tooltip.create(Component.literal("Raise the cutoff to block more background noise. Lower it if quiet speech is cut off. Use Test microphone to compare input against the marker."))); }
             @Override protected void updateMessage() { setMessage(Component.literal("Microphone cutoff: " + Math.round(-60 + value * 45) + " dB")); }
             @Override protected void applyValue() { thresholdDb = Math.round(-60 + value * 45); }
         });
-        addRenderableWidget(Button.builder(Component.literal("Refresh devices"), b -> { stopTest(); rebuildWidgets(); }).bounds(x, 140, 145, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Refresh devices"), b -> { stopTest(); rebuildWidgets(); }).bounds(x, 164, 145, 20).build());
         addRenderableWidget(Button.builder(Component.literal(inputTest == null ? "Test microphone" : "Stop test"), b -> {
             if (inputTest == null) {
                 voice.suspendAudio(); audioSuspended = true;
-                inputTest = new VoiceInputTest(input, () -> noiseGateEnabled, () -> thresholdDb);
+                inputTest = new VoiceInputTest(input, () -> voice.settings.activation.usesGate(noiseGateEnabled), () -> thresholdDb, () -> noiseSuppressionEnabled);
             } else stopTest();
             rebuildWidgets();
-        }).bounds(x + 155, 140, 145, 20).build());
+        }).bounds(x + 155, 164, 145, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Cancel"), b -> onClose()).bounds(x, height - 28, 145, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Apply"), b -> {
             voice.settings.inputDevice = input; voice.settings.outputDevice = output;
             voice.settings.noiseGateEnabled = noiseGateEnabled;
+            voice.settings.noiseSuppressionEnabled = noiseSuppressionEnabled;
             voice.settings.microphoneThresholdDb = thresholdDb;
             voice.settings.save();
             stopTest();
@@ -81,18 +87,18 @@ final class VoiceDevicesScreen extends Screen {
         if (inputTest != null) {
             int x = width / 2 - 150;
             int level = (int)(300 * Math.max(0, Math.min(1, (inputTest.levelDb() + 70) / 70)));
-            graphics.fill(x, 166, x + 300, 172, 0xFF333333);
-            graphics.fill(x, 166, x + level, 172, inputTest.gatePassing() ? 0xFF80DD99 : 0xFFFFCC80);
-            if (noiseGateEnabled) {
+            graphics.fill(x, 190, x + 300, 196, 0xFF333333);
+            graphics.fill(x, 190, x + level, 196, inputTest.gatePassing() ? 0xFF80DD99 : 0xFFFFCC80);
+            if (voice.settings.activation.usesGate(noiseGateEnabled)) {
                 int marker = x + (int)(300 * (thresholdDb + 70) / 70);
-                graphics.fill(marker, 164, marker + 2, 174, 0xFFFFFFFF);
+                graphics.fill(marker, 188, marker + 2, 198, 0xFFFFFFFF);
             }
-            String gateState = !noiseGateEnabled ? "Gate off" : inputTest.gatePassing() ? "Gate open" : "Noise blocked";
-            graphics.centeredText(font, Math.round(inputTest.levelDb()) + " dB | " + gateState + " | local test", width / 2, 178, 0xFFFFFFFF);
-            graphics.centeredText(font, font.plainSubstrByWidth(inputTest.status(), 300), width / 2, 192, 0xFFBBBBBB);
+            String gateState = !voice.settings.activation.usesGate(noiseGateEnabled) ? "Gate off" : inputTest.gatePassing() ? "Gate open" : "Noise blocked";
+            graphics.centeredText(font, Math.round(inputTest.levelDb()) + " dB | " + gateState + " | local test", width / 2, 202, 0xFFFFFFFF);
+            graphics.centeredText(font, font.plainSubstrByWidth(inputTest.status(), 300), width / 2, 216, 0xFFBBBBBB);
         } else {
-            graphics.centeredText(font, "Test microphone: set cutoff above background noise", width / 2, 170, 0xFFBBBBBB);
-            graphics.centeredText(font, "Noise gate reduces noise between words", width / 2, 186, 0xFFBBBBBB);
+            graphics.centeredText(font, "Test microphone: compare processed level to cutoff", width / 2, 194, 0xFFBBBBBB);
+            graphics.centeredText(font, "RNNoise reduces noise during speech; gate blocks pauses", width / 2, 210, 0xFFBBBBBB);
         }
     }
     @Override public boolean isPauseScreen() { return false; }

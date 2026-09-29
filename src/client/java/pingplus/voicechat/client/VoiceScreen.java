@@ -60,8 +60,11 @@ public final class VoiceScreen extends Screen {
             saveKeys();
             rebuildWidgets();
         }).bounds(x + 255, 168, 45, 20).build());
+        addRenderableWidget(Button.builder(Component.literal("Microphone mode: " + s.activation.label()), b -> {
+            s.activation = s.activation.next(); s.save(); voice.restartAudio(); rebuildWidgets();
+        }).bounds(x, 192, 300, 20).build());
         shown = voice.players.entrySet().stream().sorted(Map.Entry.comparingByValue()).map(e -> Map.entry(e.getKey(), e.getValue())).toList();
-        int listTop = 216;
+        int listTop = 240;
         int rows = Math.max(1, (height - listTop - 36) / 24);
         page = Math.min(page, Math.max(0, (shown.size() - 1) / rows));
         for (int i = page * rows; i < Math.min(shown.size(), (page + 1) * rows); i++) {
@@ -129,8 +132,8 @@ public final class VoiceScreen extends Screen {
         super.extractRenderState(graphics, mouseX, mouseY, delta);
         graphics.centeredText(font, title, width / 2, 12, 0xFFFFFFFF);
         graphics.centeredText(font, font.plainSubstrByWidth(voice.status, width - 12), width / 2, 30, voice.connected() ? 0xFF80DD99 : 0xFFFFCC80);
-        graphics.centeredText(font, pendingKey != null ? "Press a key for \"" + pendingKey.getName() + "\"... ESC cancels, click sets mouse button" : "Click a key button, then press a key or mouse button", width / 2, 192, 0xFFBBBBBB);
-        if (shown.isEmpty()) graphics.centeredText(font, "No nearby voice users", width / 2, 222, 0xFFAAAAAA);
+        graphics.centeredText(font, pendingKey != null ? "Press a key for \"" + pendingKey.getName() + "\"... ESC cancels, click sets mouse button" : "Click a key button, then press a key or mouse button", width / 2, 218, 0xFFBBBBBB);
+        if (shown.isEmpty()) graphics.centeredText(font, "No nearby voice users", width / 2, 246, 0xFFAAAAAA);
     }
     @Override public boolean isPauseScreen() { return false; }
     @Override public void onClose() { voice.settings.save(); saveKeys(); minecraft.gui.setScreen(parent); }

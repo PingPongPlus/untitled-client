@@ -10,9 +10,11 @@ final class VoiceInputTest implements AutoCloseable {
     private volatile boolean gatePassing;
     private final java.util.function.BooleanSupplier gateEnabled;
     private final java.util.function.DoubleSupplier threshold;
+    private final java.util.function.BooleanSupplier suppressionEnabled;
     private volatile String status = "Opening microphone...";
-    VoiceInputTest(String selected, java.util.function.BooleanSupplier gateEnabled, java.util.function.DoubleSupplier threshold) {
-        this.gateEnabled = gateEnabled; this.threshold = threshold;
+    VoiceInputTest(String selected, java.util.function.BooleanSupplier gateEnabled, java.util.function.DoubleSupplier threshold,
+                   java.util.function.BooleanSupplier suppressionEnabled) {
+        this.gateEnabled = gateEnabled; this.threshold = threshold; this.suppressionEnabled = suppressionEnabled;
         Thread.ofPlatform().daemon().name("Voice-Input-Test").start(() -> capture(selected));
     }
     double peak() { return peak; }
@@ -20,16 +22,25 @@ final class VoiceInputTest implements AutoCloseable {
     boolean gatePassing() { return gatePassing; }
     String status() { return status; }
     private void capture(String selected) {
-        try (VoiceCapture input = open(selected)) {
+        try (NoiseSuppression suppression = new NoiseSuppression(); VoiceCapture input = open(selected)) {
             if (input == null) return;
             status = "Microphone opened — speak to test";
             byte[] pcm = new byte[1920];
             MicrophoneGate gate = new MicrophoneGate();
             long silentSince = System.nanoTime();
+            boolean suppressionFailed = false;
             while (running) {
                 int read = input.read(pcm);
                 if (!running) break;
                 peak = peak(pcm, read);
+                if (read != pcm.length) continue;
+                if (!suppressionFailed) {
+                    try { suppression.process(pcm, suppressionEnabled.getAsBoolean()); }
+                    catch (Exception | LinkageError e) {
+                        suppressionFailed = true; suppression.close();
+                        VoicechatClient.LOG.warn("RNNoise unavailable in microphone test", e);
+                    }
+                }
                 levelDb = MicrophoneGate.levelDb(pcm, read);
                 gatePassing = gate.process(pcm, gateEnabled.getAsBoolean(), threshold.getAsDouble());
                 if (peak > 0.002) {
@@ -38,6 +49,7 @@ final class VoiceInputTest implements AutoCloseable {
                 } else if (System.nanoTime() - silentSince > 3_000_000_000L) {
                     status = "No signal — check headset mute and Windows input level";
                 }
+                if (suppressionFailed) status = "Noise suppression unavailable — testing raw input";
             }
         } catch (Exception | LinkageError e) {
             if (running) {

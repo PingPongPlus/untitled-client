@@ -17,6 +17,8 @@ public final class VoiceSettings {
     public volatile double volume = 1;
     public volatile double microphoneGain = 1;
     public volatile boolean noiseGateEnabled = false;
+    public volatile boolean noiseSuppressionEnabled = true;
+    public volatile VoiceActivation activation = VoiceActivation.PUSH_TO_TALK;
     public volatile double microphoneThresholdDb = -45;
     public volatile double distance = 32;
     public volatile String inputDevice = "";
@@ -29,6 +31,7 @@ public final class VoiceSettings {
                 if (s != null) {
                     if (s.inputDevice == null) s.inputDevice = "";
                     if (s.outputDevice == null) s.outputDevice = "";
+                    if (s.activation == null) s.activation = VoiceActivation.PUSH_TO_TALK;
                     s.volume = clamp(s.volume, 2); s.microphoneGain = clamp(s.microphoneGain, 2);
                     s.microphoneThresholdDb = Double.isFinite(s.microphoneThresholdDb)
                         ? Math.max(-60, Math.min(-15, s.microphoneThresholdDb)) : -45;

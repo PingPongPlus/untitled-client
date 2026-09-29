@@ -118,7 +118,7 @@ public final class VoiceConnection {
         if (!authenticated || current == null) return;
         int generation = audioGeneration;
         status = "Connected to LabyMod voice";
-        VoiceAudio device = new VoiceAudio(settings, () -> authenticated && client == current && pushToTalk,
+        VoiceAudio device = new VoiceAudio(settings, () -> authenticated && client == current && settings.activation.permitsInput(pushToTalk),
             data -> { if (client == current && authenticated) current.sendAudioChunk(data); },
             message -> minecraft.execute(() -> { if (client == current && audioGeneration == generation) status = message; }),
             audioSequence::getAndIncrement);

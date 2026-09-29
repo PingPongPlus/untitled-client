@@ -1,5 +1,9 @@
 Minecraft Client with Reverse-Engineered LabyMod Voice Chat, Skyblock Mods etc.
 Some features are already available like PlayerRendering modifications.
+Voice chat builds and runs without VoiceChat.jar. The protocol, Opus codec wrapper,
+and native audio libraries are included in the client. RNNoise background noise
+suppression and the noise gate are configurable in **Voice menu → Audio devices**.
+See [voice setup and runtime details](docs/VOICE.md).
 More features coming soon. 
 Still in development check out a quick demo below!
 

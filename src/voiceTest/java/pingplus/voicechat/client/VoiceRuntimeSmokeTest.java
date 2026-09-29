@@ -15,6 +15,12 @@ public final class VoiceRuntimeSmokeTest {
     public static void main(String[] args) throws Exception {
         VoiceStatusTest.run();
         MicrophoneGateTest.run();
+        NoiseSuppressionTest.run();
+        VoiceProtocolTest.run();
+        check(!VoiceActivation.PUSH_TO_TALK.permitsInput(false) && VoiceActivation.PUSH_TO_TALK.permitsInput(true), "Push-to-talk requires held key");
+        check(VoiceActivation.VOICE_ACTIVATION.permitsInput(false) && VoiceActivation.VOICE_ACTIVATION.usesGate(false), "Voice activation uses cutoff without talk key");
+        check(VoiceActivation.CONTINUOUS.permitsInput(false) && !VoiceActivation.CONTINUOUS.usesGate(false), "Continuous mode permits ungated audio");
+        check(VoiceActivation.CONTINUOUS.usesGate(true) && VoiceActivation.CONTINUOUS.next() == VoiceActivation.PUSH_TO_TALK, "Optional gate and activation cycle");
         check(VoiceInputTest.peak(new byte[1920], 1920) == 0, "Microphone meter detects silence");
         check(VoiceInputTest.peak(new byte[]{0, (byte)128, 0, 0}, 4) == 1, "Microphone meter handles negative full-scale PCM");
         check(VoiceInputTest.peak(new byte[]{0, 64, 0, (byte)128}, 2) == 0.5, "Microphone meter respects bytes read");
@@ -38,7 +44,7 @@ public final class VoiceRuntimeSmokeTest {
             }
         }
         System.out.println("PASS: audio device enumeration and missing-device handling (no devices opened)");
-        check(ProtocolVersion.VERSION == 6, "Supplied runtime must use voice protocol 6");
+        check(ProtocolVersion.VERSION == 6, "Integrated runtime must use voice protocol 6");
         HandshakePacket handshake = new HandshakePacket();
         handshake.setMethod(AuthenticationMethod.MOJANG);
         handshake.setString("VoiceTest");
