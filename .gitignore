@@ -18,3 +18,6 @@ run/
 logs/
 *.log
 .work/
+
+# Local tool configuration may contain credentials
+opencode.json
