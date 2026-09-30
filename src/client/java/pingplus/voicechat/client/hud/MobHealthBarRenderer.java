@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.gui;
+package pingplus.voicechat.client.hud;
 
 import java.util.HashSet;
 import java.util.Map;

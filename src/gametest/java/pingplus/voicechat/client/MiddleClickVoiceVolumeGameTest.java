@@ -1,5 +1,9 @@
 package pingplus.voicechat.client;
 
+import pingplus.voicechat.client.hud.ArraylistHud;
+import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.FpsHud;
+
 import com.google.gson.Gson;
 import com.mojang.authlib.GameProfile;
 import java.util.UUID;
@@ -15,7 +19,7 @@ import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
-import pingplus.voicechat.client.gui.*;
+import pingplus.voicechat.client.gui.ClickGuiScreen;
 
 /** Real crosshair picking and raw mouse callbacks, with local fixtures and saved gain checks. */
 final class MiddleClickVoiceVolumeGameTest {

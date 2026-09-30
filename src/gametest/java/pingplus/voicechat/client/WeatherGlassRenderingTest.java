@@ -47,9 +47,9 @@ final class WeatherGlassRenderingTest {
             context.runOnClient(client -> { GlassCornerSettings.setScale(1.5f); client.getWindow().setWindowed(854, 480); });
             context.waitTicks(10); context.takeScreenshot("weather-glass-small-scale3");
             context.runOnClient(client -> { client.getWindow().setWindowed(1440, 900); client.options.guiScale().set(2); client.resizeGui(); GlassCornerSettings.setScale(1); });
-            var fps = new pingplus.voicechat.client.gui.FpsHud();
-            var coordinates = new pingplus.voicechat.client.gui.CoordinatesHud();
-            var arraylist = new pingplus.voicechat.client.gui.ArraylistHud(fps, coordinates);
+            var fps = new pingplus.voicechat.client.hud.FpsHud();
+            var coordinates = new pingplus.voicechat.client.hud.CoordinatesHud();
+            var arraylist = new pingplus.voicechat.client.hud.ArraylistHud(fps, coordinates);
             var category = net.minecraft.client.KeyMapping.Category.register(net.minecraft.resources.Identifier.fromNamespaceAndPath("voicechat", "weather_test"));
             var key = new net.minecraft.client.KeyMapping("weather.test", 344, category);
             context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps, key, coordinates, arraylist));

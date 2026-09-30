@@ -1,5 +1,9 @@
 package pingplus.voicechat.client;
 
+import pingplus.voicechat.client.hud.ArraylistHud;
+import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.FpsHud;
+
 import com.mojang.blaze3d.vertex.VertexSorting;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.Minecraft;
@@ -19,7 +23,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Blocks;
-import pingplus.voicechat.client.gui.*;
+import pingplus.voicechat.client.gui.ClickGuiScreen;
 
 import java.util.EnumMap;
 import java.util.concurrent.atomic.AtomicReference;

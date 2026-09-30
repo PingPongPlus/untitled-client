@@ -1,7 +1,7 @@
-package pingplus.voicechat.client.hud;
+package pingplus.voicechat.client.hud.metrics;
 
 import net.minecraft.client.Minecraft;
-import pingplus.voicechat.client.gui.MetricsHud;
+import pingplus.voicechat.client.hud.MetricsHud;
 
 /** Client-thread sampling shared by both HUD widgets; rendering never changes gameplay. */
 public final class HudMetrics {

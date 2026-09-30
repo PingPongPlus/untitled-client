@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.gui.hud;
+package pingplus.voicechat.client.hud.editor;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.narration.NarratedElementType;

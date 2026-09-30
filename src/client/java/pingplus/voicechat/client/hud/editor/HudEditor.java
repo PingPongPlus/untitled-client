@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.gui.hud;
+package pingplus.voicechat.client.hud.editor;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;

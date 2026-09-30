@@ -7,7 +7,7 @@ import org.joml.Matrix3x2f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import pingplus.voicechat.client.gui.ChatHud;
+import pingplus.voicechat.client.hud.ChatHud;
 
 /** Keeps chat link clicks aligned with the relocated chat widget. */
 @Mixin(ChatScreen.class)

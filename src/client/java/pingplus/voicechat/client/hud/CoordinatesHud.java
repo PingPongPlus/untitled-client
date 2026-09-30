@@ -1,11 +1,10 @@
-package pingplus.voicechat.client.gui;
+package pingplus.voicechat.client.hud;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import pingplus.voicechat.client.gui.glass.GlassStyle;
 
-/** Holds the FPS toggle and draws its display during gameplay. */
-public final class FpsHud {
+public class CoordinatesHud {
     private boolean enabled = true;
     private boolean glass = true, edges = true;
 
@@ -15,7 +14,11 @@ public final class FpsHud {
     public void toggleEdges() { edges = !edges; }
     public int width() { return Minecraft.getInstance().font.width(text()) + 16; }
     public int height() { return Minecraft.getInstance().font.lineHeight + 10; }
-    private String text() { return "FPS  " + Minecraft.getInstance().getFps(); }
+    private String text() {
+        var player = Minecraft.getInstance().player;
+        return player == null ? "XYZ  0 0 0" : "XYZ  " + player.getBlockX() + " "
+                + player.getBlockY() + " " + player.getBlockZ();
+    }
 
     public boolean isEnabled() {
         return enabled;
@@ -24,6 +27,7 @@ public final class FpsHud {
     public void toggle() {
         enabled = !enabled;
     }
+
 
     public void render(GuiGraphicsExtractor graphics) {
         Minecraft client = Minecraft.getInstance();
@@ -36,6 +40,6 @@ public final class FpsHud {
             GlassStyle.surface(graphics, 0, 0, width(), height(), .88f, .08f, edges);
             graphics.nextStratum();
         }
-        graphics.text(client.font, text(), 8, 5, GuiTheme.TEXT, !glass);
+        graphics.text(client.font, text(), 8, 5, GlassStyle.TEXT, !glass);
     }
 }

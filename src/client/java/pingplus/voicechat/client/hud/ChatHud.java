@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.gui;
+package pingplus.voicechat.client.hud;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -6,8 +6,8 @@ import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import pingplus.voicechat.client.gui.glass.GlassStyle;
-import pingplus.voicechat.client.gui.hud.HudEditor;
-import pingplus.voicechat.client.gui.hud.HudLayout;
+import pingplus.voicechat.client.hud.editor.HudEditor;
+import pingplus.voicechat.client.hud.editor.HudLayout;
 import pingplus.voicechat.mixin.client.ChatComponentAccessor;
 
 /** The vanilla chat panel promoted to a movable glass widget, rendered through HudEditor. */

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pingplus.voicechat.client.gui.ChatHud;
+import pingplus.voicechat.client.hud.ChatHud;
 
 /** The chat widget owns the gameplay chat; vanilla only draws it when the widget is toggled off. */
 @Mixin(Hud.class)

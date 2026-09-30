@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.gui.hud;
+package pingplus.voicechat.client.hud.editor;
 
 import java.io.IOException;
 import java.nio.file.*;

@@ -13,20 +13,21 @@ import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import pingplus.voicechat.client.gui.ArraylistHud;
-import pingplus.voicechat.client.gui.ChatHud;
+import pingplus.voicechat.client.hud.ArraylistHud;
+import pingplus.voicechat.client.hud.ChatHud;
 import pingplus.voicechat.client.gui.ClickGuiScreen;
-import pingplus.voicechat.client.gui.CoordinatesHud;
-import pingplus.voicechat.client.gui.FpsHud;
-import pingplus.voicechat.client.gui.PingHud;
-import pingplus.voicechat.client.gui.MetricsHud;
-import pingplus.voicechat.client.hud.HudMetrics;
-import pingplus.voicechat.client.gui.LogoHud;
-import pingplus.voicechat.client.gui.ScoreboardHud;
-import pingplus.voicechat.client.gui.hud.HudEditor;
-import pingplus.voicechat.client.gui.hud.HudEditorScreen;
+import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.FpsHud;
+import pingplus.voicechat.client.hud.PingHud;
+import pingplus.voicechat.client.hud.MetricsHud;
+import pingplus.voicechat.client.hud.metrics.HudMetrics;
+import pingplus.voicechat.client.hud.LogoHud;
+import pingplus.voicechat.client.hud.ScoreboardHud;
+import pingplus.voicechat.client.hud.VoiceHud;
+import pingplus.voicechat.client.hud.editor.HudEditor;
+import pingplus.voicechat.client.hud.editor.HudEditorScreen;
 import pingplus.voicechat.client.spotify.SpotifySettings;
-import pingplus.voicechat.client.spotify.SpotifyWidget;
+import pingplus.voicechat.client.hud.SpotifyWidget;
 
 /**
  * Initializes client GUI features, HUD elements, and voice chat.
@@ -160,13 +161,13 @@ public class VoicechatClient implements ClientModInitializer {
             boolean active = client.player != null && (SpotifySettings.enabled() || SpotifySettings.musicGlass());
             pingplus.voicechat.client.spotify.SpotifyClient.INSTANCE.active(active);
             pingplus.voicechat.client.spotify.MusicGlass.tick(client.player != null);
-            if (!active) pingplus.voicechat.client.spotify.SpotifyWidget.INSTANCE.clear();
+            if (!active) pingplus.voicechat.client.hud.SpotifyWidget.INSTANCE.clear();
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> HudMetrics.reset());
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             HudEditor.finish();
             pingplus.voicechat.client.spotify.SpotifyClient.INSTANCE.close();
-            pingplus.voicechat.client.spotify.SpotifyWidget.INSTANCE.clear();
+            pingplus.voicechat.client.hud.SpotifyWidget.INSTANCE.clear();
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
@@ -204,14 +205,14 @@ public class VoicechatClient implements ClientModInitializer {
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("voicechat", "mob_health_bar"),
                 (graphics, delta) ->
-                        pingplus.voicechat.client.gui.MobHealthBarRenderer.render(graphics)
+                        pingplus.voicechat.client.hud.MobHealthBarRenderer.render(graphics)
         );
 
         // Screen-space ESP lines to bosses/minibosses.
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("voicechat", "boss_line"),
                 (graphics, delta) ->
-                        pingplus.voicechat.client.gui.BossLineHud.render(graphics)
+                        pingplus.voicechat.client.hud.BossLineHud.render(graphics)
         );
     }
 
@@ -292,71 +293,10 @@ public class VoicechatClient implements ClientModInitializer {
         KeyMapping talk = talkKey;
         KeyMapping mute = muteKey;
 
+        VoiceHud voiceHud = new VoiceHud(voice);
         HudEditor.register(new HudEditor.Entry("voice", "Voice status", () -> 300, () -> 78,
-                (w,h) -> 8, (w,h) -> 70, () -> voice.settings.enabled,
-                (graphics, mx, my, dt, editing) -> {
-                    Minecraft client = Minecraft.getInstance();
-
-                    if (!voice.settings.enabled || client.level == null) {
-                        return;
-                    }
-
-                    String label;
-
-                    if (!voice.connected()) {
-                        label = voice.status;
-                    } else if (voice.settings.deafened) {
-                        label = "Voice: deafened";
-                    } else if (voice.settings.muted) {
-                        label = "Voice: microphone muted";
-                    } else if (voice.transmitting()) {
-                        label = voice.inputPeak() > 0.002
-                                ? "Voice: transmitting audio"
-                                : "Voice: sending silence (no microphone signal)";
-                    } else {
-                        label = voice.status;
-                    }
-
-                    graphics.text(
-                            client.font,
-                            client.font.plainSubstrByWidth(label, 292),
-                            4,
-                            4,
-                            voice.connected() ? 0xFF80DD99 : 0xFFFFCC80
-                    );
-
-                    int y = 16;
-
-                    for (var entry : voice.talking.entrySet()) {
-                        if (y > 68) {
-                            break;
-                        }
-
-                        boolean recentlyTalking =
-                                System.currentTimeMillis() - entry.getValue() < 300;
-
-                        boolean audible =
-                                voice.settings.volume(entry.getKey()) > 0
-                                        && !voice.settings.deafened;
-
-                        if (recentlyTalking && audible) {
-                            String playerName = voice.players.getOrDefault(
-                                    entry.getKey(),
-                                    entry.getKey().toString().substring(0, 8)
-                            );
-
-                            graphics.text(
-                                    client.font,
-                                    client.font.plainSubstrByWidth("Speaking: " + playerName, 292),
-                                    4,
-                                    y,
-                                    0xFFFFFFFF
-                            );
-
-                            y += 12;
-                        }
-                    }
-                }, java.util.List::of));
+                (w,h) -> 8, (w,h) -> 70, voiceHud::isEnabled,
+                (graphics, mx, my, dt, editing) -> voiceHud.render(graphics), java.util.List::of));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (menu.consumeClick()) {

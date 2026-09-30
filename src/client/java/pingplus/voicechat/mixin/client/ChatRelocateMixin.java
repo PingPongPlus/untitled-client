@@ -5,7 +5,7 @@ import net.minecraft.client.gui.components.ChatComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import pingplus.voicechat.client.gui.ChatHud;
+import pingplus.voicechat.client.hud.ChatHud;
 
 /**
  * Routes every vanilla chat draw into the movable Chat widget.

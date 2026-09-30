@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.gui;
+package pingplus.voicechat.client.hud;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -90,7 +90,7 @@ public final class ArraylistHud {
         int y = rectangles ? (rowHeight() - client.font.lineHeight) / 2 : PAD;
         for (String name : names) {
             var label = GlassStyle.label(name);
-            graphics.text(client.font, label, box - client.font.width(label) - PAD, y, GuiTheme.TEXT, false);
+            graphics.text(client.font, label, box - client.font.width(label) - PAD, y, GlassStyle.TEXT, false);
             y += rectangles ? rowHeight() : LINE;
         }
     }
