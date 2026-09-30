@@ -4,8 +4,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import javax.imageio.ImageIO;
+import pingplus.voicechat.client.gui.glass.GlassEffectSettings;
 
-/** Album palette cache and time-based tint, owned by the client thread. No audio capture. */
+/** Shared custom/album tint and palette cache, owned by the client thread. No audio capture. */
 public final class MusicGlass {
     private static String artwork = "";
     private static int palette;
@@ -29,15 +30,18 @@ public final class MusicGlass {
         double seconds = lastFrame == 0 ? 0 : Math.clamp((now - lastFrame) / 1e9, 0, .1);
         lastFrame = now;
         float blend = (float)(1 - Math.exp(-seconds / .45));
-        float target = playing && SpotifySettings.musicGlass() && palette != 0
-                ? SpotifySettings.musicIntensity() / 100f * .28f : 0;
-        if (palette != 0) {
+        boolean custom = GlassEffectSettings.customTint();
+        int color = custom ? 0xFF000000 | GlassEffectSettings.tintColor() : palette;
+        float target = custom ? GlassEffectSettings.tintIntensity() / 100f * .28f
+                : playing && SpotifySettings.musicGlass() && palette != 0
+                    ? SpotifySettings.musicIntensity() / 100f * .28f : 0;
+        if (color != 0) {
             if (strength < .001f) {
-                red = (palette >>> 16) & 255; green = (palette >>> 8) & 255; blue = palette & 255;
+                red = (color >>> 16) & 255; green = (color >>> 8) & 255; blue = color & 255;
             } else {
-                red += (((palette >>> 16) & 255) - red) * blend;
-                green += (((palette >>> 8) & 255) - green) * blend;
-                blue += ((palette & 255) - blue) * blend;
+                red += (((color >>> 16) & 255) - red) * blend;
+                green += (((color >>> 8) & 255) - green) * blend;
+                blue += ((color & 255) - blue) * blend;
             }
         }
         strength += (target - strength) * blend;

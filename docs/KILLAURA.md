@@ -1,7 +1,7 @@
 # Smooth KillAura
 
 Enable **AUTOMATION → KillAura** in the control center. It starts disabled.
-Expand **KillAura options** for player/mob filters, range (1–4 blocks), and turn speed
+Click its gear to open **KillAura options** for player/mob filters, range (1–4 blocks), and turn speed
 (45–540 degrees per second). Actual reach is capped by the player's normal reach
 and held item's attack range. Settings last for the current client session.
 

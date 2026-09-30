@@ -2,7 +2,7 @@
 
 On the full `master` client, open **Right Shift > AUTOMATION > Fast Place**.
 It starts disabled. Hold right-click while placing blocks to repeat placement
-faster. Expand **Fast Place options** to set **Place delay (ticks)** from 1 to 4.
+faster. Click its gear to open **Fast Place options** and set **Place delay (ticks)** from 1 to 4.
 The default is 1 tick (up to 20 held-button placement attempts per second at the
 normal client tick rate); vanilla's 4-tick delay is about 5 attempts per second.
 Actual placed blocks depend on valid placement positions and server acceptance.

@@ -8,7 +8,7 @@ It starts disabled. Colored boxes highlight storage through solid terrain:
 - Purple: shulker boxes of every color.
 - Cyan: Ender chests.
 
-Expand **Storage ESP options** to filter each type, turn on **Filled boxes**, or
+Click its gear to open **Storage ESP options**, filter each type, turn on **Filled boxes**, or
 change **Storage range** from 16 to 128 blocks. The default range is 64 blocks
 and outlines start without fill. Settings last for the current session.
 

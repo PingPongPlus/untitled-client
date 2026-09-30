@@ -66,6 +66,7 @@ public final class GlassButtonRenderer {
         float opacity = (data >>> 24) / 255f;
         if (net.minecraft.client.Minecraft.getInstance().gui.overlay() instanceof net.minecraft.client.gui.screens.LoadingOverlay) {
             GlassStyle.round(graphics, x, y, width, height, square ? 0 : 12, GlassStyle.alpha(0xFF263D54, (data >>> 24) / 255f));
+            drawTint(graphics,x,y,width,height,opacity,pipeline,square);
             return;
         }
         if (GlassPipelines.isButton(pipeline)) {
@@ -87,17 +88,39 @@ public final class GlassButtonRenderer {
         if (scissor != null) bounds = bounds.intersection(scissor);
         if (bounds == null) return;
         graphics.guiRenderState.addGuiElement(new GlassState(pipeline, pose, x, y, width, height, data, padding, scissor, bounds));
-        if (GlassPipelines.isButton(pipeline)) {
+        drawTint(graphics,x,y,width,height,opacity,pipeline,square);
+        WeatherGlass.draw(graphics, x, y, width, height, opacity, square,
+                GlassPipelines.isButton(pipeline) ? 0 : pipeline == GlassPipelines.CONTROL ? 1 : pipeline == GlassPipelines.BOSS_BAR ? 3 : 2);
+    }
+
+    private static void drawTint(GuiGraphicsExtractor graphics, int x, int y, int width, int height,
+                                 float opacity, RenderPipeline pipeline, boolean square) {
+        if (GlassPipelines.isButton(pipeline) || GlassEffectSettings.customTint()) {
             int tint = GlassStyle.alpha(pingplus.voicechat.client.spotify.MusicGlass.tint(), opacity);
             if ((tint >>> 24) != 0) {
                 graphics.nextStratum();
-                int radius = square ? 0 : Math.min(Math.min(width, height) / 2, height > 40 ? 14 : Integer.MAX_VALUE);
-                GlassStyle.round(graphics, x, y, width, height, radius, tint);
+                float half = Math.min(width,height)/2f;
+                if (GlassPipelines.isButton(pipeline)) {
+                    int radius = square ? 0 : Math.min((int)half, height > 40 ? 14 : Integer.MAX_VALUE);
+                    GlassStyle.round(graphics,x,y,width,height,radius,tint);
+                } else if (pipeline == GlassPipelines.BOSS_BAR) {
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(x+width/2f,y+height/2f);
+                    graphics.pose().mul(new Matrix3x2f(1,0,.22f,1,0,0));
+                    graphics.pose().translate(-width/2f,-height/2f);
+                    GlassStyle.roundExact(graphics,0,0,width,height,
+                            Math.min(half,5f/(float)net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScale()),tint);
+                    graphics.pose().popMatrix();
+                } else {
+                    // These shader radii use physical pixels, including compact health/bar pieces.
+                    float radius = pipeline == GlassPipelines.CONTROL
+                            ? half*.96f*GlassCornerSettings.controlQuant()/128f
+                            : Math.min(half,4f/(float)net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScale());
+                    GlassStyle.roundExact(graphics,x,y,width,height,radius,tint);
+                }
                 graphics.nextStratum();
             }
         }
-        WeatherGlass.draw(graphics, x, y, width, height, opacity, square,
-                GlassPipelines.isButton(pipeline) ? 0 : pipeline == GlassPipelines.CONTROL ? 1 : pipeline == GlassPipelines.BOSS_BAR ? 3 : 2);
     }
 
     private record GlassState(RenderPipeline pipeline, Matrix3x2f pose, int x, int y, int width, int height, int data, int padding,

@@ -9,9 +9,11 @@ The interface renders at 60% of its logical size, including text and hit targets
 leaving room for more categories. `ClickGuiScreen.UI_SCALE` controls this independently
 of Minecraft GUI scale. Mouse clicks, releases and dragging use the inverse transform.
 
-Drag category headers to move panels. Click Player scale or Swap interval to expand
-settings. Scroll to reach panels on smaller windows. Tab/Shift-Tab navigate controls;
-keyboard focus scrolls into view. Escape or the configured key closes the screen.
+Drag category headers to move panels. Gear buttons beside features open their
+additional settings in a floating glass window. Drag its title to move it; scroll
+inside it for longer option lists. The close button, clicking outside, or Escape
+closes the settings window. Tab/Shift-Tab navigate its controls without activating
+the category panels underneath. Escape then closes the control center.
 
 All existing controls are retained: FPS, coordinates, hitboxes, body, both arms,
 hand swapping, four scale values, and the 1–20 tick swap interval. Settings retain
@@ -44,7 +46,7 @@ rendering is unchanged; default text in menus, HUD, chat, tooltips and input fie
 
 `./gradlew build --offline` compiles/packages the mod and runs the voice smoke tests.
 `./gradlew runClientGameTest --offline` launches an isolated client, exercises glass
-controls, checks expansion, numeric validation, slider input, panel dragging, keyboard
+controls, checks settings windows, numeric validation, slider input, panel dragging, keyboard
 focus, resizing and GUI scales, and performs a resource reload in a temporary world.
 It also checks the close key and captures screenshots in
 `build/run/clientGameTest/screenshots`. The test mod is not included in the production JAR.
@@ -105,10 +107,17 @@ steps. Both default to 100%, preserving the existing appearance. Blur changes th
 shared Gaussian radius; shadow changes its spread, offset and opacity. Effect
 preferences are saved in `config/voicechat-glass-effects.properties`.
 
+Open the **Glass style** gear to enable **Custom glass color**, choose RGB channels
+(0–255), and adjust **Glass tint** (0–100%). This reuses Spotify's tint overlay,
+28% opacity cap, and smooth color transitions. The custom color works without
+Spotify playback and takes priority over album colors while enabled. Disabling
+it returns panels to their Spotify tint when active. Custom tint also colors the
+shared switch, slider, and bar materials. It uses the same saved effect preferences.
+
 ## Server scoreboard widget
 
-**HUD > Scoreboard** shows or hides the server sidebar. Expand **Scoreboard options**
-to toggle **Liquid glass** and **Glass edges** independently.
+**HUD > Scoreboard** shows or hides the server sidebar. Click its gear to open
+**Scoreboard options** and toggle **Liquid glass** and **Glass edges** independently.
 Edges off removes the bright rim, refraction, sheen, and outer shadow
 while preserving the blurred glass background and rounded corners. Glass off shows only
 server text, with a text shadow for readability. These toggles follow the other HUD

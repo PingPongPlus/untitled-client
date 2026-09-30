@@ -1,6 +1,6 @@
 # Weather Glass
 
-Open **Control Center → RENDER → Weather Glass** to enable the feature, then expand
+Open **Control Center → RENDER → Weather Glass** to enable the feature, then click its gear for
 **Weather Glass options**. It defaults to off. Mode, Always active and intensity
 persist in `config/voicechat-weather-glass.properties`.
 

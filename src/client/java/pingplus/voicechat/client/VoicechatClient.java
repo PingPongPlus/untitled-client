@@ -169,12 +169,6 @@ public class VoicechatClient implements ClientModInitializer {
             pingplus.voicechat.client.ShoulderCamFeature.tick(client, shoulderCamKey != null && shoulderCamKey.isDown());
         });
 
-        // Vertical liquid-glass health bars beside visible players.
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("voicechat", "player_health_bars"),
-                (graphics, delta) -> pingplus.voicechat.client.gui.PlayerHealthBarRenderer.render(graphics)
-        );
-
         // Glass health bars above mobs (unlocked with hidden mob names).
         HudElementRegistry.addLast(
                 Identifier.fromNamespaceAndPath("voicechat", "mob_health_bar"),

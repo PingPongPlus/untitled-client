@@ -28,8 +28,16 @@ public final class ClickGuiScreen extends Screen {
     private final KeyMapping openGuiKey;
     private final List<Category> categories = new ArrayList<>();
     private final List<Entry> entries = new ArrayList<>();
-    private final Map<String, Boolean> expanded = new HashMap<>();
+    private final List<Runnable> offActions = new ArrayList<>();
+    private final Map<String, OptionsPanel> optionPanels = new LinkedHashMap<>();
     private final Map<String, int[]> positions = new HashMap<>();
+    private static final int OPTIONS_WIDTH = 220;
+    private OptionsPanel buildingOptions;
+    private String openOptions;
+    private Button optionsClose;
+    private Button allOff;
+    private int optionsX, optionsY, optionsWidth, optionsHeight, optionsScroll, optionsMaxScroll;
+    private boolean draggingOptions;
     private int scroll, maxScroll, panelWidth;
     private long opened = System.nanoTime(), closing;
     private float opacity = 1;
@@ -41,73 +49,73 @@ public final class ClickGuiScreen extends Screen {
     public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey, CoordinatesHud coordinatesHud, ArraylistHud arraylistHud) {
         super(Component.literal("Client controls"));
         this.fpsHud=fpsHud; this.openGuiKey=openGuiKey; this.coordinatesHud=coordinatesHud; this.arraylistHud=arraylistHud;
-        expanded.put("Player scale",true); expanded.put("Swap interval",true); expanded.put("General",true); expanded.put("Arraylist options",true); expanded.put("Dock options",true);
     }
 
     @Override protected void init() {
         canvasWidth = (int)(width / UI_SCALE);
         canvasHeight = (int)(height / UI_SCALE);
-        categories.clear(); entries.clear();
+        categories.clear(); entries.clear(); optionPanels.clear();
+        offActions.clear();
+        buildingOptions = null;
+        allOff = addRenderableWidget(new Button(canvasWidth-162,7,72,18,Component.literal("All off"),
+                b->disableAllSettings(),supplier->supplier.get()) {
+            @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                GlassButtonRenderer.draw(g,this);
+                g.nextStratum();
+                text(g,"All off",getX()+12,getY()+4,GlassStyle.TEXT);
+            }
+        });
+        allOff.setTooltip(Tooltip.create(Component.literal("Turn off every toggle, including extra settings.")));
         int columns = Math.clamp((canvasWidth-16)/148,2,4);
         panelWidth = Math.min(140, (canvasWidth-24-(columns-1)*8)/columns);
         int startX = 16;
         Category hud = category("HUD", "On-screen information");
         toggle(hud,"Frame rate",fpsHud::isEnabled,fpsHud::toggle);
-        disclosure(hud,"FPS options");
-        if (expanded.getOrDefault("FPS options",false)) {
+        options(hud,"FPS options",()-> {
             toggle(hud,"FPS glass",fpsHud::isGlass,fpsHud::toggleGlass);
             toggle(hud,"FPS edges",fpsHud::isEdges,fpsHud::toggleEdges);
-        }
+        });
         toggle(hud,"Ping",PingHud.INSTANCE::isEnabled,PingHud.INSTANCE::toggle);
-        disclosure(hud,"Ping options");
-        if (expanded.getOrDefault("Ping options",false)) {
+        options(hud,"Ping options",()-> {
             toggle(hud,"Ping glass",PingHud.INSTANCE::isGlass,PingHud.INSTANCE::toggleGlass);
             toggle(hud,"Ping edges",PingHud.INSTANCE::isEdges,PingHud.INSTANCE::toggleEdges);
-        }
+        });
         toggle(hud,"Coordinates",coordinatesHud::isEnabled,coordinatesHud::toggle);
-        disclosure(hud,"XYZ options");
-        if (expanded.getOrDefault("XYZ options",false)) {
+        options(hud,"XYZ options",()-> {
             toggle(hud,"XYZ glass",coordinatesHud::isGlass,coordinatesHud::toggleGlass);
             toggle(hud,"XYZ edges",coordinatesHud::isEdges,coordinatesHud::toggleEdges);
-        }
-        toggle(hud,"Player HP bars",()->PlayerSettings.playerHealthBar,()->PlayerSettings.playerHealthBar=!PlayerSettings.playerHealthBar);
+        });
         toggle(hud,"Spotify",pingplus.voicechat.client.spotify.SpotifySettings::enabled,pingplus.voicechat.client.spotify.SpotifySettings::toggle);
-        disclosure(hud,"Spotify options");
-        if (expanded.getOrDefault("Spotify options",false)) {
+        options(hud,"Spotify options",()-> {
             toggle(hud,"Spotify edges",pingplus.voicechat.client.spotify.SpotifySettings::edges,pingplus.voicechat.client.spotify.SpotifySettings::toggleEdges);
             toggle(hud,"Music-reactive glass",pingplus.voicechat.client.spotify.SpotifySettings::musicGlass,pingplus.voicechat.client.spotify.SpotifySettings::toggleMusicGlass);
             add(hud,new EffectSlider(panelWidth-20,"Music tint",pingplus.voicechat.client.spotify.SpotifySettings::musicIntensity,
                     pingplus.voicechat.client.spotify.SpotifySettings::setMusicIntensity,100,1),26);
-        }
+        });
         toggle(hud,"Arraylist",arraylistHud::isEnabled,arraylistHud::toggle);
-        disclosure(hud,"Arraylist options");
-        if (expanded.get("Arraylist options")) {
+        options(hud,"Arraylist options",()-> {
             toggle(hud,"Glass",arraylistHud::isGlass,arraylistHud::toggleGlass);
             toggle(hud,"Per-module boxes",arraylistHud::isRectangles,arraylistHud::toggleRectangles);
             toggle(hud,"Edges",arraylistHud::isEdges,arraylistHud::toggleEdges);
-        }
+        });
         toggle(hud,"Scoreboard",ScoreboardHud.INSTANCE::isEnabled,ScoreboardHud.INSTANCE::toggle);
-        disclosure(hud,"Scoreboard options");
-        if (expanded.getOrDefault("Scoreboard options",false)) {
+        options(hud,"Scoreboard options",()-> {
             toggle(hud,"Liquid glass",ScoreboardHud.INSTANCE::isGlass,ScoreboardHud.INSTANCE::toggleGlass);
             toggle(hud,"Glass edges",ScoreboardHud.INSTANCE::isEdges,ScoreboardHud.INSTANCE::toggleEdges);
-        }
+        });
         toggle(hud,"Chat",ChatHud.INSTANCE::isEnabled,ChatHud.INSTANCE::toggle);
-        disclosure(hud,"Chat options");
-        if (expanded.getOrDefault("Chat options",false)) {
+        options(hud,"Chat options",()-> {
             toggle(hud,"Chat glass",ChatHud.INSTANCE::isGlass,ChatHud.INSTANCE::toggleGlass);
             toggle(hud,"Chat edges",ChatHud.INSTANCE::isEdges,ChatHud.INSTANCE::toggleEdges);
-        }
-        disclosure(hud,"Bars");
-        if (expanded.getOrDefault("Bars",false)) {
+        });
+        options(hud,"Bars", null,()-> {
             toggle(hud,"Health bar",()->!PlayerSettings.hideHealth,()->PlayerSettings.hideHealth=!PlayerSettings.hideHealth);
             toggle(hud,"Hunger bar",()->!PlayerSettings.hideHunger,()->PlayerSettings.hideHunger=!PlayerSettings.hideHunger);
             toggle(hud,"XP bar",()->!PlayerSettings.hideXp,()->PlayerSettings.hideXp=!PlayerSettings.hideXp);
             toggle(hud,"Locator bar",()->!PlayerSettings.hideLocator,()->PlayerSettings.hideLocator=!PlayerSettings.hideLocator);
-        }
+        });
         toggle(hud,"Dock hotbar",()->PlayerSettings.dockHotbar,()->PlayerSettings.dockHotbar=!PlayerSettings.dockHotbar);
-        disclosure(hud,"Dock options");
-        if (expanded.getOrDefault("Dock options",false)) {
+        options(hud,"Dock options",()-> {
             add(hud,new DockScaleSlider(panelWidth-20),26);
             add(hud,new DockRadiusSlider(panelWidth-20),26);
             add(hud,new DockSizeSlider(panelWidth-20),26);
@@ -115,19 +123,17 @@ public final class ClickGuiScreen extends Screen {
             toggle(hud,"Hotbar frame",()->PlayerSettings.dockFrames,()->PlayerSettings.dockFrames=!PlayerSettings.dockFrames);
             toggle(hud,"Auto hide",()->PlayerSettings.dockAutoHide,()->PlayerSettings.dockAutoHide=!PlayerSettings.dockAutoHide);
             add(hud,new DockAutoHideSlider(panelWidth-20),26);
-        }
+        });
         toggle(hud,"AIR logo",LogoHud.INSTANCE::isEnabled,LogoHud.INSTANCE::toggle);
-        disclosure(hud,"Logo options");
-        if (expanded.getOrDefault("Logo options",false)) {
+        options(hud,"Logo options",()-> {
             toggle(hud,"Logo glass",LogoHud.INSTANCE::isGlass,LogoHud.INSTANCE::toggleGlass);
             toggle(hud,"Logo edges",LogoHud.INSTANCE::isEdges,LogoHud.INSTANCE::toggleEdges);
-        }
+        });
         Category render = category("RENDER", "See the details");
         toggle(render,"Glass damage effect",pingplus.voicechat.client.damageglass.DamageGlassSettings::enabled,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleEnabled);
         toggle(render,"Impact ripple",pingplus.voicechat.client.damageglass.DamageGlassSettings::impactRipple,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleImpactRipple);
         toggle(render,"Death melt glass",pingplus.voicechat.client.damageglass.DamageGlassSettings::deathWave,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleDeathWave);
-        disclosure(render,"Damage glass options");
-        if (expanded.getOrDefault("Damage glass options",false)) {
+        options(render,"Damage glass options", "Glass damage effect",()-> {
             add(render,new Button(0,0,panelWidth-20,18,Component.literal("Preset: "+pingplus.voicechat.client.damageglass.DamageGlassSettings.preset().label),
                     b->{pingplus.voicechat.client.damageglass.DamageGlassSettings.cyclePreset();rebuildWidgets();},supplier->supplier.get()) {
                 @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
@@ -141,35 +147,43 @@ public final class ClickGuiScreen extends Screen {
                     pingplus.voicechat.client.damageglass.DamageGlassSettings::setReflectivity,100,1),26);
             toggle(render,"Players",pingplus.voicechat.client.damageglass.DamageGlassSettings::players,pingplus.voicechat.client.damageglass.DamageGlassSettings::togglePlayers);
             toggle(render,"Mobs",pingplus.voicechat.client.damageglass.DamageGlassSettings::mobs,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleMobs);
-        }
+        });
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
         toggle(render,"Projectile preview",()->PlayerSettings.projectilePreview,()->PlayerSettings.projectilePreview=!PlayerSettings.projectilePreview);
         toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
         toggle(render,"Storage ESP",()->PlayerSettings.storageEsp,pingplus.voicechat.client.StorageEspFeature::toggle);
-        disclosure(render,"Storage ESP options");
-        if (expanded.getOrDefault("Storage ESP options",false)) {
+        options(render,"Storage ESP options",()-> {
             for (var kind : pingplus.voicechat.client.StorageEspFeature.Kind.values())
                 toggle(render,kind.label,kind::enabled,kind::toggle);
             toggle(render,"Filled boxes",()->PlayerSettings.storageEspFill,()->PlayerSettings.storageEspFill=!PlayerSettings.storageEspFill);
             add(render,new CombatSlider(panelWidth-20,"Storage range",16,128,16,
                     pingplus.voicechat.client.StorageEspFeature::range,v->pingplus.voicechat.client.StorageEspFeature.setRange((int)v)),26);
-        }
+        });
         toggle(render,"Xray",pingplus.voicechat.client.XrayFeature::enabled,pingplus.voicechat.client.XrayFeature::toggle);
-        disclosure(render,"Xray options");
-        if (expanded.getOrDefault("Xray options",false)) {
+        options(render,"Xray options",()-> {
             for (var mineral : pingplus.voicechat.client.XrayFeature.Mineral.values())
                 toggle(render,mineral.label,()->pingplus.voicechat.client.XrayFeature.selected(mineral),
                         ()->pingplus.voicechat.client.XrayFeature.toggle(mineral));
-        }
+        });
         toggle(render,"Zoom",()->PlayerSettings.zoom,()->PlayerSettings.zoom=!PlayerSettings.zoom);
-        add(render,new ZoomStrengthSlider(panelWidth-20),26);
+        options(render,"Zoom options",()-> {
+            add(render,new ZoomStrengthSlider(panelWidth-20),26);
+        });
         toggle(render,"Shoulder cam",()->PlayerSettings.shoulderCam,()->PlayerSettings.shoulderCam=!PlayerSettings.shoulderCam);
-        add(render,new CornerSlider(panelWidth-20),26);
-        add(render,new EffectSlider(panelWidth-20,"Glass blur",GlassEffectSettings::blurStep,GlassEffectSettings::setBlur),26);
-        add(render,new EffectSlider(panelWidth-20,"Glass shadow",GlassEffectSettings::shadowStep,GlassEffectSettings::setShadow),26);
+        options(render,"Glass style",null,()-> {
+            add(render,new CornerSlider(panelWidth-20),26);
+            add(render,new EffectSlider(panelWidth-20,"Glass blur",GlassEffectSettings::blurStep,GlassEffectSettings::setBlur),26);
+            add(render,new EffectSlider(panelWidth-20,"Glass shadow",GlassEffectSettings::shadowStep,GlassEffectSettings::setShadow),26);
+            var customTint = new Toggle("Custom glass color",GlassEffectSettings::customTint,GlassEffectSettings::toggleCustomTint);
+            customTint.setTooltip(Tooltip.create(Component.literal("Use this color for glass throughout the HUD and menus. Overrides Spotify tint while enabled.")));
+            add(render,customTint,18);
+            add(render,new EffectSlider(panelWidth-20,"Red",GlassEffectSettings::tintRed,GlassEffectSettings::setTintRed,255,1,""),26);
+            add(render,new EffectSlider(panelWidth-20,"Green",GlassEffectSettings::tintGreen,GlassEffectSettings::setTintGreen,255,1,""),26);
+            add(render,new EffectSlider(panelWidth-20,"Blue",GlassEffectSettings::tintBlue,GlassEffectSettings::setTintBlue,255,1,""),26);
+            add(render,new EffectSlider(panelWidth-20,"Glass tint",GlassEffectSettings::tintIntensity,GlassEffectSettings::setTintIntensity,100,1),26);
+        });
         toggle(render,"Weather Glass",WeatherGlassSettings::enabled,WeatherGlassSettings::toggleEnabled);
-        disclosure(render,"Weather Glass options");
-        if (expanded.getOrDefault("Weather Glass options",false)) {
+        options(render,"Weather Glass options",()-> {
             add(render,new Button(0,0,panelWidth-20,18,Component.literal("Weather mode: "+WeatherGlassSettings.mode().label),
                     b->{WeatherGlassSettings.cycleMode();rebuildWidgets();},supplier->supplier.get()) {
                 @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
@@ -190,18 +204,17 @@ public final class ClickGuiScreen extends Screen {
                     text(g,"Auto: weather + shelter",getX()+4,getY()+26,GlassStyle.MUTED);
                 }
             },38);
-        }
+        });
         Category player = category("PLAYER", "Shape your presence");
         toggle(player,"Body",()->PlayerSettings.mainBodyPart,()->PlayerSettings.mainBodyPart=!PlayerSettings.mainBodyPart);
         toggle(player,"Left arm",()->PlayerSettings.leftArm,()->PlayerSettings.leftArm=!PlayerSettings.leftArm);
         toggle(player,"Right arm",()->PlayerSettings.rightArm,()->PlayerSettings.rightArm=!PlayerSettings.rightArm);
-        disclosure(player,"Player scale");
-        if (expanded.get("Player scale")) {
+        options(player,"Player scale", null,()-> {
             scale(player,"Width",PlayerSettings.xScale,v->PlayerSettings.xScale=v);
             scale(player,"Height",PlayerSettings.yScale,v->PlayerSettings.yScale=v);
             scale(player,"Depth",PlayerSettings.zScale,v->PlayerSettings.zScale=v);
             scale(player,"Head",PlayerSettings.xyzHeadscale,v->PlayerSettings.xyzHeadscale=v);
-        }
+        });
 
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
         Category automation = category("AUTOMATION", "Small actions, effortless");
@@ -209,32 +222,30 @@ public final class ClickGuiScreen extends Screen {
             PlayerSettings.autoTools=!PlayerSettings.autoTools;
             if (!PlayerSettings.autoTools) pingplus.voicechat.client.AutoToolsFeature.finish(net.minecraft.client.Minecraft.getInstance());
         });
-        disclosure(automation,"Auto Tools options");
-        if (expanded.getOrDefault("Auto Tools options",false))
+        options(automation,"Auto Tools options",()-> {
             toggle(automation,"Restore slot",()->PlayerSettings.autoToolsRestore,()->PlayerSettings.autoToolsRestore=!PlayerSettings.autoToolsRestore);
+        });
         toggle(automation,"Fast Place",()->PlayerSettings.fastPlace,()->PlayerSettings.fastPlace=!PlayerSettings.fastPlace);
-        disclosure(automation,"Fast Place options");
-        if (expanded.getOrDefault("Fast Place options",false)) {
+        options(automation,"Fast Place options",()-> {
             add(automation,new CombatSlider(panelWidth-20,"Place delay (ticks)",1,4,1,
                     pingplus.voicechat.client.FastPlaceFeature::delayTicks,v->PlayerSettings.fastPlaceDelayTicks=(int)v),26);
-        }
+        });
         toggle(automation,"KillAura",()->PlayerSettings.killAura,()->{
             PlayerSettings.killAura=!PlayerSettings.killAura;
             if (!PlayerSettings.killAura) pingplus.voicechat.client.KillAuraFeature.clear();
         });
-        disclosure(automation,"KillAura options");
-        if (expanded.getOrDefault("KillAura options",false)) {
+        options(automation,"KillAura options",()-> {
             toggle(automation,"Target players",()->PlayerSettings.killAuraPlayers,()->PlayerSettings.killAuraPlayers=!PlayerSettings.killAuraPlayers);
             toggle(automation,"Target mobs",()->PlayerSettings.killAuraMobs,()->PlayerSettings.killAuraMobs=!PlayerSettings.killAuraMobs);
             add(automation,new CombatSlider(panelWidth-20,"Range",1,4,.1,()->PlayerSettings.killAuraRange,v->PlayerSettings.killAuraRange=(float)v),26);
             add(automation,new CombatSlider(panelWidth-20,"Turn speed",45,540,15,()->PlayerSettings.killAuraTurnSpeed,v->PlayerSettings.killAuraTurnSpeed=(float)v),26);
-        }
+        });
         toggle(automation,"Hand swap",()->PlayerSettings.handSwap,()->PlayerSettings.handSwap=!PlayerSettings.handSwap);
-        disclosure(automation,"Swap interval");
-        if (expanded.get("Swap interval")) add(automation,new SpeedSlider(panelWidth-20),26);
+        options(automation,"Swap interval",()-> {
+            add(automation,new SpeedSlider(panelWidth-20),26);
+        });
         Category skyblock = category("SKYBLOCK", "Hypixel skyblock helpers");
-        disclosure(skyblock,"General");
-        if (expanded.get("General")) {
+        options(skyblock,"General", null,()-> {
             toggle(skyblock,"No particles",()->PlayerSettings.hideParticles,()->PlayerSettings.hideParticles=!PlayerSettings.hideParticles);
             toggle(skyblock,"No mob names",()->PlayerSettings.hideMobNames,()->{
                 PlayerSettings.hideMobNames=!PlayerSettings.hideMobNames;
@@ -260,7 +271,7 @@ public final class ClickGuiScreen extends Screen {
             });
             toggle(skyblock,"Boss lines",()->PlayerSettings.slayerLine,()->PlayerSettings.slayerLine=!PlayerSettings.slayerLine);
             toggle(skyblock,"Player outline",()->PlayerSettings.playerOutline,()->PlayerSettings.playerOutline=!PlayerSettings.playerOutline);
-        }
+        });
         Category keys = category("KEYS", "Hotkeys, click then press");
         keyButton(keys, "GUI", VoicechatClient.openGuiKey());
         keyButton(keys, "HUD editor", VoicechatClient.hudEditorKey());
@@ -293,23 +304,143 @@ public final class ClickGuiScreen extends Screen {
             }
         }
         updateScroll(); layout();
+        installOptionsWindow();
+    }
+    private void disableAllSettings() {
+        openOptions = null;
+        pendingKey = null;
+        // Some toggle callbacks rebuild the widgets. Keep this complete snapshot until all are off.
+        for (Runnable off : List.copyOf(offActions)) off.run();
+        // This toggle may be hidden when "No mob names" is already off.
+        PlayerSettings.mobHealthBar = false;
+        PlayerSettings.slayerBossHighlight = false;
+        VoicechatClient.syncSlayerCfg();
+        if (GlassRainSettings.isEnabled()) GlassRainSettings.setEnabled(false);
+        rebuildWidgets();
     }
     private Category category(String name,String subtitle) { Category c=new Category(name,subtitle);categories.add(c);return c; }
-    private void add(Category c,AbstractWidget w,int h) { entries.add(new Entry(c,addRenderableWidget(w),c.content));c.content+=h; }
+    private void add(Category c,AbstractWidget w,int h) {
+        if (buildingOptions != null) {
+            if (!(w instanceof EditBox)) w.setWidth(OPTIONS_WIDTH - 20);
+            buildingOptions.entries.add(new OptionEntry(w, buildingOptions.content));
+            buildingOptions.content += h;
+        } else {
+            entries.add(new Entry(c,addRenderableWidget(w),c.content));
+            c.content += h;
+        }
+    }
     private void toggle(Category c,String name,BooleanSupplier state,Runnable action) { add(c,new Toggle(name,state,action),18); }
-    private void disclosure(Category c,String name) {
-        add(c,new Button(0,0,panelWidth-20,18,Component.literal(name),b->{expanded.put(name,!expanded.getOrDefault(name,false));rebuildWidgets();},supplier->supplier.get()) {
+    private void options(Category c,String name,Runnable controls) {
+        Entry last = entries.isEmpty() ? null : entries.getLast();
+        String anchor = last != null && last.category == c && last.widget instanceof Toggle
+                ? last.widget.getMessage().getString() : null;
+        options(c,name,anchor,controls);
+    }
+    private void options(Category c,String name,String anchor,Runnable controls) {
+        Entry owner = entries.stream().filter(e -> e.category == c && e.widget.getMessage().getString().equals(anchor))
+                .findFirst().orElse(null);
+        if (owner == null) {
+            add(c,new Button(0,0,panelWidth-20,18,Component.literal(name),b->openOptions(name,b),supplier->supplier.get()) {
+                @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                    if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
+                    text(g,name,getX()+4,getY()+4,GlassStyle.MUTED);
+                }
+            },18);
+            owner = entries.getLast();
+        }
+        owner.widget.setWidth(panelWidth-42);
+        OptionGear gear = new OptionGear(name);
+        entries.add(new Entry(c,addRenderableWidget(gear),owner.row));
+        OptionsPanel panel = new OptionsPanel(name);
+        optionPanels.put(name,panel);
+        buildingOptions = panel;
+        try { controls.run(); } finally { buildingOptions = null; }
+    }
+    private void openOptions(String name,AbstractWidget anchor) {
+        openOptions = name;
+        optionsScroll = 0;
+        optionsX = anchor.getRight()+8;
+        if (optionsX+OPTIONS_WIDTH > canvasWidth-8) optionsX = anchor.getX()-OPTIONS_WIDTH-8;
+        optionsY = anchor.getY()-4;
+        dragging = null;
+        draggingOptions = false;
+        setDragging(false);
+        rebuildWidgets();
+    }
+    private void closeOptions() {
+        openOptions = null;
+        draggingOptions = false;
+        setDragging(false);
+        setFocused(null);
+        rebuildWidgets();
+    }
+    private void installOptionsWindow() {
+        OptionsPanel panel = optionPanels.get(openOptions);
+        if (panel == null) { openOptions = null; return; }
+        optionsWidth = Math.min(OPTIONS_WIDTH,canvasWidth-16);
+        optionsHeight = Math.min(panel.content+34,canvasHeight-50);
+        optionsMaxScroll = Math.max(0,panel.content-(optionsHeight-34));
+        optionsScroll = Math.clamp(optionsScroll,0,optionsMaxScroll);
+        optionsX = Math.clamp(optionsX,8,canvasWidth-optionsWidth-8);
+        optionsY = Math.clamp(optionsY,28,canvasHeight-optionsHeight-18);
+        for (Entry e : entries) e.widget.active = false;
+        allOff.active = false;
+        for (OptionEntry e : panel.entries) {
+            if (!(e.widget instanceof EditBox)) e.widget.setWidth(optionsWidth-20);
+            addRenderableWidget(e.widget);
+        }
+        optionsClose = addRenderableWidget(new Button(0,0,18,18,Component.literal("Close "+panel.title),
+                b->closeOptions(),supplier->supplier.get()) {
             @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
                 if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
-                text(g,name,getX()+4,getY()+4,GlassStyle.MUTED);
-                text(g,expanded.getOrDefault(name,false)?"-":"+",getRight()-13,getY()+4,GlassStyle.ACCENT);
+                text(g,"x",getX()+6,getY()+4,GlassStyle.TEXT);
             }
-        },18);
+        });
+        layoutOptions();
+        setFocused(panel.entries.stream().map(OptionEntry::widget).filter(w->w.active).findFirst().orElse(optionsClose));
+    }
+    private void layoutOptions() {
+        OptionsPanel panel = optionPanels.get(openOptions);
+        if (panel == null) return;
+        for (OptionEntry e : panel.entries) {
+            e.widget.setX(optionsX+(e.widget instanceof EditBox?optionsWidth-65:10));
+            e.widget.setY(optionsY+26+e.row-optionsScroll);
+        }
+        optionsClose.setPosition(optionsX+optionsWidth-23,optionsY+3);
+    }
+    private boolean insideOptions(double x,double y) {
+        return x>=optionsX && x<optionsX+optionsWidth && y>=optionsY && y<optionsY+optionsHeight;
+    }
+    private void drawOptions(GuiGraphicsExtractor g,int mx,int my,float dt) {
+        OptionsPanel panel = optionPanels.get(openOptions);
+        if (panel == null) return;
+        g.nextStratum();
+        g.fill(0,26,canvasWidth,canvasHeight-16,GlassStyle.alpha(0x38000000,opacity));
+        g.nextStratum();
+        GlassStyle.surface(g,optionsX,optionsY,optionsWidth,optionsHeight,opacity,.2f);
+        g.nextStratum();
+        text(g,panel.title,optionsX+10,optionsY+8,GlassStyle.TEXT);
+        GlassButtonRenderer.control(g,optionsX+10,optionsY+22,optionsWidth-20,1,GlassStyle.alpha(0xFFBBBBBB,opacity*.5f));
+        optionsClose.setAlpha(opacity);
+        optionsClose.extractRenderState(g,mx,my,dt);
+        g.enableScissor(optionsX+6,optionsY+26,optionsX+optionsWidth-6,optionsY+optionsHeight-6);
+        for (OptionEntry e : panel.entries) {
+            e.widget.setAlpha(opacity);
+            e.widget.extractRenderState(g,mx,my,dt);
+        }
+        g.disableScissor();
+        if (optionsMaxScroll>0) {
+            int track=optionsHeight-34;
+            int thumb=Math.max(12,track*track/panel.content);
+            int y=optionsY+26+(track-thumb)*optionsScroll/optionsMaxScroll;
+            g.nextStratum();
+            GlassButtonRenderer.control(g,optionsX+optionsWidth-5,y,2,thumb,GlassStyle.alpha(GlassStyle.MUTED,opacity*.7f));
+        }
     }
     private void scale(Category c,String label,float value,Consumer<Float> setter) {
         EditBox box=new EditBox(font,0,0,45,14,Component.literal(label+" scale")) {
             @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt) {
-                text(g,label,getX()-(panelWidth-80),getY()+3,GlassStyle.MUTED);
+                text(g,label,getX()-(optionsWidth-80),getY()+3,GlassStyle.MUTED);
                 GlassButtonRenderer.control(g,getX()-5,getY()-2,getWidth()+10,18,GlassStyle.alpha(isFocused()?0xFF555555:0xFF303030,opacity));
                 g.nextStratum();super.extractWidgetRenderState(g,mx,my,dt);
             }
@@ -355,7 +486,7 @@ public final class ClickGuiScreen extends Screen {
     }
     private void layout() {
         for(Entry e:entries){
-            e.widget.setX(e.category.x+(e.widget instanceof EditBox?panelWidth-65:10));
+            e.widget.setX(e.category.x+(e.widget instanceof OptionGear?panelWidth-28:10));
             e.widget.setY(e.category.y+22+e.row-scroll);
         }
     }
@@ -375,6 +506,8 @@ public final class ClickGuiScreen extends Screen {
         mx = (int)(mx / UI_SCALE);
         my = (int)(my / UI_SCALE);
         text(g,"UNTITLED",16,13,GlassStyle.TEXT);text(g,"/  CONTROL CENTER",74,13,GlassStyle.MUTED);
+        allOff.setAlpha(opacity);
+        allOff.extractRenderState(g,mx,my,dt);
         text(g,"ESC  /  CLOSE",canvasWidth-78,13,GlassStyle.MUTED);
         g.enableScissor(0,26,canvasWidth,canvasHeight-16);
         for(Category c:categories){
@@ -387,15 +520,25 @@ public final class ClickGuiScreen extends Screen {
             int y=c.y-scroll;
             text(g,c.title,c.x+10,y+6,GlassStyle.TEXT);
             GlassButtonRenderer.control(g,c.x+10,y+18,panelWidth-20,1,GlassStyle.alpha(0xFFBBBBBB,opacity*.5f));
-            for(Entry e:entries)if(e.category==c){e.widget.setAlpha(opacity);e.widget.extractRenderState(g,mx,my,dt);}
+            for(Entry e:entries)if(e.category==c){e.widget.setAlpha(opacity);e.widget.extractRenderState(g,openOptions==null?mx:-100,openOptions==null?my:-100,dt);}
         }
         g.disableScissor();
-        text(g,"DRAG HEADERS  /  EXPAND SETTINGS",16,canvasHeight-13,GlassStyle.MUTED);
+        text(g,"DRAG HEADERS  /  GEARS OPEN OPTIONS",16,canvasHeight-13,GlassStyle.MUTED);
         if(maxScroll>0)text(g,"SCROLL",canvasWidth-48,canvasHeight-13,GlassStyle.ACCENT);
+        drawOptions(g,mx,my,dt);
         g.pose().popMatrix();
     }
     private void text(GuiGraphicsExtractor g,String value,int x,int y,int color){g.text(font,GlassStyle.label(value),x,y,GlassStyle.alpha(color,opacity),false);}
-    @Override public boolean mouseScrolled(double x,double y,double horizontal,double vertical){scroll=Math.clamp(scroll-(int)(vertical*28),0,maxScroll);layout();return true;}
+    @Override public boolean mouseScrolled(double x,double y,double horizontal,double vertical){
+        if (openOptions!=null) {
+            if (insideOptions(x/UI_SCALE,y/UI_SCALE)) {
+                optionsScroll=Math.clamp(optionsScroll-(int)(vertical*28),0,optionsMaxScroll);
+                layoutOptions();
+            }
+            return true;
+        }
+        scroll=Math.clamp(scroll-(int)(vertical*28),0,maxScroll);layout();return true;
+    }
     private MouseButtonEvent logicalMouse(MouseButtonEvent event) {
         return new MouseButtonEvent(event.x() / UI_SCALE, event.y() / UI_SCALE, event.buttonInfo());
     }
@@ -413,12 +556,33 @@ public final class ClickGuiScreen extends Screen {
         MouseButtonEvent e = logicalMouse(event);
         if(openGuiKey != null && openGuiKey.matchesMouse(e)){onClose();return true;}
         if(closing!=0)return true;
-        if(e.y()<26){if(e.x()>canvasWidth-85)onClose();return true;}
+        if(openOptions!=null){
+            if (!insideOptions(e.x(),e.y())) { closeOptions(); return true; }
+            if (optionsClose.mouseClicked(e,twice)) return true;
+            if (e.button()==0 && e.y()<optionsY+24) {
+                draggingOptions=true;dragX=e.x()-optionsX;dragY=e.y()-optionsY;return true;
+            }
+            if (e.y()>=optionsY+26 && e.y()<optionsY+optionsHeight-6) {
+                for (OptionEntry entry:optionPanels.get(openOptions).entries) {
+                    if(entry.widget.mouseClicked(e,twice)){
+                        // A mode or conditional toggle may rebuild the window during its callback.
+                        if(children().contains(entry.widget)){setFocused(entry.widget);setDragging(true);}
+                        return true;
+                    }
+                }
+            }
+            return true;
+        }
+        if(e.y()<26){
+            if(allOff.mouseClicked(e,twice))return true;
+            if(e.x()>canvasWidth-85)onClose();
+            return true;
+        }
         if(e.y()>canvasHeight-16)return true;
         for(int i=categories.size()-1;i>=0;i--){Category c=categories.get(i);int y=c.y-scroll;
             if(e.button()==0&&e.x()>=c.x&&e.x()<c.x+panelWidth&&e.y()>=y&&e.y()<y+20){dragging=c;dragX=e.x()-c.x;dragY=e.y()-y;return true;}
             if(e.x()>=c.x&&e.x()<c.x+panelWidth&&e.y()>=y&&e.y()<y+c.height()){
-                for(Entry entry:entries)if(entry.category==c&&entry.widget.mouseClicked(e,twice)){setFocused(entry.widget);setDragging(true);return true;}
+                for(Entry entry:entries)if(entry.category==c&&entry.widget.mouseClicked(e,twice)){if(children().contains(entry.widget)){setFocused(entry.widget);setDragging(true);}return true;}
                 return true;
             }
         }
@@ -427,10 +591,15 @@ public final class ClickGuiScreen extends Screen {
     @Override public boolean mouseDragged(MouseButtonEvent event,double dx,double dy){
         MouseButtonEvent e = logicalMouse(event);
         dx /= UI_SCALE; dy /= UI_SCALE;
+        if(draggingOptions){
+            optionsX=Math.clamp((int)(e.x()-dragX),8,canvasWidth-optionsWidth-8);
+            optionsY=Math.clamp((int)(e.y()-dragY),28,canvasHeight-optionsHeight-18);
+            layoutOptions();return true;
+        }
         if(dragging!=null){dragging.x=Math.clamp((int)(e.x()-dragX),8,Math.max(8,canvasWidth-panelWidth-8));dragging.y=Math.clamp((int)(e.y()-dragY)+scroll,28,Math.max(28,canvasHeight-18-dragging.height()));positions.put(dragging.title,new int[]{dragging.x,dragging.y});updateScroll();layout();return true;}
         return super.mouseDragged(e,dx,dy);
     }
-    @Override public boolean mouseReleased(MouseButtonEvent e){if(dragging!=null){dragging=null;return true;}return super.mouseReleased(logicalMouse(e));}
+    @Override public boolean mouseReleased(MouseButtonEvent e){if(draggingOptions){draggingOptions=false;return true;}if(dragging!=null){dragging=null;return true;}return super.mouseReleased(logicalMouse(e));}
     @Override public boolean keyPressed(KeyEvent e){
         if (pendingKey != null) {
             if (e.key() == GLFW.GLFW_KEY_ESCAPE) {
@@ -446,12 +615,19 @@ public final class ClickGuiScreen extends Screen {
             rebuildWidgets();
             return true;
         }
+        if(openOptions!=null && e.key()==GLFW.GLFW_KEY_ESCAPE){closeOptions();return true;}
         if(openGuiKey != null && openGuiKey.matches(e)){onClose();return true;}
         boolean handled=super.keyPressed(e);
-        if(getFocused() instanceof AbstractWidget w){
-            if(w.getY()<28)scroll=Math.max(0,scroll+w.getY()-30);
-            if(w.getBottom()>canvasHeight-18)scroll=Math.min(maxScroll,scroll+w.getBottom()-(canvasHeight-20));
-            layout();
+        if(getFocused()!=allOff && getFocused() instanceof AbstractWidget w){
+            if(openOptions!=null){
+                if(w.getY()<optionsY+26)optionsScroll=Math.max(0,optionsScroll+w.getY()-(optionsY+26));
+                if(w.getBottom()>optionsY+optionsHeight-8)optionsScroll=Math.min(optionsMaxScroll,optionsScroll+w.getBottom()-(optionsY+optionsHeight-8));
+                layoutOptions();
+            }else{
+                if(w.getY()<28)scroll=Math.max(0,scroll+w.getY()-30);
+                if(w.getBottom()>canvasHeight-18)scroll=Math.min(maxScroll,scroll+w.getBottom()-(canvasHeight-20));
+                layout();
+            }
         }
         return handled;
     }
@@ -465,14 +641,40 @@ public final class ClickGuiScreen extends Screen {
         int height(){return 22+content;}
     }
     private record Entry(Category category,AbstractWidget widget,int row){}
+    private static final class OptionsPanel {
+        final String title;
+        final List<OptionEntry> entries = new ArrayList<>();
+        int content;
+        OptionsPanel(String title){this.title=title;}
+    }
+    private record OptionEntry(AbstractWidget widget,int row){}
+    private final class OptionGear extends Button {
+        OptionGear(String name){
+            super(0,0,18,18,Component.literal(name),b->openOptions(name,b),DEFAULT_NARRATION);
+            setTooltip(Tooltip.create(Component.literal("Configure "+name)));
+        }
+        @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt){
+            if(isHoveredOrFocused())GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
+            int cx=getX()+8,cy=getY()+8,color=GlassStyle.alpha(GlassStyle.MUTED,opacity);
+            for(int y=-6;y<=6;y++)for(int x=-6;x<=6;x++){
+                double radius=Math.hypot(x,y);
+                double edge=4.7+1.2*Math.max(0,Math.cos(Math.atan2(y,x)*8));
+                if(radius>=2.1&&radius<=edge)g.fill(cx+x,cy+y,cx+x+1,cy+y+1,color);
+            }
+        }
+    }
     private final class Toggle extends Button {
         private final String label;private final BooleanSupplier state;private float position,hover;private long last=System.nanoTime();
-        Toggle(String label,BooleanSupplier state,Runnable action){super(0,0,panelWidth-20,18,Component.literal(label),b->action.run(),DEFAULT_NARRATION);this.label=label;this.state=state;position=state.getAsBoolean()?1:0;}
+        Toggle(String label,BooleanSupplier state,Runnable action){
+            super(0,0,panelWidth-20,18,Component.literal(label),b->action.run(),DEFAULT_NARRATION);
+            this.label=label;this.state=state;position=state.getAsBoolean()?1:0;
+            offActions.add(()->{if(state.getAsBoolean())action.run();});
+        }
         @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt){
             long now=System.nanoTime();float step=(float)(1-Math.exp(-16*Math.min(.1,(now-last)/1e9)));last=now;
             position+=((state.getAsBoolean()?1:0)-position)*step;hover+=((isHoveredOrFocused()?1:0)-hover)*step;
             if(hover>.01)GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*hover*.85f));
-            text(g,label,getX()+4,getY()+4,state.getAsBoolean()?GlassStyle.TEXT:GlassStyle.MUTED);
+            GlassStyle.line(g,label,getX()+4,getY()+4,width-38,GlassStyle.alpha(state.getAsBoolean()?GlassStyle.TEXT:GlassStyle.MUTED,opacity));
             int x=getRight()-30,y=getY()+3;
             int r=(int)(55+position*105), green=r,b=r;
             GlassButtonRenderer.control(g,x,y,26,13,GlassStyle.alpha(0xFF000000|(r<<16)|(green<<8)|b,opacity));
@@ -499,14 +701,18 @@ public final class ClickGuiScreen extends Screen {
         private final IntSupplier getter;
         private final IntConsumer setter;
         private final int steps, percentPerStep;
+        private final String suffix;
         EffectSlider(int w,String label,IntSupplier getter,IntConsumer setter){
             this(w,label,getter,setter,GlassEffectSettings.STEPS,25);
         }
         EffectSlider(int w,String label,IntSupplier getter,IntConsumer setter,int steps,int percentPerStep){
-            super(0,0,w,26,Component.literal(label),getter.getAsInt()/(double)steps);
-            this.label=label;this.getter=getter;this.setter=setter;this.steps=steps;this.percentPerStep=percentPerStep;updateMessage();
+            this(w,label,getter,setter,steps,percentPerStep," %");
         }
-        @Override protected void updateMessage(){setMessage(Component.literal(label+"   "+(getter.getAsInt()*percentPerStep)+" %"));}
+        EffectSlider(int w,String label,IntSupplier getter,IntConsumer setter,int steps,int percentPerStep,String suffix){
+            super(0,0,w,26,Component.literal(label),getter.getAsInt()/(double)steps);
+            this.label=label;this.getter=getter;this.setter=setter;this.steps=steps;this.percentPerStep=percentPerStep;this.suffix=suffix;updateMessage();
+        }
+        @Override protected void updateMessage(){setMessage(Component.literal(label+"   "+(getter.getAsInt()*percentPerStep)+suffix));}
         @Override protected void applyValue(){setter.accept((int)Math.round(value*steps));updateMessage();}
         @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
             text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);

@@ -17,6 +17,10 @@ import pingplus.voicechat.client.gui.ScoreboardHud;
 public final class GlassRenderingTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
+        if (Boolean.getBoolean("voicechat.clickGuiOptionsTest")) {
+            ClickGuiOptionsGameTest.run(context);
+            return;
+        }
         if (Boolean.getBoolean("voicechat.storageEspTest")) {
             StorageEspGameTest.run(context);
             return;
@@ -113,7 +117,7 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.runOnClient(client -> {
             Screen screen=client.gui.screen();
             for(var child:screen.children()) if(child instanceof net.minecraft.client.gui.components.AbstractWidget w) {
-                if(w.getX()<0 || w.getRight()*0.60f>screen.width || w.getY()<26 || w.getBottom()*0.60f>screen.height-9)
+                if (!w.getMessage().getString().equals("All off") && (w.getX()<0 || w.getRight()*0.60f>screen.width || w.getY()<26 || w.getBottom()*0.60f>screen.height-9))
                     throw new AssertionError("Control outside viewport: "+w.getMessage().getString());
             }
         });
@@ -124,6 +128,7 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.waitTicks(10);
         context.takeScreenshot("clickgui-scrolled");
         clickCompactButton(context, "Hand swap");
+        clickCompactButton(context, "Player scale");
         context.runOnClient(client -> {
             if (!PlayerSettings.handSwap) throw new AssertionError("Hand swap toggle failed");
             PlayerSettings.handSwap = false;
@@ -157,6 +162,11 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             Screen screen = client.gui.screen();
             if(screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.EditBox).count()!=4)
                 throw new AssertionError("Settings did not expand");
+            screen.keyPressed(new net.minecraft.client.input.KeyEvent(256,0,0));
+        });
+        clickCompactButton(context,"Swap interval");
+        context.runOnClient(client -> {
+            Screen screen=client.gui.screen();
             var slider=screen.children().stream().filter(c -> c instanceof net.minecraft.client.gui.components.AbstractSliderButton)
                 .map(c -> (net.minecraft.client.gui.components.AbstractSliderButton)c)
                 .filter(c -> c.getMessage().getString().startsWith("Interval")).findFirst().orElseThrow();
@@ -164,7 +174,9 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             screen.mouseClicked(click,false);screen.mouseReleased(click);
             if(PlayerSettings.handSwapIntervalTicks!=20)throw new AssertionError("Slider maximum failed");
             PlayerSettings.handSwapIntervalTicks=6;
-            var first=screen.children().stream().filter(c -> c instanceof Button).map(c -> (Button)c).findFirst().orElseThrow();
+            screen.keyPressed(new net.minecraft.client.input.KeyEvent(256,0,0));
+            var first=screen.children().stream().filter(c -> c instanceof Button).map(c -> (Button)c)
+                .filter(b -> b.getMessage().getString().equals("Frame rate")).findFirst().orElseThrow();
             int oldX=first.getX();
             var down=new net.minecraft.client.input.MouseButtonEvent((oldX+5)*0.60,(first.getY()-15)*0.60,new net.minecraft.client.input.MouseButtonInfo(0,0));
             screen.mouseClicked(down,false);
@@ -530,6 +542,7 @@ public final class GlassRenderingTest implements FabricClientGameTest {
                         client.gui.screen().width, client.gui.screen().height, 240, 100);
                 pingplus.voicechat.client.spotify.SpotifySettings.save();
             });
+            clickCompactButton(context, "Arraylist options");
             clickCompactButton(context, "Per-module boxes");
             clickCompactButton(context, "Edges");
             context.runOnClient(client -> {
