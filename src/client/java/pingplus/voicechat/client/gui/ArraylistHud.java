@@ -116,6 +116,7 @@ public final class ArraylistHud {
                 new Named("Right arm", () -> PlayerSettings.rightArm),
                 new Named("Direction", () -> PlayerSettings.direction),
                 new Named("Hand swap", () -> PlayerSettings.handSwap),
+                new Named("Fast Place", () -> PlayerSettings.fastPlace),
                 new Named("KillAura", () -> PlayerSettings.killAura)
         );
     }

@@ -9,6 +9,8 @@ public final class PlayerSettings {
     public static boolean leftArm = true;
     public static boolean rightArm = true;
     public static boolean handSwap = false;
+    public static boolean fastPlace = false;
+    public static int fastPlaceDelayTicks = 1;
     public static boolean hitboxes = false;
     public static boolean projectilePreview = false;
     public static int handSwapIntervalTicks = 6;

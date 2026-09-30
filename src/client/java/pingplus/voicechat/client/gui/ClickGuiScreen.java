@@ -189,6 +189,12 @@ public final class ClickGuiScreen extends Screen {
 
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
         Category automation = category("AUTOMATION", "Small actions, effortless");
+        toggle(automation,"Fast Place",()->PlayerSettings.fastPlace,()->PlayerSettings.fastPlace=!PlayerSettings.fastPlace);
+        disclosure(automation,"Fast Place options");
+        if (expanded.getOrDefault("Fast Place options",false)) {
+            add(automation,new CombatSlider(panelWidth-20,"Place delay (ticks)",1,4,1,
+                    pingplus.voicechat.client.FastPlaceFeature::delayTicks,v->PlayerSettings.fastPlaceDelayTicks=(int)v),26);
+        }
         toggle(automation,"KillAura",()->PlayerSettings.killAura,()->{
             PlayerSettings.killAura=!PlayerSettings.killAura;
             if (!PlayerSettings.killAura) pingplus.voicechat.client.KillAuraFeature.clear();

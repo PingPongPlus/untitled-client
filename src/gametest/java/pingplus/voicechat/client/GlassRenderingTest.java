@@ -17,6 +17,10 @@ import pingplus.voicechat.client.gui.ScoreboardHud;
 public final class GlassRenderingTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
+        if (Boolean.getBoolean("voicechat.fastPlaceTest")) {
+            FastPlaceGameTest.run(context);
+            return;
+        }
         if (Boolean.getBoolean("voicechat.weatherGlassTest")) {
             WeatherGlassRenderingTest.run(context);
             return;
