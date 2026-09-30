@@ -4,8 +4,6 @@
   "package": "pingplus.voicechat.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
-    "KillAuraFrameMixin",
-    "ProjectileImpactMixin",
     "DamageGlassStateMixin",
     "DamageGlassLivingMixin",
     "DamageGlassRenderTypeAccessor",
@@ -23,7 +21,6 @@
     "ExperienceBarMixin",
     "LocatorBarMixin",
     "VanillaBarsMixin",
-    "FullbrightMixin",
     "DockBarsScaleMixin",
     "ZoomFovMixin",
     "ZoomSensitivityMixin",
@@ -50,9 +47,6 @@
     "GlassLoadingTextMixin",
     "GlassMessageTextMixin",
     "GlassRainToggleMixin",
-    "ParticleHideMixin",
-    "MobNameHideMixin",
-    "SlayerOutlineMixin",
     "ShoulderCamEntityMixin",
     "ShoulderCamCameraMixin"
   ],

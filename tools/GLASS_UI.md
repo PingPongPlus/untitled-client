@@ -9,12 +9,12 @@ The interface renders at 60% of its logical size, including text and hit targets
 leaving room for more categories. `ClickGuiScreen.UI_SCALE` controls this independently
 of Minecraft GUI scale. Mouse clicks, releases and dragging use the inverse transform.
 
-Drag category headers to move panels. Click Player scale or Swap interval to expand
+Drag category headers to move panels. Click Player scale or HUD options to expand
 settings. Scroll to reach panels on smaller windows. Tab/Shift-Tab navigate controls;
 keyboard focus scrolls into view. Escape or the configured key closes the screen.
 
-All existing controls are retained: FPS, coordinates, hitboxes, body, both arms,
-hand swapping, four scale values, and the 1–20 tick swap interval. Settings retain
+The legit controls include FPS, ping, coordinates, hitboxes, body, both arms,
+and four cosmetic scale values. Settings retain
 their existing session lifetime; this redesign does not add disk persistence or
 change gameplay logic. Panel positions survive resizing and settings expansion
 within the current screen. Closing and reopening starts with the responsive layout.

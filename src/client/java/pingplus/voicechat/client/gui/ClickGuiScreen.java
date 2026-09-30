@@ -41,7 +41,7 @@ public final class ClickGuiScreen extends Screen {
     public ClickGuiScreen(FpsHud fpsHud, KeyMapping openGuiKey, CoordinatesHud coordinatesHud, ArraylistHud arraylistHud) {
         super(Component.literal("Client controls"));
         this.fpsHud=fpsHud; this.openGuiKey=openGuiKey; this.coordinatesHud=coordinatesHud; this.arraylistHud=arraylistHud;
-        expanded.put("Player scale",true); expanded.put("Swap interval",true); expanded.put("General",true); expanded.put("Arraylist options",true); expanded.put("Dock options",true);
+        expanded.put("Player scale",true); expanded.put("Arraylist options",true); expanded.put("Dock options",true);
     }
 
     @Override protected void init() {
@@ -70,7 +70,6 @@ public final class ClickGuiScreen extends Screen {
             toggle(hud,"XYZ glass",coordinatesHud::isGlass,coordinatesHud::toggleGlass);
             toggle(hud,"XYZ edges",coordinatesHud::isEdges,coordinatesHud::toggleEdges);
         }
-        toggle(hud,"Player HP bars",()->PlayerSettings.playerHealthBar,()->PlayerSettings.playerHealthBar=!PlayerSettings.playerHealthBar);
         toggle(hud,"Spotify",pingplus.voicechat.client.spotify.SpotifySettings::enabled,pingplus.voicechat.client.spotify.SpotifySettings::toggle);
         disclosure(hud,"Spotify options");
         if (expanded.getOrDefault("Spotify options",false)) {
@@ -143,8 +142,6 @@ public final class ClickGuiScreen extends Screen {
             toggle(render,"Mobs",pingplus.voicechat.client.damageglass.DamageGlassSettings::mobs,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleMobs);
         }
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
-        toggle(render,"Projectile preview",()->PlayerSettings.projectilePreview,()->PlayerSettings.projectilePreview=!PlayerSettings.projectilePreview);
-        toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
         toggle(render,"Zoom",()->PlayerSettings.zoom,()->PlayerSettings.zoom=!PlayerSettings.zoom);
         add(render,new ZoomStrengthSlider(panelWidth-20),26);
         toggle(render,"Shoulder cam",()->PlayerSettings.shoulderCam,()->PlayerSettings.shoulderCam=!PlayerSettings.shoulderCam);
@@ -188,50 +185,6 @@ public final class ClickGuiScreen extends Screen {
         }
 
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
-        Category automation = category("AUTOMATION", "Small actions, effortless");
-        toggle(automation,"KillAura",()->PlayerSettings.killAura,()->{
-            PlayerSettings.killAura=!PlayerSettings.killAura;
-            if (!PlayerSettings.killAura) pingplus.voicechat.client.KillAuraFeature.clear();
-        });
-        disclosure(automation,"KillAura options");
-        if (expanded.getOrDefault("KillAura options",false)) {
-            toggle(automation,"Target players",()->PlayerSettings.killAuraPlayers,()->PlayerSettings.killAuraPlayers=!PlayerSettings.killAuraPlayers);
-            toggle(automation,"Target mobs",()->PlayerSettings.killAuraMobs,()->PlayerSettings.killAuraMobs=!PlayerSettings.killAuraMobs);
-            add(automation,new CombatSlider(panelWidth-20,"Range",1,4,.1,()->PlayerSettings.killAuraRange,v->PlayerSettings.killAuraRange=(float)v),26);
-            add(automation,new CombatSlider(panelWidth-20,"Turn speed",45,540,15,()->PlayerSettings.killAuraTurnSpeed,v->PlayerSettings.killAuraTurnSpeed=(float)v),26);
-        }
-        toggle(automation,"Hand swap",()->PlayerSettings.handSwap,()->PlayerSettings.handSwap=!PlayerSettings.handSwap);
-        disclosure(automation,"Swap interval");
-        if (expanded.get("Swap interval")) add(automation,new SpeedSlider(panelWidth-20),26);
-        Category skyblock = category("SKYBLOCK", "Hypixel skyblock helpers");
-        disclosure(skyblock,"General");
-        if (expanded.get("General")) {
-            toggle(skyblock,"No particles",()->PlayerSettings.hideParticles,()->PlayerSettings.hideParticles=!PlayerSettings.hideParticles);
-            toggle(skyblock,"No mob names",()->PlayerSettings.hideMobNames,()->{
-                PlayerSettings.hideMobNames=!PlayerSettings.hideMobNames;
-                rebuildWidgets();
-            });
-            // Health bar is only unlocked while mob names are hidden.
-            if (PlayerSettings.hideMobNames) {
-                toggle(skyblock,"Mob HP bar",()->PlayerSettings.mobHealthBar,()->PlayerSettings.mobHealthBar=!PlayerSettings.mobHealthBar);
-                add(skyblock,new PercentSlider(panelWidth-20),26);
-            }
-            toggle(skyblock,"Slayer outline",()->PlayerSettings.slayerOutline,()->{
-                PlayerSettings.slayerOutline=!PlayerSettings.slayerOutline;
-                PlayerSettings.slayerBossHighlight=PlayerSettings.slayerOutline;
-                VoicechatClient.syncSlayerCfg();
-            });
-            toggle(skyblock,"Boss yellow",()->PlayerSettings.slayerBoss,()->{
-                PlayerSettings.slayerBoss=!PlayerSettings.slayerBoss;
-                VoicechatClient.syncSlayerCfg();
-            });
-            toggle(skyblock,"Miniboss red",()->PlayerSettings.slayerMiniboss,()->{
-                PlayerSettings.slayerMiniboss=!PlayerSettings.slayerMiniboss;
-                VoicechatClient.syncSlayerCfg();
-            });
-            toggle(skyblock,"Boss lines",()->PlayerSettings.slayerLine,()->PlayerSettings.slayerLine=!PlayerSettings.slayerLine);
-            toggle(skyblock,"Player outline",()->PlayerSettings.playerOutline,()->PlayerSettings.playerOutline=!PlayerSettings.playerOutline);
-        }
         Category keys = category("KEYS", "Hotkeys, click then press");
         keyButton(keys, "GUI", VoicechatClient.openGuiKey());
         keyButton(keys, "HUD editor", VoicechatClient.hudEditorKey());
@@ -240,7 +193,6 @@ public final class ClickGuiScreen extends Screen {
         keyButton(keys, "Mute", VoicechatClient.muteKey());
         keyButton(keys, "Zoom", VoicechatClient.zoomKey());
         keyButton(keys, "Shoulder cam", VoicechatClient.shoulderCamKey());
-        keyButton(keys, "Killaura", VoicechatClient.killAuraKey());
         add(keys, new Button(0,0,panelWidth-20,18,Component.literal("Reset keys"),b->{resetKeys();rebuildWidgets();},supplier->supplier.get()) {
             @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
                 if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
@@ -250,8 +202,8 @@ public final class ClickGuiScreen extends Screen {
         // Stack shorter categories together, keeping the full Player settings column visible.
         int[] columnY = new int[columns];
         Arrays.fill(columnY, 30);
-        int[] columnFor = columns == 2 ? new int[]{0,0,1,0,1,0}
-                : columns == 3 ? new int[]{0,0,1,2,1,2} : new int[]{0,1,2,3,1,3};
+        int[] columnFor = columns == 2 ? new int[]{0,1,1,0}
+                : columns == 3 ? new int[]{0,1,2,2} : new int[]{0,1,2,3};
         for (int i=0; i<categories.size(); i++) {
             Category c=categories.get(i);
             int col=columnFor[Math.min(i, columnFor.length-1)];
@@ -312,7 +264,6 @@ public final class ClickGuiScreen extends Screen {
         if (VoicechatClient.muteKey() != null) VoicechatClient.muteKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_M));
         if (VoicechatClient.zoomKey() != null) VoicechatClient.zoomKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_C));
         if (VoicechatClient.shoulderCamKey() != null) VoicechatClient.shoulderCamKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_R));
-        if (VoicechatClient.killAuraKey() != null) VoicechatClient.killAuraKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_Z));
         pendingKey = null;
         saveKeys();
     }
@@ -479,52 +430,6 @@ public final class ClickGuiScreen extends Screen {
         }
         @Override protected void updateMessage(){setMessage(Component.literal(label+"   "+(getter.getAsInt()*percentPerStep)+" %"));}
         @Override protected void applyValue(){setter.accept((int)Math.round(value*steps));updateMessage();}
-        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
-            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
-            int x=getX()+4,y=getY()+19,length=width-8;
-            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
-            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
-            g.nextStratum();
-            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
-        }
-    }
-    private final class CombatSlider extends AbstractSliderButton {
-        private final String label;
-        private final double min,max,step;
-        private final DoubleSupplier getter;
-        private final DoubleConsumer setter;
-        CombatSlider(int w,String label,double min,double max,double step,DoubleSupplier getter,DoubleConsumer setter) {
-            super(0,0,w,26,Component.literal(label),(getter.getAsDouble()-min)/(max-min));
-            this.label=label;this.min=min;this.max=max;this.step=step;this.getter=getter;this.setter=setter;updateMessage();
-        }
-        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"%s   %.1f",label,getter.getAsDouble())));}
-        @Override protected void applyValue(){setter.accept(Math.clamp(min+Math.round(value*(max-min)/step)*step,min,max));updateMessage();}
-        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
-            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
-            int x=getX()+4,y=getY()+19,length=width-8;
-            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
-            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
-            g.nextStratum();
-            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(GlassStyle.TEXT,opacity));
-        }
-    }
-    private final class SpeedSlider extends AbstractSliderButton {
-        SpeedSlider(int w){super(0,0,w,26,Component.literal("Hand swap interval"),Math.clamp((PlayerSettings.handSwapIntervalTicks-1)/19.0,0,1));updateMessage();}
-        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Interval   %.2f s",PlayerSettings.handSwapIntervalTicks/20.0)));}
-        @Override protected void applyValue(){PlayerSettings.handSwapIntervalTicks=1+(int)Math.round(value*19);updateMessage();}
-        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
-            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
-            int x=getX()+4,y=getY()+19,length=width-8;
-            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
-            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
-            g.nextStratum();
-            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
-        }
-    }
-    private final class PercentSlider extends AbstractSliderButton {
-        PercentSlider(int w){super(0,0,w,26,Component.literal("Bar opacity"),Math.clamp(PlayerSettings.mobBarOpacity,0,1));updateMessage();}
-        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"Bar opacity   %d%%",Math.round(value*100))));}
-        @Override protected void applyValue(){PlayerSettings.mobBarOpacity=(float)value;updateMessage();}
         @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
             text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
             int x=getX()+4,y=getY()+19,length=width-8;

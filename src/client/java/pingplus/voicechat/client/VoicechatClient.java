@@ -38,7 +38,6 @@ public class VoicechatClient implements ClientModInitializer {
     private static KeyMapping muteKey;
     private static KeyMapping zoomKey;
     private static KeyMapping shoulderCamKey;
-    private static KeyMapping killauraKey;
     private static final KeyMapping.Category CLIENT_CATEGORY = KeyMapping.Category.register(
             Identifier.fromNamespaceAndPath("voicechat", "client")
     );
@@ -54,10 +53,6 @@ public class VoicechatClient implements ClientModInitializer {
     public static KeyMapping muteKey() { return muteKey; }
     public static KeyMapping zoomKey() { return zoomKey; }
     public static KeyMapping shoulderCamKey() { return shoulderCamKey; }
-    public static KeyMapping killAuraKey() { return killauraKey; }
-
-    public static final pingplus.voicechat.client.slayer.SlayerOutlineConfig SLAYER_CFG =
-        new pingplus.voicechat.client.slayer.SlayerOutlineConfig();
 
     public static final Logger LOG =
             LoggerFactory.getLogger("laby-voicechat");
@@ -66,18 +61,8 @@ public class VoicechatClient implements ClientModInitializer {
     public void onInitializeClient() {
         pingplus.voicechat.client.gui.glass.GlassPipelines.initialize();
         pingplus.voicechat.client.damageglass.DamageGlassRenderer.initialize();
-        syncSlayerCfg();
-        pingplus.voicechat.client.slayer.SlayerOutlineHook.register(SLAYER_CFG);
         initializeClientFeatures();
         initializeVoiceChat();
-    }
-
-    public static void syncSlayerCfg() {
-        SLAYER_CFG.enabled = PlayerSettings.slayerOutline && PlayerSettings.slayerBossHighlight;
-        SLAYER_CFG.highlightBoss = PlayerSettings.slayerBoss;
-        SLAYER_CFG.highlightMiniboss = PlayerSettings.slayerMiniboss;
-        SLAYER_CFG.bossColor = PlayerSettings.slayerBossColor;
-        SLAYER_CFG.minibossColor = PlayerSettings.slayerMinibossColor;
     }
 
     private void initializeClientFeatures() {
@@ -87,9 +72,7 @@ public class VoicechatClient implements ClientModInitializer {
         hudEditorKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
                 "key.voicechat.hud_editor", GLFW.GLFW_KEY_G, CLIENT_CATEGORY));
         zoomKey = registerZoomKey();
-        killauraKey = registerKillAura();
         shoulderCamKey = registerShoulderCamKey();
-        HandSwapFeature handSwap = new HandSwapFeature();
 
         ArraylistHud arraylistHud = new ArraylistHud(fpsHud, coordinatesHud);
 
@@ -157,35 +140,10 @@ public class VoicechatClient implements ClientModInitializer {
                 }
             }
 
-            handSwap.tick(client);
-            KillAuraFeature.tick(client);
-            while (killauraKey != null && killauraKey.consumeClick()) {
-                PlayerSettings.killAura = !PlayerSettings.killAura;
-                if (!PlayerSettings.killAura) KillAuraFeature.clear();
-            }
             pingplus.voicechat.client.ZoomFeature.tick(client, zoomKey != null && zoomKey.isDown());
             pingplus.voicechat.client.ShoulderCamFeature.tick(client, shoulderCamKey != null && shoulderCamKey.isDown());
         });
 
-        // Vertical liquid-glass health bars beside visible players.
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("voicechat", "player_health_bars"),
-                (graphics, delta) -> pingplus.voicechat.client.gui.PlayerHealthBarRenderer.render(graphics)
-        );
-
-        // Glass health bars above mobs (unlocked with hidden mob names).
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("voicechat", "mob_health_bar"),
-                (graphics, delta) ->
-                        pingplus.voicechat.client.gui.MobHealthBarRenderer.render(graphics)
-        );
-
-        // Screen-space ESP lines to bosses/minibosses.
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath("voicechat", "boss_line"),
-                (graphics, delta) ->
-                        pingplus.voicechat.client.gui.BossLineHud.render(graphics)
-        );
     }
 
     private KeyMapping registerOpenGuiKey() {
@@ -207,16 +165,6 @@ public class VoicechatClient implements ClientModInitializer {
                 )
         );
     }
-    private KeyMapping registerKillAura() {
-        return KeyMappingHelper.registerKeyMapping(
-                new KeyMapping(
-                        "key.voicechat.killaura",
-                        GLFW.GLFW_KEY_Z,
-                        CLIENT_CATEGORY
-                )
-        );
-    }
-
     private KeyMapping registerShoulderCamKey() {
         return KeyMappingHelper.registerKeyMapping(
                 new KeyMapping(

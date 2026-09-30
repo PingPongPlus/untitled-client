@@ -8,25 +8,8 @@ public final class PlayerSettings {
     public static boolean mainBodyPart = true;
     public static boolean leftArm = true;
     public static boolean rightArm = true;
-    public static boolean handSwap = false;
     public static boolean hitboxes = false;
-    public static boolean projectilePreview = false;
-    public static int handSwapIntervalTicks = 6;
     public static boolean direction = false;
-    public static boolean slayerBossHighlight = false;
-    public static boolean slayerOutline = false;
-    public static boolean slayerBoss = false;
-    public static boolean slayerMiniboss = false;
-    public static boolean slayerLine = false;
-    public static int slayerBossColor = 0xFFF200;
-    public static int slayerMinibossColor = 0xFF5757;
-    public static boolean hideParticles = false;
-    public static boolean hideMobNames = false;
-    public static boolean mobHealthBar = false;
-    public static boolean playerHealthBar = true;
-    public static float mobBarOpacity = 0.85f;
-    public static boolean playerOutline = true;
-    public static int playerOutlineColor = 0x7FDBFF;
     public static boolean dockHotbar = true;
     public static float dockMaxScale = 0.8f;
     public static float dockRadius = 1.5f;
@@ -39,15 +22,9 @@ public final class PlayerSettings {
     public static boolean hideHunger = false;
     public static boolean hideXp = false;
     public static boolean hideLocator = false;
-    public static boolean fullbright = true;
     public static boolean zoom = true;
     public static float zoomStrength = 3f;
     public static boolean shoulderCam = true;
-    public static boolean killAura = false;
-    public static boolean killAuraPlayers = true;
-    public static boolean killAuraMobs = true;
-    public static float killAuraRange = 3f;
-    public static float killAuraTurnSpeed = 170f;
 
 }
 

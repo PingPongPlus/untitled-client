@@ -7,7 +7,7 @@ version = project.mod_version
 group = project.maven_group
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = "${project.archives_base_name}-legit"
 }
 
 loom {
@@ -17,13 +17,6 @@ loom {
         "voicechat" {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
-        }
-    }
-
-    runs {
-        named("client") {
-            // Auto-join Hypixel on start (like SkyHanni) for live testing.
-            programArguments.addAll("--quickPlayMultiplayer", "hypixel.net")
         }
     }
 }
@@ -40,31 +33,12 @@ fabricApi {
     }
 }
 
-repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
-    exclusiveContent {
-        forRepository {
-            maven { url = "https://maven.azureaaron.net/releases" }
-        }
-        filter {
-            includeGroupAndSubgroups("net.azureaaron")
-        }
-    }
-}
-
 dependencies {
     // To change the versions see the gradle.properties file
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
     implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    // Clean glowing outline wie SkyHanni (CustomGlowCallback)
-    implementation "net.azureaaron:render-chest:1.0.3+26.2"
-    include "net.azureaaron:render-chest:1.0.3+26.2"
 }
 
 processResources {
@@ -127,14 +101,6 @@ tasks.register('musicGlassSmokeTest', JavaExec) {
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
 }
 tasks.named('check') { dependsOn 'musicGlassSmokeTest' }
-
-tasks.register('aimSmoothingTest', JavaExec) {
-    dependsOn voiceTestClasses, clientClasses
-    classpath = sourceSets.voiceTest.runtimeClasspath
-    mainClass = 'pingplus.voicechat.client.AimSmoothingTest'
-    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
-}
-tasks.named('check') { dependsOn 'aimSmoothingTest' }
 
 tasks.register('damageGlassSmokeTest', JavaExec) {
     dependsOn voiceTestClasses, clientClasses
