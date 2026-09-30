@@ -20,6 +20,7 @@ import pingplus.voicechat.client.hud.CoordinatesHud;
 import pingplus.voicechat.client.hud.FpsHud;
 import pingplus.voicechat.client.hud.PingHud;
 import pingplus.voicechat.client.hud.MetricsHud;
+import pingplus.voicechat.client.hud.KeystrokesHud;
 import pingplus.voicechat.client.hud.metrics.HudMetrics;
 import pingplus.voicechat.client.hud.LogoHud;
 import pingplus.voicechat.client.hud.ScoreboardHud;
@@ -114,6 +115,10 @@ public class VoicechatClient implements ClientModInitializer {
                 cpsHud::isEnabled, (g,mx,my,dt,editing) -> cpsHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("speed", "Speed", speedHud::width, speedHud::height, (w,h) -> 18, (w,h) -> 155,
                 speedHud::isEnabled, (g,mx,my,dt,editing) -> speedHud.render(g), java.util.List::of));
+        KeystrokesHud keystrokesHud = KeystrokesHud.INSTANCE;
+        HudEditor.register(new HudEditor.Entry("keystrokes", "Keystrokes", keystrokesHud::width, keystrokesHud::height,
+                (w,h) -> 18, (w,h) -> 180, keystrokesHud::isEnabled,
+                (g,mx,my,dt,editing) -> keystrokesHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("arraylist", "Arraylist", arraylistHud::width, arraylistHud::height,
                 (w,h) -> w - arraylistHud.width() - 8, (w,h) -> 8,
                 arraylistHud::isEnabled, (g,mx,my,dt,editing) -> arraylistHud.render(g), java.util.List::of, true));

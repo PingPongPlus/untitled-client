@@ -101,6 +101,7 @@ public final class ArraylistHud {
                 new Named("Ping", PingHud.INSTANCE::isEnabled),
                 new Named("CPS", MetricsHud.CPS::isEnabled),
                 new Named("Speed", MetricsHud.SPEED::isEnabled),
+                new Named("Keystrokes", KeystrokesHud.INSTANCE::isEnabled),
                 new Named("Coordinates", coordinatesHud::isEnabled),
                 new Named("Scoreboard", ScoreboardHud.INSTANCE::isEnabled),
                 new Named("Chat", ChatHud.INSTANCE::isEnabled),
