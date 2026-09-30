@@ -19,6 +19,8 @@ import pingplus.voicechat.client.gui.ClickGuiScreen;
 import pingplus.voicechat.client.gui.CoordinatesHud;
 import pingplus.voicechat.client.gui.FpsHud;
 import pingplus.voicechat.client.gui.PingHud;
+import pingplus.voicechat.client.gui.MetricsHud;
+import pingplus.voicechat.client.hud.HudMetrics;
 import pingplus.voicechat.client.gui.LogoHud;
 import pingplus.voicechat.client.gui.ScoreboardHud;
 import pingplus.voicechat.client.gui.hud.HudEditor;
@@ -101,6 +103,11 @@ public class VoicechatClient implements ClientModInitializer {
                 pingHud::isEnabled, (g,mx,my,dt,editing) -> pingHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("coordinates", "Coordinates", coordinatesHud::width, coordinatesHud::height, (w,h) -> 18, (w,h) -> 38,
                 coordinatesHud::isEnabled, (g,mx,my,dt,editing) -> coordinatesHud.render(g), java.util.List::of));
+        MetricsHud cpsHud = MetricsHud.CPS, speedHud = MetricsHud.SPEED;
+        HudEditor.register(new HudEditor.Entry("cps", "CPS", cpsHud::width, cpsHud::height, (w,h) -> 18, (w,h) -> 130,
+                cpsHud::isEnabled, (g,mx,my,dt,editing) -> cpsHud.render(g), java.util.List::of));
+        HudEditor.register(new HudEditor.Entry("speed", "Speed", speedHud::width, speedHud::height, (w,h) -> 18, (w,h) -> 155,
+                speedHud::isEnabled, (g,mx,my,dt,editing) -> speedHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("arraylist", "Arraylist", arraylistHud::width, arraylistHud::height,
                 (w,h) -> w - arraylistHud.width() - 8, (w,h) -> 8,
                 arraylistHud::isEnabled, (g,mx,my,dt,editing) -> arraylistHud.render(g), java.util.List::of, true));
@@ -127,11 +134,13 @@ public class VoicechatClient implements ClientModInitializer {
                         HudEditor.render(graphics, -100, -100, 0, false);
                 });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            HudMetrics.tick(client);
             boolean active = client.player != null && (SpotifySettings.enabled() || SpotifySettings.musicGlass());
             pingplus.voicechat.client.spotify.SpotifyClient.INSTANCE.active(active);
             pingplus.voicechat.client.spotify.MusicGlass.tick(client.player != null);
             if (!active) pingplus.voicechat.client.spotify.SpotifyWidget.INSTANCE.clear();
         });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> HudMetrics.reset());
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
             HudEditor.finish();
             pingplus.voicechat.client.spotify.SpotifyClient.INSTANCE.close();
