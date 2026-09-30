@@ -6,6 +6,7 @@ import pingplus.voicechat.client.hud.CoordinatesHud;
 import pingplus.voicechat.client.hud.FpsHud;
 import pingplus.voicechat.client.hud.LogoHud;
 import pingplus.voicechat.client.hud.MetricsHud;
+import pingplus.voicechat.client.hud.KeystrokesHud;
 import pingplus.voicechat.client.hud.PingHud;
 import pingplus.voicechat.client.hud.ScoreboardHud;
 
@@ -98,6 +99,13 @@ public final class ClickGuiScreen extends Screen {
         options(hud,"Speed options",()-> {
             toggle(hud,"Speed glass",MetricsHud.SPEED::isGlass,MetricsHud.SPEED::toggleGlass);
             toggle(hud,"Speed edges",MetricsHud.SPEED::isEdges,MetricsHud.SPEED::toggleEdges);
+        });
+        toggle(hud,"Keystrokes",KeystrokesHud.INSTANCE::isEnabled,KeystrokesHud.INSTANCE::toggle);
+        options(hud,"Keystrokes options",()-> {
+            toggle(hud,"Keystrokes glass",KeystrokesHud.INSTANCE::isGlass,KeystrokesHud.INSTANCE::toggleGlass);
+            toggle(hud,"Keystrokes edges",KeystrokesHud.INSTANCE::isEdges,KeystrokesHud.INSTANCE::toggleEdges);
+            toggle(hud,"Mouse buttons",KeystrokesHud.INSTANCE::isMouseButtons,KeystrokesHud.INSTANCE::toggleMouseButtons);
+            toggle(hud,"Space bar",KeystrokesHud.INSTANCE::isSpaceBar,KeystrokesHud.INSTANCE::toggleSpaceBar);
         });
         toggle(hud,"Coordinates",coordinatesHud::isEnabled,coordinatesHud::toggle);
         options(hud,"XYZ options",()-> {

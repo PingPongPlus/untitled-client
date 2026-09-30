@@ -6,6 +6,7 @@ import pingplus.voicechat.client.hud.CoordinatesHud;
 import pingplus.voicechat.client.hud.FpsHud;
 import pingplus.voicechat.client.hud.LogoHud;
 import pingplus.voicechat.client.hud.MetricsHud;
+import pingplus.voicechat.client.hud.KeystrokesHud;
 import pingplus.voicechat.client.hud.PingHud;
 import pingplus.voicechat.client.hud.ScoreboardHud;
 
@@ -57,6 +58,11 @@ final class ClickGuiAllOffGameTest {
                 toggles.add(saved(metrics::isEdges,metrics::toggleEdges));
             }
             toggles.add(saved(ChatHud.INSTANCE::isEnabled,ChatHud.INSTANCE::toggle));
+            toggles.add(saved(KeystrokesHud.INSTANCE::isEnabled,KeystrokesHud.INSTANCE::toggle));
+            toggles.add(saved(KeystrokesHud.INSTANCE::isGlass,KeystrokesHud.INSTANCE::toggleGlass));
+            toggles.add(saved(KeystrokesHud.INSTANCE::isEdges,KeystrokesHud.INSTANCE::toggleEdges));
+            toggles.add(saved(KeystrokesHud.INSTANCE::isMouseButtons,KeystrokesHud.INSTANCE::toggleMouseButtons));
+            toggles.add(saved(KeystrokesHud.INSTANCE::isSpaceBar,KeystrokesHud.INSTANCE::toggleSpaceBar));
             toggles.add(saved(ChatHud.INSTANCE::isGlass,ChatHud.INSTANCE::toggleGlass));
             toggles.add(saved(ChatHud.INSTANCE::isEdges,ChatHud.INSTANCE::toggleEdges));
             toggles.add(saved(ScoreboardHud.INSTANCE::isEnabled,ScoreboardHud.INSTANCE::toggle));
@@ -110,6 +116,7 @@ final class ClickGuiAllOffGameTest {
                 checkSavedOff("voicechat-spotify-hud.properties","enabled","edges","musicGlass");
                 checkSavedOff("voicechat-logo-hud.properties","enabled","glass","edges");
                 checkSavedOff("voicechat-metrics-hud.properties","cps","cpsGlass","cpsEdges","speed","speedGlass","speedEdges");
+                checkSavedOff("voicechat-keystrokes-hud.properties","enabled","glass","edges","mouseButtons","spaceBar");
                 check(!VoiceSettings.load().middleClickVolume,"All off must save the middle-click volume setting");
                 checkSavedOff("voicechat-glass-effects.properties","customTint");
             });
