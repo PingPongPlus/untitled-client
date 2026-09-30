@@ -13,6 +13,10 @@ public final class GlassStyle {
     }
     public static void round(GuiGraphicsExtractor g, int x, int y, int w, int h, int r, int color) {
         r = (int)Math.round(r * GlassCornerSettings.getScale());
+        roundExact(g,x,y,w,h,r,color);
+    }
+    /** A material mask with its shader's radius, without applying corner scale twice. */
+    static void roundExact(GuiGraphicsExtractor g, int x, int y, int w, int h, float r, int color) {
         if (w <= 0 || h <= 0 || (color >>> 24) == 0) return;
         // Rasterize the fallback silhouette at physical-pixel resolution, including edge coverage.
         int scale = Math.max(1, (int)Math.ceil(net.minecraft.client.Minecraft.getInstance().getWindow().getGuiScale()));

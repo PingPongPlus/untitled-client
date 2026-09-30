@@ -16,6 +16,8 @@ public final class LegitClientGameTest {
             context.runOnClient(client -> {
                 for (String removed : new String[]{
                         "pingplus.voicechat.client.KillAuraFeature", "pingplus.voicechat.client.HandSwapFeature",
+                        "pingplus.voicechat.client.AutoToolsFeature", "pingplus.voicechat.client.FastPlaceFeature",
+                        "pingplus.voicechat.client.XrayFeature", "pingplus.voicechat.client.StorageEspFeature",
                         "pingplus.voicechat.client.ProjectilePreviewRenderer", "pingplus.voicechat.client.gui.PlayerHealthBarRenderer",
                         "pingplus.voicechat.client.gui.MobHealthBarRenderer", "pingplus.voicechat.client.slayer.SlayerOutlineHook",
                         "pingplus.voicechat.mixin.client.FullbrightMixin", "pingplus.voicechat.client.gui.NotificationHud" }) {
@@ -33,9 +35,11 @@ public final class LegitClientGameTest {
                 var labels = client.gui.screen().children().stream().filter(child -> child instanceof Button)
                         .map(child -> ((Button) child).getMessage().getString()).toList();
                 for (String removed : new String[]{"Player HP bars", "KillAura", "Hand swap", "Projectile preview",
+                        "Auto Tools", "Fast Place", "Storage ESP", "Xray",
                         "Fullbright", "Slayer outline", "Boss lines", "Player outline", "Glass notifications", "Killaura: Z"})
                     check(!labels.contains(removed), "removed menu control: " + removed);
                 check(labels.contains("Ping") && labels.contains("Spotify") && labels.contains("HUD editor: G"), "retained controls");
+                check(labels.contains("All off") && labels.contains("Glass style") && labels.contains("FPS options"), "shared UI controls");
             });
             context.takeScreenshot("legit-control-center");
             context.runOnClient(client -> {
