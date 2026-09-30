@@ -84,6 +84,7 @@ public final class VoiceScreen extends Screen {
         return Component.literal(name + ": ").append(mapping.getTranslatedKeyMessage());
     }
     private void saveKeys() {
+        KeyMapping.resetMapping();
         try {
             minecraft.options.save();
         } catch (Exception ignored) {

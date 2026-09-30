@@ -108,10 +108,12 @@ preferences are saved in `config/voicechat-glass-effects.properties`.
 ## Server scoreboard widget
 
 **HUD > Scoreboard** shows or hides the server sidebar. Expand **Scoreboard options**
-to toggle **Liquid glass** and **Glass edges** independently. Glass off shows only
+to toggle **Liquid glass** and **Glass edges** independently.
+Edges off removes the bright rim, refraction, sheen, and outer shadow
+while preserving the blurred glass background and rounded corners. Glass off shows only
 server text, with a text shadow for readability. These toggles follow the other HUD
 options' session lifetime. Position and scale persist through the shared HUD editor:
-open chat, drag to move, use the corner or mouse wheel to resize, and right-click to reset.
+press G to open the HUD editor, drag to move, use the corner or mouse wheel to resize, and right-click to reset.
 
 The widget appears only when the server supplies a sidebar objective, including
 team-specific sidebars. It preserves styled titles, team prefixes/suffixes, custom
@@ -123,6 +125,6 @@ Tab-list and below-name scores are unaffected.
 **HUD > AIR logo** toggles the supplied transparent AIR artwork. **Logo options**
 contains **Logo glass** (blurred glass background on/off) and **Logo edges**.
 Glass uses the global Render blur, shadow and corner settings. All three preferences
-persist in `config/voicechat-logo-hud.properties`. Open chat to drag, resize with the
+persist in `config/voicechat-logo-hud.properties`. Open the HUD editor (G) to drag, resize with the
 corner or wheel, or right-click to reset its saved layout. The artwork keeps its
 native proportions and uses smooth filtering. The main-menu logo is separate.

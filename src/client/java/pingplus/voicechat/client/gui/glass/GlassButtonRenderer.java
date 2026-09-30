@@ -87,6 +87,15 @@ public final class GlassButtonRenderer {
         if (scissor != null) bounds = bounds.intersection(scissor);
         if (bounds == null) return;
         graphics.guiRenderState.addGuiElement(new GlassState(pipeline, pose, x, y, width, height, data, padding, scissor, bounds));
+        if (GlassPipelines.isButton(pipeline)) {
+            int tint = GlassStyle.alpha(pingplus.voicechat.client.spotify.MusicGlass.tint(), opacity);
+            if ((tint >>> 24) != 0) {
+                graphics.nextStratum();
+                int radius = square ? 0 : Math.min(Math.min(width, height) / 2, height > 40 ? 14 : Integer.MAX_VALUE);
+                GlassStyle.round(graphics, x, y, width, height, radius, tint);
+                graphics.nextStratum();
+            }
+        }
         WeatherGlass.draw(graphics, x, y, width, height, opacity, square,
                 GlassPipelines.isButton(pipeline) ? 0 : pipeline == GlassPipelines.CONTROL ? 1 : pipeline == GlassPipelines.BOSS_BAR ? 3 : 2);
     }

@@ -4,7 +4,9 @@
   "key.voicechat.talk": "Push to talk",
   "key.voicechat.mute": "Mute microphone",
   "key.voicechat.click_gui": "Open ClickGUI",
+  "key.voicechat.hud_editor": "Open HUD editor",
   "key.voicechat.zoom": "Zoom",
   "key.voicechat.shoulder_cam": "Shoulder cam (hold)",
+  "key.voicechat.killaura": "Killaura",
   "key.category.voicechat.client": "PingPlus Client"
 }

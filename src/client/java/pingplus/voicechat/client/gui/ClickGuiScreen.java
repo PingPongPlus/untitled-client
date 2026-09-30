@@ -58,6 +58,12 @@ public final class ClickGuiScreen extends Screen {
             toggle(hud,"FPS glass",fpsHud::isGlass,fpsHud::toggleGlass);
             toggle(hud,"FPS edges",fpsHud::isEdges,fpsHud::toggleEdges);
         }
+        toggle(hud,"Ping",PingHud.INSTANCE::isEnabled,PingHud.INSTANCE::toggle);
+        disclosure(hud,"Ping options");
+        if (expanded.getOrDefault("Ping options",false)) {
+            toggle(hud,"Ping glass",PingHud.INSTANCE::isGlass,PingHud.INSTANCE::toggleGlass);
+            toggle(hud,"Ping edges",PingHud.INSTANCE::isEdges,PingHud.INSTANCE::toggleEdges);
+        }
         toggle(hud,"Coordinates",coordinatesHud::isEnabled,coordinatesHud::toggle);
         disclosure(hud,"XYZ options");
         if (expanded.getOrDefault("XYZ options",false)) {
@@ -69,6 +75,9 @@ public final class ClickGuiScreen extends Screen {
         disclosure(hud,"Spotify options");
         if (expanded.getOrDefault("Spotify options",false)) {
             toggle(hud,"Spotify edges",pingplus.voicechat.client.spotify.SpotifySettings::edges,pingplus.voicechat.client.spotify.SpotifySettings::toggleEdges);
+            toggle(hud,"Music-reactive glass",pingplus.voicechat.client.spotify.SpotifySettings::musicGlass,pingplus.voicechat.client.spotify.SpotifySettings::toggleMusicGlass);
+            add(hud,new EffectSlider(panelWidth-20,"Music tint",pingplus.voicechat.client.spotify.SpotifySettings::musicIntensity,
+                    pingplus.voicechat.client.spotify.SpotifySettings::setMusicIntensity,100,1),26);
         }
         toggle(hud,"Arraylist",arraylistHud::isEnabled,arraylistHud::toggle);
         disclosure(hud,"Arraylist options");
@@ -134,6 +143,7 @@ public final class ClickGuiScreen extends Screen {
             toggle(render,"Mobs",pingplus.voicechat.client.damageglass.DamageGlassSettings::mobs,pingplus.voicechat.client.damageglass.DamageGlassSettings::toggleMobs);
         }
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
+        toggle(render,"Projectile preview",()->PlayerSettings.projectilePreview,()->PlayerSettings.projectilePreview=!PlayerSettings.projectilePreview);
         toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
         toggle(render,"Zoom",()->PlayerSettings.zoom,()->PlayerSettings.zoom=!PlayerSettings.zoom);
         add(render,new ZoomStrengthSlider(panelWidth-20),26);
@@ -179,6 +189,17 @@ public final class ClickGuiScreen extends Screen {
 
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
         Category automation = category("AUTOMATION", "Small actions, effortless");
+        toggle(automation,"KillAura",()->PlayerSettings.killAura,()->{
+            PlayerSettings.killAura=!PlayerSettings.killAura;
+            if (!PlayerSettings.killAura) pingplus.voicechat.client.KillAuraFeature.clear();
+        });
+        disclosure(automation,"KillAura options");
+        if (expanded.getOrDefault("KillAura options",false)) {
+            toggle(automation,"Target players",()->PlayerSettings.killAuraPlayers,()->PlayerSettings.killAuraPlayers=!PlayerSettings.killAuraPlayers);
+            toggle(automation,"Target mobs",()->PlayerSettings.killAuraMobs,()->PlayerSettings.killAuraMobs=!PlayerSettings.killAuraMobs);
+            add(automation,new CombatSlider(panelWidth-20,"Range",1,4,.1,()->PlayerSettings.killAuraRange,v->PlayerSettings.killAuraRange=(float)v),26);
+            add(automation,new CombatSlider(panelWidth-20,"Turn speed",45,540,15,()->PlayerSettings.killAuraTurnSpeed,v->PlayerSettings.killAuraTurnSpeed=(float)v),26);
+        }
         toggle(automation,"Hand swap",()->PlayerSettings.handSwap,()->PlayerSettings.handSwap=!PlayerSettings.handSwap);
         disclosure(automation,"Swap interval");
         if (expanded.get("Swap interval")) add(automation,new SpeedSlider(panelWidth-20),26);
@@ -213,11 +234,13 @@ public final class ClickGuiScreen extends Screen {
         }
         Category keys = category("KEYS", "Hotkeys, click then press");
         keyButton(keys, "GUI", VoicechatClient.openGuiKey());
+        keyButton(keys, "HUD editor", VoicechatClient.hudEditorKey());
         keyButton(keys, "Voice", VoicechatClient.voiceMenuKey());
         keyButton(keys, "Talk", VoicechatClient.talkKey());
         keyButton(keys, "Mute", VoicechatClient.muteKey());
         keyButton(keys, "Zoom", VoicechatClient.zoomKey());
         keyButton(keys, "Shoulder cam", VoicechatClient.shoulderCamKey());
+        keyButton(keys, "Killaura", VoicechatClient.killAuraKey());
         add(keys, new Button(0,0,panelWidth-20,18,Component.literal("Reset keys"),b->{resetKeys();rebuildWidgets();},supplier->supplier.get()) {
             @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
                 if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
@@ -283,15 +306,18 @@ public final class ClickGuiScreen extends Screen {
     }
     private void resetKeys() {
         if (VoicechatClient.openGuiKey() != null) VoicechatClient.openGuiKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_RIGHT_SHIFT));
+        if (VoicechatClient.hudEditorKey() != null) VoicechatClient.hudEditorKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_G));
         if (VoicechatClient.voiceMenuKey() != null) VoicechatClient.voiceMenuKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_V));
         if (VoicechatClient.talkKey() != null) VoicechatClient.talkKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_CAPS_LOCK));
         if (VoicechatClient.muteKey() != null) VoicechatClient.muteKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_M));
         if (VoicechatClient.zoomKey() != null) VoicechatClient.zoomKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_C));
         if (VoicechatClient.shoulderCamKey() != null) VoicechatClient.shoulderCamKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_R));
+        if (VoicechatClient.killAuraKey() != null) VoicechatClient.killAuraKey().setKey(InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_Z));
         pendingKey = null;
         saveKeys();
     }
     private void saveKeys() {
+        KeyMapping.resetMapping();
         try { minecraft.options.save(); } catch (Exception ignored) {}
     }
     private void updateScroll() {
@@ -460,6 +486,26 @@ public final class ClickGuiScreen extends Screen {
             GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
             g.nextStratum();
             GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class CombatSlider extends AbstractSliderButton {
+        private final String label;
+        private final double min,max,step;
+        private final DoubleSupplier getter;
+        private final DoubleConsumer setter;
+        CombatSlider(int w,String label,double min,double max,double step,DoubleSupplier getter,DoubleConsumer setter) {
+            super(0,0,w,26,Component.literal(label),(getter.getAsDouble()-min)/(max-min));
+            this.label=label;this.min=min;this.max=max;this.step=step;this.getter=getter;this.setter=setter;updateMessage();
+        }
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"%s   %.1f",label,getter.getAsDouble())));}
+        @Override protected void applyValue(){setter.accept(Math.clamp(min+Math.round(value*(max-min)/step)*step,min,max));updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(GlassStyle.TEXT,opacity));
         }
     }
     private final class SpeedSlider extends AbstractSliderButton {

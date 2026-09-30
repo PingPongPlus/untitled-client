@@ -70,7 +70,7 @@ public final class HudLayout {
         });
         Files.createDirectories(file.getParent());
         Path temporary = file.resolveSibling(file.getFileName() + ".tmp");
-        try (var writer = Files.newBufferedWriter(temporary)) { p.store(writer, "HUD anchors and scale; edit in chat"); }
+        try (var writer = Files.newBufferedWriter(temporary)) { p.store(writer, "HUD anchors and scale; edit with the HUD editor key"); }
         Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING);
     }
 }

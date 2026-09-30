@@ -98,6 +98,7 @@ public final class ArraylistHud {
     private List<Named> features() {
         return List.of(
                 new Named("Frame rate", fpsHud::isEnabled),
+                new Named("Ping", PingHud.INSTANCE::isEnabled),
                 new Named("Coordinates", coordinatesHud::isEnabled),
                 new Named("Player HP bars", () -> PlayerSettings.playerHealthBar),
                 new Named("Scoreboard", ScoreboardHud.INSTANCE::isEnabled),
@@ -107,13 +108,15 @@ public final class ArraylistHud {
                 new Named("AIR logo", LogoHud.INSTANCE::isEnabled),
                 new Named("Spotify", SpotifySettings::enabled),
                 new Named("Hitboxes", () -> PlayerSettings.hitboxes),
+                new Named("Projectile preview", () -> PlayerSettings.projectilePreview),
                 new Named("Fullbright", () -> PlayerSettings.fullbright),
                 new Named("Zoom", () -> PlayerSettings.zoom),
                 new Named("Body", () -> PlayerSettings.mainBodyPart),
                 new Named("Left arm", () -> PlayerSettings.leftArm),
                 new Named("Right arm", () -> PlayerSettings.rightArm),
                 new Named("Direction", () -> PlayerSettings.direction),
-                new Named("Hand swap", () -> PlayerSettings.handSwap)
+                new Named("Hand swap", () -> PlayerSettings.handSwap),
+                new Named("KillAura", () -> PlayerSettings.killAura)
         );
     }
 

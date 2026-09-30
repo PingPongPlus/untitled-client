@@ -14,7 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.util.Base64;
 import java.util.List;
 
-/** One HUD instance, shared with chat for keyboard controls and drag positioning. */
+/** One HUD instance with controls and drag positioning in the HUD editor. */
 public final class SpotifyWidget {
     public static final SpotifyWidget INSTANCE = new SpotifyWidget();
     private static final Identifier ART = Identifier.fromNamespaceAndPath("voicechat", "spotify_cover");

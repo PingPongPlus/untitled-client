@@ -4,8 +4,17 @@ Voice chat builds and runs without VoiceChat.jar. The protocol, Opus codec wrapp
 and native audio libraries are included in the client. RNNoise background noise
 suppression and the noise gate are configurable in **Voice menu → Audio devices**.
 See [voice setup and runtime details](docs/VOICE.md).
-More features coming soon. 
+More features coming soon.
+
+Ping is available under **Right Shift → HUD**. Move and resize it with **G**.
+Its enabled state, glass background, and edges are saved. See [ping controls](docs/PING.md).
 Still in development check out a quick demo below!
+
+Music-reactive glass: enable **HUD → Spotify options → Music-reactive glass** in the control center.
+The **Music tint** slider adjusts subtle album-art colors on glass panels, buttons, and the glass hotbar.
+Colors transition smoothly between covers and fade out when playback pauses, artwork is missing, or the feature is disabled.
+The setting is saved and defaults to off. It works with the Spotify HUD hidden, using the existing Windows Spotify media connection.
+This feature follows album artwork; it does not capture audio or provide a beat visualizer.
 
 
 https://github.com/user-attachments/assets/170978ec-86ae-4d9f-b966-9cd72ded4a35

@@ -18,9 +18,11 @@ import pingplus.voicechat.client.gui.ChatHud;
 import pingplus.voicechat.client.gui.ClickGuiScreen;
 import pingplus.voicechat.client.gui.CoordinatesHud;
 import pingplus.voicechat.client.gui.FpsHud;
+import pingplus.voicechat.client.gui.PingHud;
 import pingplus.voicechat.client.gui.LogoHud;
 import pingplus.voicechat.client.gui.ScoreboardHud;
 import pingplus.voicechat.client.gui.hud.HudEditor;
+import pingplus.voicechat.client.gui.hud.HudEditorScreen;
 import pingplus.voicechat.client.spotify.SpotifySettings;
 import pingplus.voicechat.client.spotify.SpotifyWidget;
 
@@ -30,11 +32,13 @@ import pingplus.voicechat.client.spotify.SpotifyWidget;
 public class VoicechatClient implements ClientModInitializer {
     private static VoiceConnection voiceConnection;
     private static KeyMapping openGuiKey;
+    private static KeyMapping hudEditorKey;
     private static KeyMapping voiceMenuKey;
     private static KeyMapping talkKey;
     private static KeyMapping muteKey;
     private static KeyMapping zoomKey;
     private static KeyMapping shoulderCamKey;
+    private static KeyMapping killauraKey;
     private static final KeyMapping.Category CLIENT_CATEGORY = KeyMapping.Category.register(
             Identifier.fromNamespaceAndPath("voicechat", "client")
     );
@@ -44,11 +48,13 @@ public class VoicechatClient implements ClientModInitializer {
     }
 
     public static KeyMapping openGuiKey() { return openGuiKey; }
+    public static KeyMapping hudEditorKey() { return hudEditorKey; }
     public static KeyMapping voiceMenuKey() { return voiceMenuKey; }
     public static KeyMapping talkKey() { return talkKey; }
     public static KeyMapping muteKey() { return muteKey; }
     public static KeyMapping zoomKey() { return zoomKey; }
     public static KeyMapping shoulderCamKey() { return shoulderCamKey; }
+    public static KeyMapping killAuraKey() { return killauraKey; }
 
     public static final pingplus.voicechat.client.slayer.SlayerOutlineConfig SLAYER_CFG =
         new pingplus.voicechat.client.slayer.SlayerOutlineConfig();
@@ -78,7 +84,10 @@ public class VoicechatClient implements ClientModInitializer {
         FpsHud fpsHud = new FpsHud();
         CoordinatesHud coordinatesHud = new CoordinatesHud();
         openGuiKey = registerOpenGuiKey();
+        hudEditorKey = KeyMappingHelper.registerKeyMapping(new KeyMapping(
+                "key.voicechat.hud_editor", GLFW.GLFW_KEY_G, CLIENT_CATEGORY));
         zoomKey = registerZoomKey();
+        killauraKey = registerKillAura();
         shoulderCamKey = registerShoulderCamKey();
         HandSwapFeature handSwap = new HandSwapFeature();
 
@@ -86,6 +95,10 @@ public class VoicechatClient implements ClientModInitializer {
 
         HudEditor.register(new HudEditor.Entry("fps", "FPS", fpsHud::width, fpsHud::height, (w,h) -> 18, (w,h) -> 13,
                 fpsHud::isEnabled, (g,mx,my,dt,editing) -> fpsHud.render(g), java.util.List::of));
+        PingHud pingHud = PingHud.INSTANCE;
+        HudEditor.register(new HudEditor.Entry("ping", "Ping", pingHud::width, pingHud::height,
+                (w,h) -> 26 + fpsHud.width(), (w,h) -> 13,
+                pingHud::isEnabled, (g,mx,my,dt,editing) -> pingHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("coordinates", "Coordinates", coordinatesHud::width, coordinatesHud::height, (w,h) -> 18, (w,h) -> 38,
                 coordinatesHud::isEnabled, (g,mx,my,dt,editing) -> coordinatesHud.render(g), java.util.List::of));
         HudEditor.register(new HudEditor.Entry("arraylist", "Arraylist", arraylistHud::width, arraylistHud::height,
@@ -110,12 +123,13 @@ public class VoicechatClient implements ClientModInitializer {
         HudElementRegistry.attachElementBefore(VanillaHudElements.CHAT,
                 Identifier.fromNamespaceAndPath("voicechat", "editable_hud"), (graphics, delta) -> {
                     Minecraft client = Minecraft.getInstance();
-                    if (client.player != null && !(client.gui.screen() instanceof net.minecraft.client.gui.screens.ChatScreen))
+                    if (client.player != null && !(client.gui.screen() instanceof HudEditorScreen))
                         HudEditor.render(graphics, -100, -100, 0, false);
                 });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            boolean active = client.player != null && pingplus.voicechat.client.spotify.SpotifySettings.enabled();
+            boolean active = client.player != null && (SpotifySettings.enabled() || SpotifySettings.musicGlass());
             pingplus.voicechat.client.spotify.SpotifyClient.INSTANCE.active(active);
+            pingplus.voicechat.client.spotify.MusicGlass.tick(client.player != null);
             if (!active) pingplus.voicechat.client.spotify.SpotifyWidget.INSTANCE.clear();
         });
         ClientLifecycleEvents.CLIENT_STOPPING.register(client -> {
@@ -125,6 +139,10 @@ public class VoicechatClient implements ClientModInitializer {
         });
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (hudEditorKey != null && hudEditorKey.consumeClick()) {
+                if (client.gui.screen() == null && client.player != null)
+                    client.gui.setScreen(new HudEditorScreen());
+            }
             while (openGuiKey != null && openGuiKey.consumeClick()) {
                 // Do not replace inventory, chat, or another mod's screen.
                 if (client.gui.screen() == null && client.player != null) {
@@ -140,6 +158,11 @@ public class VoicechatClient implements ClientModInitializer {
             }
 
             handSwap.tick(client);
+            KillAuraFeature.tick(client);
+            while (killauraKey != null && killauraKey.consumeClick()) {
+                PlayerSettings.killAura = !PlayerSettings.killAura;
+                if (!PlayerSettings.killAura) KillAuraFeature.clear();
+            }
             pingplus.voicechat.client.ZoomFeature.tick(client, zoomKey != null && zoomKey.isDown());
             pingplus.voicechat.client.ShoulderCamFeature.tick(client, shoulderCamKey != null && shoulderCamKey.isDown());
         });
@@ -180,6 +203,15 @@ public class VoicechatClient implements ClientModInitializer {
                 new KeyMapping(
                         "key.voicechat.zoom",
                         GLFW.GLFW_KEY_C,
+                        CLIENT_CATEGORY
+                )
+        );
+    }
+    private KeyMapping registerKillAura() {
+        return KeyMappingHelper.registerKeyMapping(
+                new KeyMapping(
+                        "key.voicechat.killaura",
+                        GLFW.GLFW_KEY_Z,
                         CLIENT_CATEGORY
                 )
         );

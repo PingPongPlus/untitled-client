@@ -34,6 +34,10 @@ void main() {
     // Stronger interaction feedback only for controls, not cursor-lit large panels.
     float highlight = hover * enabled * (1.0 - step(40.5, glassData.b * 255.0));
 
+    // Edgeless HUD panels must not retain an outer halo or shadow.
+#ifdef NO_EDGES
+    if (coverage < 0.001) discard;
+#else
     // Soft shadow extends beyond the rounded silhouette.
     float shadowDistance = roundedBox(p - vec2(0.0, pixelScale * SHADOW_SCALE), halfSize, radius);
     float shadow = exp(-max(shadowDistance, 0.0) / (1.1 * pixelScale * max(SHADOW_SCALE, 0.001))) * 0.18 * SHADOW_SCALE;
@@ -42,6 +46,7 @@ void main() {
         fragColor = vec4(0.025, 0.025, 0.025, shadow * opacity);
         return;
     }
+#endif
 
     vec2 texSize = vec2(textureSize(Sampler0, 0));
     vec2 screenUV = gl_FragCoord.xy / texSize;
@@ -67,14 +72,13 @@ void main() {
     color *= 1.0 - absorption;
     color = mix(color, vec3(1.0), highlight * 0.18);
 
+#ifndef NO_EDGES
     float edge = 1.0 - smoothstep(0.0, (0.7 + highlight * 0.45) * pixelScale, abs(distance + 0.45 * pixelScale));
-#ifdef NO_EDGES
-    edge = 0.0;
-#endif
     float light = pow(max(dot(normal, normalize(vec2(-0.5, -0.85))), 0.0), 2.0);
     float lowerRim = pow(max(dot(normal, normalize(vec2(0.45, 0.9))), 0.0), 5.0);
     color = mix(color, vec3(0.96), edge * (0.20 + light * 0.32 + lowerRim * 0.14 + hover * 0.08 + highlight * 0.26));
     float sheen = exp(-pow((localUV.y - 0.08) / 0.20, 2.0)) * (0.014 + hover * 0.012 + highlight * 0.04);
     color += sheen;
+#endif
     fragColor = vec4(clamp(color, 0.0, 1.0), coverage * opacity);
 }

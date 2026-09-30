@@ -120,6 +120,22 @@ tasks.register('spotifySmokeTest', JavaExec) {
 }
 tasks.named('check') { dependsOn 'spotifySmokeTest' }
 
+tasks.register('musicGlassSmokeTest', JavaExec) {
+    dependsOn voiceTestClasses, clientClasses
+    classpath = sourceSets.voiceTest.runtimeClasspath
+    mainClass = 'pingplus.voicechat.client.spotify.MusicGlassTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+tasks.named('check') { dependsOn 'musicGlassSmokeTest' }
+
+tasks.register('aimSmoothingTest', JavaExec) {
+    dependsOn voiceTestClasses, clientClasses
+    classpath = sourceSets.voiceTest.runtimeClasspath
+    mainClass = 'pingplus.voicechat.client.AimSmoothingTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+tasks.named('check') { dependsOn 'aimSmoothingTest' }
+
 tasks.register('damageGlassSmokeTest', JavaExec) {
     dependsOn voiceTestClasses, clientClasses
     classpath = sourceSets.voiceTest.runtimeClasspath
@@ -135,6 +151,7 @@ tasks.register('weatherGlassTest', JavaExec) {
     javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
 }
 tasks.named('check') { dependsOn 'weatherGlassTest' }
+
 
 jar {
     from("LICENSE.txt") {

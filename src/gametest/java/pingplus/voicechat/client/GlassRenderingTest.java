@@ -21,6 +21,18 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             WeatherGlassRenderingTest.run(context);
             return;
         }
+        if (Boolean.getBoolean("voicechat.hudEditorTest")) {
+            hudEditor(context);
+            return;
+        }
+        if (Boolean.getBoolean("voicechat.killAuraTest")) {
+            new KillAuraGameTest().runTest(context);
+            return;
+        }
+        if (Boolean.getBoolean("voicechat.scoreboardEdgesTest")) {
+            scoreboardEdges(context);
+            return;
+        }
         if (Boolean.getBoolean("voicechat.damageGlassTest")) {
             new DamageGlassRenderingTest().runTest(context);
             return;
@@ -229,23 +241,25 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             context.setScreen(() -> new net.minecraft.client.gui.screens.ChatScreen("scoreboard widget", false));
             context.waitTicks(5);
             context.takeScreenshot("scoreboard-glass");
+            context.setScreen(pingplus.voicechat.client.gui.hud.HudEditorScreen::new);
+            context.waitTicks(5);
             context.runOnClient(client -> {
-                Screen chat = client.gui.screen();
-                var before = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", chat.width, chat.height);
+                Screen editor = client.gui.screen();
+                var before = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", editor.width, editor.height);
                 var down = new net.minecraft.client.input.MouseButtonEvent(before.x()+10, before.y()+10,
                         new net.minecraft.client.input.MouseButtonInfo(0,0));
-                chat.mouseClicked(down,false);
+                editor.mouseClicked(down,false);
                 var moved = new net.minecraft.client.input.MouseButtonEvent(before.x()<150 ? 220 : 100, 140, down.buttonInfo());
-                if (!chat.mouseDragged(moved,moved.x()-down.x(),moved.y()-down.y()))
+                if (!editor.mouseDragged(moved,moved.x()-down.x(),moved.y()-down.y()))
                     throw new AssertionError("Scoreboard drag failed");
-                chat.mouseReleased(moved);
-                var after = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", chat.width, chat.height);
+                editor.mouseReleased(moved);
+                var after = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", editor.width, editor.height);
                 if (before.x()==after.x() && before.y()==after.y()) throw new AssertionError("Scoreboard did not move");
-                chat.mouseScrolled(after.x()+10,after.y()+10,0,1);
-                var scaled = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", chat.width, chat.height);
+                editor.mouseScrolled(after.x()+10,after.y()+10,0,1);
+                var scaled = pingplus.voicechat.client.gui.hud.HudEditor.bounds("scoreboard", editor.width, editor.height);
                 if (scaled.scale()<=after.scale()) throw new AssertionError("Scoreboard resize failed");
                 // Restore default placement so later runs start consistently.
-                chat.mouseClicked(new net.minecraft.client.input.MouseButtonEvent(scaled.x()+10,scaled.y()+10,
+                editor.mouseClicked(new net.minecraft.client.input.MouseButtonEvent(scaled.x()+10,scaled.y()+10,
                         new net.minecraft.client.input.MouseButtonInfo(1,0)),false);
             });
             context.setScreen(() -> new pingplus.voicechat.client.gui.ClickGuiScreen(fps,key,coords,arraylist));
@@ -458,6 +472,13 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             context.takeScreenshot("spotify-chat-icons");
             context.runOnClient(client -> {
                 Screen chat = client.gui.screen();
+                if (chat.children().stream().anyMatch(c -> c instanceof Button))
+                    throw new AssertionError("HUD controls must not appear in chat");
+            });
+            context.setScreen(pingplus.voicechat.client.gui.hud.HudEditorScreen::new);
+            context.waitTicks(5);
+            context.runOnClient(client -> {
+                Screen chat = client.gui.screen();
                 var buttons = chat.children().stream().filter(c -> c instanceof Button).map(c -> (Button)c).toList();
                 if (buttons.size() != 3) throw new AssertionError("Spotify icon controls missing");
                 if (pingplus.voicechat.client.spotify.SpotifyClient.INSTANCE.state().playback() == null && buttons.stream().anyMatch(b -> b.active))
@@ -543,6 +564,72 @@ public final class GlassRenderingTest implements FabricClientGameTest {
         context.waitForScreen(TitleScreen.class);
     }
 
+    private static void hudEditor(ClientGameTestContext context) {
+        try (var world = context.worldBuilder().create()) {
+            context.waitFor(client -> client.player != null && client.gui.overlay() == null);
+            context.runOnClient(client -> client.getWindow().setWindowed(1440, 900));
+            context.waitTicks(5);
+            context.setScreen(() -> new net.minecraft.client.gui.screens.ChatScreen("normal chat", false));
+            context.waitTicks(3);
+            context.runOnClient(client -> {
+                Screen chat = client.gui.screen();
+                if (chat.children().stream().anyMatch(child -> child instanceof Button))
+                    throw new AssertionError("HUD controls appeared in chat");
+                var before = pingplus.voicechat.client.gui.hud.HudEditor.bounds("fps", chat.width, chat.height);
+                var down = new net.minecraft.client.input.MouseButtonEvent(before.x()+5, before.y()+5,
+                        new net.minecraft.client.input.MouseButtonInfo(0, 0));
+                chat.mouseClicked(down, false);
+                var moved = new net.minecraft.client.input.MouseButtonEvent(down.x()+60, down.y()+40, down.buttonInfo());
+                chat.mouseDragged(moved, 60, 40);
+                chat.mouseReleased(moved);
+                var after = pingplus.voicechat.client.gui.hud.HudEditor.bounds("fps", chat.width, chat.height);
+                if (before.x() != after.x() || before.y() != after.y())
+                    throw new AssertionError("Chat still edits HUD widgets");
+                chat.onClose();
+                VoicechatClient.hudEditorKey().setKey(com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM.getOrCreate(71));
+                net.minecraft.client.KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM.getOrCreate(71));
+            });
+            context.waitForScreen(pingplus.voicechat.client.gui.hud.HudEditorScreen.class);
+            context.waitTicks(3);
+            context.takeScreenshot("hud-editor");
+            context.runOnClient(client -> {
+                Screen editor = client.gui.screen();
+                var ids = java.util.List.of("fps", "coordinates", "arraylist", "logo", "chat", "spotify", "voice");
+                var allBefore = ids.stream().collect(java.util.stream.Collectors.toMap(id -> id,
+                        id -> pingplus.voicechat.client.gui.hud.HudEditor.bounds(id, editor.width, editor.height)));
+                var before = pingplus.voicechat.client.gui.hud.HudEditor.bounds("fps", editor.width, editor.height);
+                var down = new net.minecraft.client.input.MouseButtonEvent(before.x()+5, before.y()+5,
+                        new net.minecraft.client.input.MouseButtonInfo(0, 0));
+                editor.mouseClicked(down, false);
+                var moved = new net.minecraft.client.input.MouseButtonEvent(down.x()+60, down.y()+40, down.buttonInfo());
+                if (!editor.mouseDragged(moved, 60, 40)) throw new AssertionError("HUD drag was not handled");
+                editor.mouseReleased(moved);
+                var after = pingplus.voicechat.client.gui.hud.HudEditor.bounds("fps", editor.width, editor.height);
+                boolean movedAny = ids.stream().anyMatch(id -> {
+                    var previous = allBefore.get(id);
+                    var current = pingplus.voicechat.client.gui.hud.HudEditor.bounds(id, editor.width, editor.height);
+                    return previous.x() != current.x() || previous.y() != current.y();
+                });
+                if (!movedAny)
+                    throw new AssertionError("HUD did not move in editor");
+                editor.mouseClicked(new net.minecraft.client.input.MouseButtonEvent(after.x()+5, after.y()+5,
+                        new net.minecraft.client.input.MouseButtonInfo(1, 0)), false);
+                editor.keyPressed(new net.minecraft.client.input.KeyEvent(71, 0, 0));
+                if (client.gui.screen() != null) throw new AssertionError("G did not close the editor");
+                VoicechatClient.hudEditorKey().setKey(com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM.getOrCreate(72));
+                net.minecraft.client.KeyMapping.resetMapping();
+                net.minecraft.client.KeyMapping.click(com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM.getOrCreate(72));
+            });
+            context.waitForScreen(pingplus.voicechat.client.gui.hud.HudEditorScreen.class);
+            context.runOnClient(client -> {
+                client.gui.screen().keyPressed(new net.minecraft.client.input.KeyEvent(72, 0, 0));
+                if (client.gui.screen() != null) throw new AssertionError("Custom HUD key did not close the editor");
+                VoicechatClient.hudEditorKey().setKey(com.mojang.blaze3d.platform.InputConstants.Type.KEYSYM.getOrCreate(71));
+                net.minecraft.client.KeyMapping.resetMapping();
+            });
+        }
+    }
+
     private static void clickCompactButton(ClientGameTestContext context, String label) {
         context.runOnClient(client -> {
             Screen screen=client.gui.screen();
@@ -554,6 +641,38 @@ public final class GlassRenderingTest implements FabricClientGameTest {
             if(!screen.mouseClicked(event,false))throw new AssertionError("Missed scaled button: "+label);
             screen.mouseReleased(event);
         });
+    }
+
+    private static void scoreboardEdges(ClientGameTestContext context) {
+        boolean original = ScoreboardHud.INSTANCE.isEdges();
+        try {
+            context.runOnClient(client -> {
+                if (!ScoreboardHud.INSTANCE.isEdges()) ScoreboardHud.INSTANCE.toggleEdges();
+            });
+            context.setScreen(() -> new Screen(Component.literal("Scoreboard edge regression")) {
+                @Override public void extractBackground(GuiGraphicsExtractor g, int mx, int my, float dt) {
+                    g.fill(0, 0, width, height, 0xFF344354);
+                    g.nextStratum();
+                    pingplus.voicechat.client.gui.glass.GlassButtonRenderer.drawHudRect(
+                            g, width / 2 - 85, height / 2 - 70, 170, 140, 0xE01FFF00, false, ScoreboardHud.INSTANCE.isEdges());
+                    g.nextStratum();
+                    g.text(font, Component.literal("Scoreboard"), width / 2 - 30, height / 2 - 55, 0xFFFFFFFF, false);
+                }
+            });
+            context.waitTicks(10);
+            context.takeScreenshot("scoreboard-edges-on");
+            context.runOnClient(client -> ScoreboardHud.INSTANCE.toggleEdges());
+            context.waitTicks(10);
+            context.takeScreenshot("scoreboard-edges-off");
+            context.runOnClient(client -> {
+                if (ScoreboardHud.INSTANCE.isEdges()) throw new AssertionError("Scoreboard edges did not switch off");
+            });
+        } finally {
+            context.runOnClient(client -> {
+                if (ScoreboardHud.INSTANCE.isEdges() != original) ScoreboardHud.INSTANCE.toggleEdges();
+            });
+            context.setScreen(TitleScreen::new);
+        }
     }
 
     private static final class GlassTestScreen extends Screen {

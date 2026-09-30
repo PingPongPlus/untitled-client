@@ -4,6 +4,8 @@
   "package": "pingplus.voicechat.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "KillAuraFrameMixin",
+    "ProjectileImpactMixin",
     "DamageGlassStateMixin",
     "DamageGlassLivingMixin",
     "DamageGlassRenderTypeAccessor",
@@ -13,7 +15,6 @@
     "DamageGlassPrepareMixin",
     "DamageGlassLevelMixin",
     "DamageGlassCaptureMixin",
-    "HudEditorChatMixin",
     "ChatComponentAccessor",
     "ChatClickRelocateMixin",
     "ChatHudCancelMixin",

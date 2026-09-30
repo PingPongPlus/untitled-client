@@ -10,6 +10,7 @@ public final class PlayerSettings {
     public static boolean rightArm = true;
     public static boolean handSwap = false;
     public static boolean hitboxes = false;
+    public static boolean projectilePreview = false;
     public static int handSwapIntervalTicks = 6;
     public static boolean direction = false;
     public static boolean slayerBossHighlight = false;
@@ -42,6 +43,11 @@ public final class PlayerSettings {
     public static boolean zoom = true;
     public static float zoomStrength = 3f;
     public static boolean shoulderCam = true;
+    public static boolean killAura = false;
+    public static boolean killAuraPlayers = true;
+    public static boolean killAuraMobs = true;
+    public static float killAuraRange = 3f;
+    public static float killAuraTurnSpeed = 170f;
 
 }
 

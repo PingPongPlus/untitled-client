@@ -24,7 +24,7 @@ public class ServerIPLookup {
 
     public record ServerInfo(String address, String country, String city) {
         public String displayText() {
-            return address + "\nApproximate location: " + city + ", " + country;
+            return address + "\n Location: " + city + ", " + country;
         }
     }
 

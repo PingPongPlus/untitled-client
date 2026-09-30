@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.function.*;
 
-/** Shared draw transforms and hit testing for every mod HUD widget. Chat owns edit input. */
+/** Shared draw transforms and hit testing for every mod HUD widget. */
 public final class HudEditor {
     @FunctionalInterface public interface Renderer { void draw(GuiGraphicsExtractor g, int mx, int my, float dt, boolean editing); }
     public record Entry(String id, String label, IntSupplier width, IntSupplier height, IntBinaryOperator defaultX,
@@ -69,8 +69,13 @@ public final class HudEditor {
                 }
             }
         }
-        if (editing) g.text(Minecraft.getInstance().font, GlassStyle.label(
-                "Drag to move  |  Corner / wheel to resize  |  Right-click to reset"), 8, screenHeight - 28, GlassStyle.MUTED, true);
+        if (editing) {
+            var key = pingplus.voicechat.client.VoicechatClient.hudEditorKey();
+            String closeKey = key == null ? "Esc" : key.getTranslatedKeyMessage().getString() + " / Esc";
+            g.text(Minecraft.getInstance().font, GlassStyle.label(
+                    "Drag to move  |  Corner / wheel to resize  |  Right-click to reset  |  " + closeKey + " to close"),
+                    8, screenHeight - 28, GlassStyle.MUTED, true);
+        }
     }
     public static List<Button> controls() {
         if (!active()) return List.of();

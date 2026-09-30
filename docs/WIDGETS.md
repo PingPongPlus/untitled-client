@@ -1,7 +1,7 @@
 # Client widgets
 
 Every on-screen feature that appears during gameplay is a HUD widget. Drag, resize,
-chat hit-testing and layout persistence are shared. Liquid glass is **optional** and
+control hit-testing and layout persistence are shared. Liquid glass is **optional** and
 only used by card-style widgets such as Spotify.
 
 ## Path from feature to widget
@@ -33,11 +33,13 @@ only used by card-style widgets such as Spotify.
    toggle(hud, "Clock", clock::isEnabled, clock::toggle);
    ```
 
-5. **Interact** — open chat (**T**) to drag, corner/scroll-resize, or click controls.
+5. **Interact** — press **G** to open the HUD editor, then drag, corner/scroll-resize,
+   or click controls. Change the key under **Right Shift → KEYS → HUD editor** or
+   Minecraft's Controls screen.
    Layout is stored in `config/voicechat-hud-layout.properties`. F1 hides the HUD.
 
 ## Rules
 
 - One `Entry` id per widget; registering again replaces the previous entry.
-- Buttons stay in local space; `HudEditor` maps them to the screen for chat.
+- Buttons stay in local space; `HudEditor` maps them to the editor screen.
 - World/gameplay logic stays out of the renderer.
