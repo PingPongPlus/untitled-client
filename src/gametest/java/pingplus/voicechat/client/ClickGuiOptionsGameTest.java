@@ -49,6 +49,7 @@ final class ClickGuiOptionsGameTest {
             context.waitFor(client -> client.gameMode.getPlayerMode() == GameType.SURVIVAL);
             context.waitTicks(60);
             HudMetricsGameTest.run(context);
+            MiddleClickVoiceVolumeGameTest.run(context);
             captureHud(context);
             context.setScreen(() -> new ClickGuiScreen(fps,VoicechatClient.openGuiKey(),coordinates,new ArraylistHud(fps,coordinates)));
             context.waitTicks(10);

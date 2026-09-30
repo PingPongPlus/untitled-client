@@ -71,7 +71,7 @@ public final class VoiceScreen extends Screen {
             var player = shown.get(i); UUID id = player.getKey(); int y = listTop + (i - page * rows) * 24;
             slider(x, y, 225, player.getValue(), s.volume(id), 2, value -> s.playerVolumes.put(id.toString(), value));
             addRenderableWidget(Button.builder(Component.literal(s.volume(id) == 0 ? "Unmute" : "Mute"), b -> {
-                s.playerVolumes.put(id.toString(), s.volume(id) == 0 ? 1.0 : 0.0); s.save(); rebuildWidgets();
+                s.setVolume(id, s.volume(id) == 0 ? 1.0 : 0.0); rebuildWidgets();
             }).bounds(x + 230, y, 70, 20).build());
         }
         addRenderableWidget(Button.builder(Component.literal("<"), b -> { page = Math.max(0, page - 1); rebuildWidgets(); }).bounds(x, height - 28, 35, 20).build());

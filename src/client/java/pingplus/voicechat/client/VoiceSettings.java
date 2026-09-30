@@ -14,6 +14,7 @@ public final class VoiceSettings {
     public volatile boolean enabled = false;
     public volatile boolean muted = false;
     public volatile boolean deafened = false;
+    public volatile boolean middleClickVolume = true;
     public volatile double volume = 1;
     public volatile double microphoneGain = 1;
     public volatile boolean noiseGateEnabled = false;
@@ -46,6 +47,10 @@ public final class VoiceSettings {
     }
     private static double clamp(double value, double max) { return Double.isFinite(value) ? Math.max(0, Math.min(max, value)) : 1; }
     public double volume(UUID player) { return playerVolumes.getOrDefault(player.toString(), 1.0); }
+    public void setVolume(UUID player, double value) {
+        playerVolumes.put(player.toString(), clamp(value, 2));
+        save();
+    }
     public synchronized void save() {
         try {
             Files.createDirectories(FILE.getParent());

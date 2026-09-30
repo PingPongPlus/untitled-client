@@ -227,6 +227,7 @@ public final class ClickGuiScreen extends Screen {
         });
 
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
+        toggle(player,"Middle-click volume",VoicechatClient::isMiddleClickVolumeEnabled,VoicechatClient::toggleMiddleClickVolume);
         Category automation = category("AUTOMATION", "Small actions, effortless");
         toggle(automation,"Auto Tools",()->PlayerSettings.autoTools,()->{
             PlayerSettings.autoTools=!PlayerSettings.autoTools;

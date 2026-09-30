@@ -118,6 +118,7 @@ public final class ArraylistHud {
                 new Named("Left arm", () -> PlayerSettings.leftArm),
                 new Named("Right arm", () -> PlayerSettings.rightArm),
                 new Named("Direction", () -> PlayerSettings.direction),
+                new Named("Middle-click volume", pingplus.voicechat.client.VoicechatClient::isMiddleClickVolumeEnabled),
                 new Named("Hand swap", () -> PlayerSettings.handSwap),
                 new Named("Fast Place", () -> PlayerSettings.fastPlace),
                 new Named("Auto Tools", () -> PlayerSettings.autoTools),

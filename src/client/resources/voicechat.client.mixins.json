@@ -33,6 +33,7 @@
     "ZoomFovMixin",
     "ZoomSensitivityMixin",
     "HudMetricsMouseMixin",
+    "VoiceVolumeMouseMixin",
     "HotbarDockMixin",
     "ScoreboardHudMixin",
     "DebugRendererMixin",
