@@ -24,6 +24,7 @@
     "DockBarsScaleMixin",
     "ZoomFovMixin",
     "ZoomSensitivityMixin",
+    "HudMetricsMouseMixin",
     "HotbarDockMixin",
     "ScoreboardHudMixin",
     "DebugRendererMixin",

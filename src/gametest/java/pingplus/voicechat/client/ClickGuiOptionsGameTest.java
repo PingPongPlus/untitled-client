@@ -47,12 +47,13 @@ final class ClickGuiOptionsGameTest {
             });
             context.waitFor(client -> client.gameMode.getPlayerMode() == GameType.SURVIVAL);
             context.waitTicks(60);
+            HudMetricsGameTest.run(context);
             captureHud(context);
             context.setScreen(() -> new ClickGuiScreen(fps,VoicechatClient.openGuiKey(),coordinates,new ArraylistHud(fps,coordinates)));
             context.waitTicks(10);
             context.takeScreenshot("clickgui-gears");
 
-            List<String> groups = List.of("FPS options","Ping options","XYZ options","Spotify options",
+            List<String> groups = List.of("FPS options","Ping options","CPS options","Speed options","XYZ options","Spotify options",
                     "Arraylist options","Scoreboard options","Chat options","Bars","Dock options","Logo options",
                     "Damage glass options","Zoom options","Glass style","Weather Glass options","Player scale");
             for (String name : groups) {

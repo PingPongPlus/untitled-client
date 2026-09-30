@@ -118,6 +118,14 @@ tasks.register('weatherGlassTest', JavaExec) {
 }
 tasks.named('check') { dependsOn 'weatherGlassTest' }
 
+tasks.register('hudMetricsTest', JavaExec) {
+    dependsOn voiceTestClasses, clientClasses
+    classpath = sourceSets.voiceTest.runtimeClasspath
+    mainClass = 'pingplus.voicechat.client.HudMetricsTest'
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+}
+tasks.named('check') { dependsOn 'hudMetricsTest' }
+
 
 jar {
     from("LICENSE.txt") {

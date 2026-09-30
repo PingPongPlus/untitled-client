@@ -40,6 +40,11 @@ final class ClickGuiAllOffGameTest {
             toggles.add(saved(PingHud.INSTANCE::isEnabled,PingHud.INSTANCE::toggle));
             toggles.add(saved(PingHud.INSTANCE::isGlass,PingHud.INSTANCE::toggleGlass));
             toggles.add(saved(PingHud.INSTANCE::isEdges,PingHud.INSTANCE::toggleEdges));
+            for (var metrics : List.of(MetricsHud.CPS,MetricsHud.SPEED)) {
+                toggles.add(saved(metrics::isEnabled,metrics::toggle));
+                toggles.add(saved(metrics::isGlass,metrics::toggleGlass));
+                toggles.add(saved(metrics::isEdges,metrics::toggleEdges));
+            }
             toggles.add(saved(ChatHud.INSTANCE::isEnabled,ChatHud.INSTANCE::toggle));
             toggles.add(saved(ChatHud.INSTANCE::isGlass,ChatHud.INSTANCE::toggleGlass));
             toggles.add(saved(ChatHud.INSTANCE::isEdges,ChatHud.INSTANCE::toggleEdges));
@@ -88,6 +93,7 @@ final class ClickGuiAllOffGameTest {
                         && GlassEffectSettings.blurStep()==blur && GlassEffectSettings.tintColor()==color,"All off changed numeric settings");
                 checkSavedOff("voicechat-spotify-hud.properties","enabled","edges","musicGlass");
                 checkSavedOff("voicechat-logo-hud.properties","enabled","glass","edges");
+                checkSavedOff("voicechat-metrics-hud.properties","cps","cpsGlass","cpsEdges","speed","speedGlass","speedEdges");
                 checkSavedOff("voicechat-glass-effects.properties","customTint");
             });
             pressAllOff(context);

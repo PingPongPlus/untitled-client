@@ -80,6 +80,16 @@ public final class ClickGuiScreen extends Screen {
             toggle(hud,"Ping glass",PingHud.INSTANCE::isGlass,PingHud.INSTANCE::toggleGlass);
             toggle(hud,"Ping edges",PingHud.INSTANCE::isEdges,PingHud.INSTANCE::toggleEdges);
         });
+        toggle(hud,"CPS",MetricsHud.CPS::isEnabled,MetricsHud.CPS::toggle);
+        options(hud,"CPS options",()-> {
+            toggle(hud,"CPS glass",MetricsHud.CPS::isGlass,MetricsHud.CPS::toggleGlass);
+            toggle(hud,"CPS edges",MetricsHud.CPS::isEdges,MetricsHud.CPS::toggleEdges);
+        });
+        toggle(hud,"Speed",MetricsHud.SPEED::isEnabled,MetricsHud.SPEED::toggle);
+        options(hud,"Speed options",()-> {
+            toggle(hud,"Speed glass",MetricsHud.SPEED::isGlass,MetricsHud.SPEED::toggleGlass);
+            toggle(hud,"Speed edges",MetricsHud.SPEED::isEdges,MetricsHud.SPEED::toggleEdges);
+        });
         toggle(hud,"Coordinates",coordinatesHud::isEnabled,coordinatesHud::toggle);
         options(hud,"XYZ options",()-> {
             toggle(hud,"XYZ glass",coordinatesHud::isGlass,coordinatesHud::toggleGlass);
