@@ -12,6 +12,7 @@ Fast Place is available on `master` under **Right Shift → AUTOMATION** for fas
 held-button block placement. See [Fast Place controls](docs/FAST_PLACE.md).
 Auto Tools (**AUTOMATION**) and Xray (**RENDER**) are also on `master`.
 See [mining controls](docs/MINING_FEATURES.md).
+Storage ESP is under **RENDER** on `master`. See [storage controls](docs/STORAGE_ESP.md).
 Still in development check out a quick demo below!
 
 Music-reactive glass: enable **HUD → Spotify options → Music-reactive glass** in the control center.

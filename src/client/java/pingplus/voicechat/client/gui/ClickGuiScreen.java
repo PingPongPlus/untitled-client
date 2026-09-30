@@ -145,6 +145,15 @@ public final class ClickGuiScreen extends Screen {
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
         toggle(render,"Projectile preview",()->PlayerSettings.projectilePreview,()->PlayerSettings.projectilePreview=!PlayerSettings.projectilePreview);
         toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
+        toggle(render,"Storage ESP",()->PlayerSettings.storageEsp,pingplus.voicechat.client.StorageEspFeature::toggle);
+        disclosure(render,"Storage ESP options");
+        if (expanded.getOrDefault("Storage ESP options",false)) {
+            for (var kind : pingplus.voicechat.client.StorageEspFeature.Kind.values())
+                toggle(render,kind.label,kind::enabled,kind::toggle);
+            toggle(render,"Filled boxes",()->PlayerSettings.storageEspFill,()->PlayerSettings.storageEspFill=!PlayerSettings.storageEspFill);
+            add(render,new CombatSlider(panelWidth-20,"Storage range",16,128,16,
+                    pingplus.voicechat.client.StorageEspFeature::range,v->pingplus.voicechat.client.StorageEspFeature.setRange((int)v)),26);
+        }
         toggle(render,"Xray",pingplus.voicechat.client.XrayFeature::enabled,pingplus.voicechat.client.XrayFeature::toggle);
         disclosure(render,"Xray options");
         if (expanded.getOrDefault("Xray options",false)) {

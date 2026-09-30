@@ -15,6 +15,13 @@ public final class PlayerSettings {
     public static boolean autoToolsRestore = true;
     public static boolean hitboxes = false;
     public static boolean projectilePreview = false;
+    public static boolean storageEsp = false;
+    public static boolean storageEspChests = true;
+    public static boolean storageEspBarrels = true;
+    public static boolean storageEspShulkers = true;
+    public static boolean storageEspEnderChests = true;
+    public static boolean storageEspFill = false;
+    public static int storageEspRange = 64;
     public static int handSwapIntervalTicks = 6;
     public static boolean direction = false;
     public static boolean slayerBossHighlight = false;

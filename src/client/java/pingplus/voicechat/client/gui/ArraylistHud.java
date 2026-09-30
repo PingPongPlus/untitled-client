@@ -111,6 +111,7 @@ public final class ArraylistHud {
                 new Named("Projectile preview", () -> PlayerSettings.projectilePreview),
                 new Named("Fullbright", () -> PlayerSettings.fullbright),
                 new Named("Xray", pingplus.voicechat.client.XrayFeature::enabled),
+                new Named("Storage ESP", () -> PlayerSettings.storageEsp),
                 new Named("Zoom", () -> PlayerSettings.zoom),
                 new Named("Body", () -> PlayerSettings.mainBodyPart),
                 new Named("Left arm", () -> PlayerSettings.leftArm),
