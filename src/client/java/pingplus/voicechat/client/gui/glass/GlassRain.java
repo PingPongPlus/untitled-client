@@ -17,6 +17,7 @@ public final class GlassRain {
     public static void draw(GuiGraphicsExtractor graphics) {
         if (Minecraft.getInstance().gui.overlay() instanceof LoadingOverlay) return;
         if (!GlassRainSettings.isEnabled()) return;
+        if (WeatherGlassSettings.enabled()) return;
         GlassBackdrop.request();
         graphics.nextStratum();
         // Wall time keeps rain moving while the integrated server is paused.

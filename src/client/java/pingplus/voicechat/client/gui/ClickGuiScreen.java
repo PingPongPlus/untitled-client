@@ -141,6 +141,30 @@ public final class ClickGuiScreen extends Screen {
         add(render,new CornerSlider(panelWidth-20),26);
         add(render,new EffectSlider(panelWidth-20,"Glass blur",GlassEffectSettings::blurStep,GlassEffectSettings::setBlur),26);
         add(render,new EffectSlider(panelWidth-20,"Glass shadow",GlassEffectSettings::shadowStep,GlassEffectSettings::setShadow),26);
+        toggle(render,"Weather Glass",WeatherGlassSettings::enabled,WeatherGlassSettings::toggleEnabled);
+        disclosure(render,"Weather Glass options");
+        if (expanded.getOrDefault("Weather Glass options",false)) {
+            add(render,new Button(0,0,panelWidth-20,18,Component.literal("Weather mode: "+WeatherGlassSettings.mode().label),
+                    b->{WeatherGlassSettings.cycleMode();rebuildWidgets();},supplier->supplier.get()) {
+                @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                    if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
+                    text(g,getMessage().getString(),getX()+4,getY()+4,GlassStyle.MUTED);
+                }
+            },18);
+            var alwaysWeather = new Toggle("Always active",WeatherGlassSettings::alwaysActive,WeatherGlassSettings::toggleAlwaysActive);
+            alwaysWeather.setTooltip(net.minecraft.client.gui.components.Tooltip.create(Component.literal(
+                    "Rain and Frost stay active everywhere, including indoors and menus. Automatic always follows local weather and shelter.")));
+            add(render,alwaysWeather,18);
+            add(render,new EffectSlider(panelWidth-20,"Weather intensity",WeatherGlassSettings::intensity,WeatherGlassSettings::setIntensity,100,1),26);
+            add(render,new Button(0,0,panelWidth-20,38,Component.empty(),b->{},supplier->supplier.get()) {
+                { active=false; }
+                @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                    text(g,"Always active:",getX()+4,getY()+2,GlassStyle.MUTED);
+                    text(g,"Rain / Frost anywhere",getX()+4,getY()+14,GlassStyle.MUTED);
+                    text(g,"Auto: weather + shelter",getX()+4,getY()+26,GlassStyle.MUTED);
+                }
+            },38);
+        }
         Category player = category("PLAYER", "Shape your presence");
         toggle(player,"Body",()->PlayerSettings.mainBodyPart,()->PlayerSettings.mainBodyPart=!PlayerSettings.mainBodyPart);
         toggle(player,"Left arm",()->PlayerSettings.leftArm,()->PlayerSettings.leftArm=!PlayerSettings.leftArm);

@@ -63,6 +63,7 @@ public final class GlassButtonRenderer {
     private static void drawShape(GuiGraphicsExtractor graphics, int x, int y, int width, int height, int data,
                                   RenderPipeline pipeline, boolean square) {
         if (width <= 0 || height <= 0) return;
+        float opacity = (data >>> 24) / 255f;
         if (net.minecraft.client.Minecraft.getInstance().gui.overlay() instanceof net.minecraft.client.gui.screens.LoadingOverlay) {
             GlassStyle.round(graphics, x, y, width, height, square ? 0 : 12, GlassStyle.alpha(0xFF263D54, (data >>> 24) / 255f));
             return;
@@ -86,6 +87,8 @@ public final class GlassButtonRenderer {
         if (scissor != null) bounds = bounds.intersection(scissor);
         if (bounds == null) return;
         graphics.guiRenderState.addGuiElement(new GlassState(pipeline, pose, x, y, width, height, data, padding, scissor, bounds));
+        WeatherGlass.draw(graphics, x, y, width, height, opacity, square,
+                GlassPipelines.isButton(pipeline) ? 0 : pipeline == GlassPipelines.CONTROL ? 1 : pipeline == GlassPipelines.BOSS_BAR ? 3 : 2);
     }
 
     private record GlassState(RenderPipeline pipeline, Matrix3x2f pose, int x, int y, int width, int height, int data, int padding,

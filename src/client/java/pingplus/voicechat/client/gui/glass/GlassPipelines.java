@@ -8,6 +8,12 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 
 public final class GlassPipelines {
+    public static final RenderPipeline WEATHER = RenderPipelines.register(
+            RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
+                    .withLocation(id("pipeline/weather_glass"))
+                    .withVertexShader(id("core/weather_glass"))
+                    .withFragmentShader(id("core/weather_glass"))
+                    .withCull(false).build());
     public static final RenderPipeline RAIN = RenderPipelines.register(
             RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
                     .withLocation(id("pipeline/glass_rain"))
