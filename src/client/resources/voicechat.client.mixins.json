@@ -4,6 +4,9 @@
   "package": "pingplus.voicechat.mixin.client",
   "compatibilityLevel": "JAVA_25",
   "client": [
+    "AutoToolsMixin",
+    "XraySectionMixin",
+    "XrayRegionMixin",
     "FastPlaceMixin",
     "MinecraftPlaceDelayAccessor",
     "KillAuraFrameMixin",

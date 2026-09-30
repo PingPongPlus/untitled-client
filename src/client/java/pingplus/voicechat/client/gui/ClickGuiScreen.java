@@ -145,6 +145,13 @@ public final class ClickGuiScreen extends Screen {
         toggle(render,"Hitboxes",()->PlayerSettings.hitboxes,()->PlayerSettings.hitboxes=!PlayerSettings.hitboxes);
         toggle(render,"Projectile preview",()->PlayerSettings.projectilePreview,()->PlayerSettings.projectilePreview=!PlayerSettings.projectilePreview);
         toggle(render,"Fullbright",()->PlayerSettings.fullbright,()->PlayerSettings.fullbright=!PlayerSettings.fullbright);
+        toggle(render,"Xray",pingplus.voicechat.client.XrayFeature::enabled,pingplus.voicechat.client.XrayFeature::toggle);
+        disclosure(render,"Xray options");
+        if (expanded.getOrDefault("Xray options",false)) {
+            for (var mineral : pingplus.voicechat.client.XrayFeature.Mineral.values())
+                toggle(render,mineral.label,()->pingplus.voicechat.client.XrayFeature.selected(mineral),
+                        ()->pingplus.voicechat.client.XrayFeature.toggle(mineral));
+        }
         toggle(render,"Zoom",()->PlayerSettings.zoom,()->PlayerSettings.zoom=!PlayerSettings.zoom);
         add(render,new ZoomStrengthSlider(panelWidth-20),26);
         toggle(render,"Shoulder cam",()->PlayerSettings.shoulderCam,()->PlayerSettings.shoulderCam=!PlayerSettings.shoulderCam);
@@ -189,6 +196,13 @@ public final class ClickGuiScreen extends Screen {
 
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
         Category automation = category("AUTOMATION", "Small actions, effortless");
+        toggle(automation,"Auto Tools",()->PlayerSettings.autoTools,()->{
+            PlayerSettings.autoTools=!PlayerSettings.autoTools;
+            if (!PlayerSettings.autoTools) pingplus.voicechat.client.AutoToolsFeature.finish(net.minecraft.client.Minecraft.getInstance());
+        });
+        disclosure(automation,"Auto Tools options");
+        if (expanded.getOrDefault("Auto Tools options",false))
+            toggle(automation,"Restore slot",()->PlayerSettings.autoToolsRestore,()->PlayerSettings.autoToolsRestore=!PlayerSettings.autoToolsRestore);
         toggle(automation,"Fast Place",()->PlayerSettings.fastPlace,()->PlayerSettings.fastPlace=!PlayerSettings.fastPlace);
         disclosure(automation,"Fast Place options");
         if (expanded.getOrDefault("Fast Place options",false)) {

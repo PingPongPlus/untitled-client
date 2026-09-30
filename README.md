@@ -10,6 +10,8 @@ Ping is available under **Right Shift → HUD**. Move and resize it with **G**.
 Its enabled state, glass background, and edges are saved. See [ping controls](docs/PING.md).
 Fast Place is available on `master` under **Right Shift → AUTOMATION** for faster
 held-button block placement. See [Fast Place controls](docs/FAST_PLACE.md).
+Auto Tools (**AUTOMATION**) and Xray (**RENDER**) are also on `master`.
+See [mining controls](docs/MINING_FEATURES.md).
 Still in development check out a quick demo below!
 
 Music-reactive glass: enable **HUD → Spotify options → Music-reactive glass** in the control center.

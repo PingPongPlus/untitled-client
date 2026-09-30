@@ -110,6 +110,7 @@ public final class ArraylistHud {
                 new Named("Hitboxes", () -> PlayerSettings.hitboxes),
                 new Named("Projectile preview", () -> PlayerSettings.projectilePreview),
                 new Named("Fullbright", () -> PlayerSettings.fullbright),
+                new Named("Xray", pingplus.voicechat.client.XrayFeature::enabled),
                 new Named("Zoom", () -> PlayerSettings.zoom),
                 new Named("Body", () -> PlayerSettings.mainBodyPart),
                 new Named("Left arm", () -> PlayerSettings.leftArm),
@@ -117,6 +118,7 @@ public final class ArraylistHud {
                 new Named("Direction", () -> PlayerSettings.direction),
                 new Named("Hand swap", () -> PlayerSettings.handSwap),
                 new Named("Fast Place", () -> PlayerSettings.fastPlace),
+                new Named("Auto Tools", () -> PlayerSettings.autoTools),
                 new Named("KillAura", () -> PlayerSettings.killAura)
         );
     }

@@ -13,7 +13,7 @@ import pingplus.voicechat.client.PlayerSettings;
 public abstract class FullbrightMixin {
     @Inject(method = "extract", at = @At("TAIL"))
     private void voicechat$fullbright(LightmapRenderState state, float partialTick, CallbackInfo ci) {
-        if (!PlayerSettings.fullbright) return;
+        if (!PlayerSettings.fullbright && !pingplus.voicechat.client.XrayFeature.enabled()) return;
         state.ambientColor = LightmapRenderStateExtractor.WHITE;
         state.blockFactor = 0;
         state.skyFactor = 0;

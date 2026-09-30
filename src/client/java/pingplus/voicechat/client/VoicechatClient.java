@@ -158,6 +158,7 @@ public class VoicechatClient implements ClientModInitializer {
             }
 
             handSwap.tick(client);
+            AutoToolsFeature.tick(client);
             KillAuraFeature.tick(client);
             while (killauraKey != null && killauraKey.consumeClick()) {
                 PlayerSettings.killAura = !PlayerSettings.killAura;
