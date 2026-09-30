@@ -9,7 +9,7 @@ import java.util.Properties;
 public final class SpotifySettings {
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("voicechat-spotify-hud.properties");
     private static boolean enabled = true;
-    private static boolean edges = true;
+    private static boolean edges = false;
     private static boolean musicGlass;
     private static int musicIntensity = 35;
     private static double horizontal = 1, vertical = 0;
@@ -17,7 +17,7 @@ public final class SpotifySettings {
         try (var reader = Files.newBufferedReader(FILE)) {
             Properties p = new Properties(); p.load(reader);
             enabled = Boolean.parseBoolean(p.getProperty("enabled", "true"));
-            edges = Boolean.parseBoolean(p.getProperty("edges", "true"));
+            edges = Boolean.parseBoolean(p.getProperty("edges", "false"));
             musicGlass = Boolean.parseBoolean(p.getProperty("musicGlass", "false"));
             musicIntensity = Math.clamp(Integer.parseInt(p.getProperty("musicIntensity", "35")), 0, 100);
             horizontal = fraction(Double.parseDouble(p.getProperty("x", "1")));

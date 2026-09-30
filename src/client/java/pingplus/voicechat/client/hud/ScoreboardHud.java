@@ -14,7 +14,7 @@ import java.util.List;
 public final class ScoreboardHud {
     public static final ScoreboardHud INSTANCE = new ScoreboardHud();
     private static final int PAD = 5, GAP = 6;
-    private boolean enabled = true, glass = true, edges = true;
+    private boolean enabled = true, glass = true, edges = false;
     private View view;
 
     public boolean isEnabled() { return enabled; }

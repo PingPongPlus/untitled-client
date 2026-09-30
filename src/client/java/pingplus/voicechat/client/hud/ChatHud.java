@@ -17,7 +17,7 @@ public final class ChatHud {
     private static final int PAD = 8;
     /** Logical bottom anchor for the gameplay render; consumed by ChatRelocateMixin. */
     private static final ThreadLocal<Integer> LOGICAL_ANCHOR = new ThreadLocal<>();
-    private boolean enabled = true, glass = true, edges = true;
+    private boolean enabled = true, glass = true, edges = false;
 
     public boolean isEnabled() { return enabled; }
     public void toggle() { enabled = !enabled; }

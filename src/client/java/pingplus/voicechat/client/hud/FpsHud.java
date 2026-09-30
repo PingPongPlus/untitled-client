@@ -7,7 +7,7 @@ import pingplus.voicechat.client.gui.glass.GlassStyle;
 /** Holds the FPS toggle and draws its display during gameplay. */
 public final class FpsHud {
     private boolean enabled = true;
-    private boolean glass = true, edges = true;
+    private boolean glass = true, edges = false;
 
     public boolean isGlass() { return glass; }
     public void toggleGlass() { glass = !glass; }

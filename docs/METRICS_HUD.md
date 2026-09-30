@@ -1,7 +1,7 @@
 # CPS and speed
 
 Right Shift → HUD has independent **CPS** and **Speed** toggles. Their gears open
-glass and edge options, using the global glass tint. Both are enabled by default;
+glass and edge options, using the global glass tint. Both widgets and their glass are enabled by default; edges start off.
 **All off** disables them and their options. Preferences survive restarts.
 
 - **CPS** shows left (`L`) and right (`R`) mouse presses during the last second.

@@ -99,8 +99,7 @@ vanilla include fonts directly for missing glyphs, avoiding a default/UI referen
 In HUD, open **Arraylist options**. Enable **Glass** and **Per-module boxes** for
 separate square backgrounds sized to each enabled entry. Rows share a right edge,
 use equal padding and center their text vertically. **Edges** toggles the glass
-outline and edge refraction for this HUD only. The single panel and visible edges
-remain the defaults. Arraylist options follow the other HUD toggles' session lifetime.
+outline and edge refraction for this HUD only. The arraylist and edges start off; a single panel is the default layout when enabled. Arraylist options follow the other HUD toggles' session lifetime.
 
 In RENDER, **Glass blur** and **Glass shadow** range from 0% (off) to 200% in 25%
 steps. Both default to 100%, preserving the existing appearance. Blur changes the
