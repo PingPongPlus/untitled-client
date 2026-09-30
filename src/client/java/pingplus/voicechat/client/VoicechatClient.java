@@ -53,6 +53,28 @@ public class VoicechatClient implements ClientModInitializer {
     public static KeyMapping voiceMenuKey() { return voiceMenuKey; }
     public static KeyMapping talkKey() { return talkKey; }
     public static KeyMapping muteKey() { return muteKey; }
+    public static VoiceSettings voiceSettings() { return voiceConnection == null ? null : voiceConnection.settings; }
+    public static boolean isMiddleClickVolumeEnabled() {
+        var settings = voiceSettings();
+        return settings != null && settings.middleClickVolume;
+    }
+    public static void toggleMiddleClickVolume() {
+        var settings = voiceSettings();
+        if (settings == null) return;
+        settings.middleClickVolume = !settings.middleClickVolume;
+        settings.save();
+    }
+    /** Uses Minecraft's normal crosshair target, including its reach and obstruction checks. */
+    public static boolean openPlayerVoiceVolume(Minecraft client) {
+        var settings = voiceSettings();
+        if (settings == null || !settings.middleClickVolume || client.player == null || client.level == null
+                || client.gui.screen() != null || client.gui.overlay() != null || client.isPaused()) return false;
+        if (!(client.hitResult instanceof net.minecraft.world.phys.EntityHitResult hit)
+                || !(hit.getEntity() instanceof net.minecraft.world.entity.player.Player target)
+                || target == client.player || !target.isAlive() || target.isRemoved()) return false;
+        client.gui.setScreen(new PlayerVoiceVolumeScreen(target.getUUID(), target.getName(), settings));
+        return true;
+    }
     public static KeyMapping zoomKey() { return zoomKey; }
     public static KeyMapping shoulderCamKey() { return shoulderCamKey; }
 

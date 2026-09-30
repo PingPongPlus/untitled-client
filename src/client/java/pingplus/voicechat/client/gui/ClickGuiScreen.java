@@ -211,6 +211,7 @@ public final class ClickGuiScreen extends Screen {
         });
 
         toggle(player, "Direction", ()->PlayerSettings.direction,()->PlayerSettings.direction = !PlayerSettings.direction);
+        toggle(player,"Middle-click volume",VoicechatClient::isMiddleClickVolumeEnabled,VoicechatClient::toggleMiddleClickVolume);
         Category keys = category("KEYS", "Hotkeys, click then press");
         keyButton(keys, "GUI", VoicechatClient.openGuiKey());
         keyButton(keys, "HUD editor", VoicechatClient.hudEditorKey());

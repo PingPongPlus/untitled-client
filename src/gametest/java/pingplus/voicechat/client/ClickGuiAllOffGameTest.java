@@ -66,6 +66,7 @@ final class ClickGuiAllOffGameTest {
             toggles.add(saved(GlassEffectSettings::customTint,GlassEffectSettings::toggleCustomTint));
             toggles.add(saved(WeatherGlassSettings::enabled,WeatherGlassSettings::toggleEnabled));
             toggles.add(saved(WeatherGlassSettings::alwaysActive,WeatherGlassSettings::toggleAlwaysActive));
+            toggles.add(saved(VoicechatClient::isMiddleClickVolumeEnabled,VoicechatClient::toggleMiddleClickVolume));
         });
         try {
             context.runOnClient(client -> {
@@ -94,6 +95,7 @@ final class ClickGuiAllOffGameTest {
                 checkSavedOff("voicechat-spotify-hud.properties","enabled","edges","musicGlass");
                 checkSavedOff("voicechat-logo-hud.properties","enabled","glass","edges");
                 checkSavedOff("voicechat-metrics-hud.properties","cps","cpsGlass","cpsEdges","speed","speedGlass","speedEdges");
+                check(!VoiceSettings.load().middleClickVolume,"All off must save the middle-click volume setting");
                 checkSavedOff("voicechat-glass-effects.properties","customTint");
             });
             pressAllOff(context);

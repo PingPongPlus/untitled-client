@@ -113,7 +113,8 @@ public final class ArraylistHud {
                 new Named("Body", () -> PlayerSettings.mainBodyPart),
                 new Named("Left arm", () -> PlayerSettings.leftArm),
                 new Named("Right arm", () -> PlayerSettings.rightArm),
-                new Named("Direction", () -> PlayerSettings.direction)
+                new Named("Direction", () -> PlayerSettings.direction),
+                new Named("Middle-click volume", pingplus.voicechat.client.VoicechatClient::isMiddleClickVolumeEnabled)
         );
     }
 
