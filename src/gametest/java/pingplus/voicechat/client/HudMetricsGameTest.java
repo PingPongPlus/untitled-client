@@ -3,10 +3,10 @@ package pingplus.voicechat.client;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
-import pingplus.voicechat.client.gui.MetricsHud;
-import pingplus.voicechat.client.gui.hud.HudEditor;
-import pingplus.voicechat.client.gui.hud.HudEditorScreen;
-import pingplus.voicechat.client.hud.HudMetrics;
+import pingplus.voicechat.client.hud.MetricsHud;
+import pingplus.voicechat.client.hud.editor.HudEditor;
+import pingplus.voicechat.client.hud.editor.HudEditorScreen;
+import pingplus.voicechat.client.hud.metrics.HudMetrics;
 
 /** Runs inside the ClickGUI test's world, through Minecraft's actual input callbacks. */
 final class HudMetricsGameTest {

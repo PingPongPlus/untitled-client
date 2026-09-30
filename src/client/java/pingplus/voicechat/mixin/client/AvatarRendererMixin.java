@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import pingplus.voicechat.client.PlayerSettings;
 import pingplus.voicechat.client.VoicechatClient;
-import pingplus.voicechat.client.gui.VoiceNametag;
+import pingplus.voicechat.client.hud.VoiceNametag;
 
 @Mixin(AvatarRenderer.class)
 public abstract class AvatarRendererMixin {

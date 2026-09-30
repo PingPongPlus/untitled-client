@@ -1,5 +1,14 @@
 package pingplus.voicechat.client;
 
+import pingplus.voicechat.client.hud.ArraylistHud;
+import pingplus.voicechat.client.hud.ChatHud;
+import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.FpsHud;
+import pingplus.voicechat.client.hud.LogoHud;
+import pingplus.voicechat.client.hud.MetricsHud;
+import pingplus.voicechat.client.hud.PingHud;
+import pingplus.voicechat.client.hud.ScoreboardHud;
+
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -13,7 +22,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
 import pingplus.voicechat.client.damageglass.DamageGlassSettings;
-import pingplus.voicechat.client.gui.*;
+import pingplus.voicechat.client.gui.ClickGuiScreen;
 import pingplus.voicechat.client.gui.glass.*;
 import pingplus.voicechat.client.spotify.SpotifySettings;
 

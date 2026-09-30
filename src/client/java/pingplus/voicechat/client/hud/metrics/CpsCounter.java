@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.hud;
+package pingplus.voicechat.client.hud.metrics;
 
 import java.util.ArrayDeque;
 

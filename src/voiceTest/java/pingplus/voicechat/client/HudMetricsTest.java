@@ -1,7 +1,7 @@
 package pingplus.voicechat.client;
 
-import pingplus.voicechat.client.hud.CpsCounter;
-import pingplus.voicechat.client.hud.MovementSpeed;
+import pingplus.voicechat.client.hud.metrics.CpsCounter;
+import pingplus.voicechat.client.hud.metrics.MovementSpeed;
 
 public final class HudMetricsTest {
     public static void main(String[] args) {

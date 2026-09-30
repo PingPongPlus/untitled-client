@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pingplus.voicechat.client.gui.HotbarDock;
+import pingplus.voicechat.client.hud.HotbarDock;
 
 /** Lifts the health, hunger, armor, air and XP bars up when dock slots magnify into them. */
 @Mixin(Hud.class)

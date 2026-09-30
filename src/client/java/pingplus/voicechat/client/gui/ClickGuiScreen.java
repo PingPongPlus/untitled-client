@@ -1,5 +1,14 @@
 package pingplus.voicechat.client.gui;
 
+import pingplus.voicechat.client.hud.ArraylistHud;
+import pingplus.voicechat.client.hud.ChatHud;
+import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.FpsHud;
+import pingplus.voicechat.client.hud.LogoHud;
+import pingplus.voicechat.client.hud.MetricsHud;
+import pingplus.voicechat.client.hud.PingHud;
+import pingplus.voicechat.client.hud.ScoreboardHud;
+
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphicsExtractor;

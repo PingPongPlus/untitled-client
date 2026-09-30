@@ -1,4 +1,8 @@
-package pingplus.voicechat.client.spotify;
+package pingplus.voicechat.client.hud;
+
+import pingplus.voicechat.client.spotify.SpotifyClient;
+import pingplus.voicechat.client.spotify.SpotifyPlayback;
+import pingplus.voicechat.client.spotify.SpotifySettings;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import pingplus.voicechat.client.gui.HotbarDock;
+import pingplus.voicechat.client.hud.HotbarDock;
 
 /** Replaces the vanilla item hotbar row with the macOS-style dock while enabled. */
 @Mixin(Hud.class)

@@ -1,4 +1,4 @@
-package pingplus.voicechat.client.gui;
+package pingplus.voicechat.client.hud;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -8,7 +8,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import pingplus.voicechat.client.gui.glass.GlassStyle;
-import pingplus.voicechat.client.hud.HudMetrics;
+import pingplus.voicechat.client.hud.metrics.HudMetrics;
 
 /** CPS and speed share the existing glass styling and HUD editor. */
 public final class MetricsHud {

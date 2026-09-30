@@ -1,12 +1,17 @@
 package pingplus.voicechat.client;
 
+import pingplus.voicechat.client.hud.ArraylistHud;
+import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.FpsHud;
+import pingplus.voicechat.client.hud.PingHud;
+
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.input.MouseButtonInfo;
-import pingplus.voicechat.client.gui.*;
-import pingplus.voicechat.client.gui.hud.HudEditor;
-import pingplus.voicechat.client.gui.hud.HudEditorScreen;
+import pingplus.voicechat.client.gui.ClickGuiScreen;
+import pingplus.voicechat.client.hud.editor.HudEditor;
+import pingplus.voicechat.client.hud.editor.HudEditorScreen;
 
 /** Confirms the reduced client starts without removed feature classes and retains its HUD. */
 public final class LegitClientGameTest {
@@ -19,7 +24,7 @@ public final class LegitClientGameTest {
                         "pingplus.voicechat.client.AutoToolsFeature", "pingplus.voicechat.client.FastPlaceFeature",
                         "pingplus.voicechat.client.XrayFeature", "pingplus.voicechat.client.StorageEspFeature",
                         "pingplus.voicechat.client.ProjectilePreviewRenderer", "pingplus.voicechat.client.gui.PlayerHealthBarRenderer",
-                        "pingplus.voicechat.client.gui.MobHealthBarRenderer", "pingplus.voicechat.client.slayer.SlayerOutlineHook",
+                        "pingplus.voicechat.client.hud.MobHealthBarRenderer", "pingplus.voicechat.client.slayer.SlayerOutlineHook",
                         "pingplus.voicechat.mixin.client.FullbrightMixin", "pingplus.voicechat.client.gui.NotificationHud" }) {
                     try { Class.forName(removed); throw new AssertionError("Removed feature is loadable: " + removed); }
                     catch (ClassNotFoundException expected) { }

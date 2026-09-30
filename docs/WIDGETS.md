@@ -1,8 +1,9 @@
 # Client widgets
 
-Every on-screen feature that appears during gameplay is a HUD widget. Drag, resize,
-control hit-testing and layout persistence are shared. Liquid glass is **optional** and
-only used by card-style widgets such as Spotify.
+HUD widgets live in `src/client/java/pingplus/voicechat/client/hud/`, with shared
+layout/editing in `hud/editor/` and measurements in `hud/metrics/`.
+Drag, resize, control hit-testing and layout persistence are shared. Liquid glass
+is **optional**. See [ADDING_FEATURES.md](ADDING_FEATURES.md) for a short FPS example.
 
 ## Path from feature to widget
 
@@ -10,14 +11,14 @@ only used by card-style widgets such as Spotify.
    independent of rendering.
 2. **Draw content** — a method `render(GuiGraphicsExtractor g, ...)` that paints in
    **local coordinates** starting at `(0, 0)`.
-   - Simple overlays (FPS, XYZ): just draw text, like `FpsHud`.
+   - Text overlays (FPS, XYZ): draw text and optional glass, like `FpsHud`.
    - Card widgets: call `GlassStyle.widget` or `GlassStyle.surface`, then
      `GlassStyle.line` with `TEXT` / `MUTED` / `STATUS`. See `SpotifyWidget`.
 3. **Register** in `VoicechatClient.initializeClientFeatures()` (or voice init):
 
    ```java
    HudEditor.register(new HudEditor.Entry(
-           "clock", "Clock", 120, 18,
+           "clock", "Clock", () -> 120, () -> 18,
            (sw, sh) -> 18, (sw, sh) -> 66,
            clock::isEnabled,
            (g, mx, my, dt, editing) -> clock.render(g),
