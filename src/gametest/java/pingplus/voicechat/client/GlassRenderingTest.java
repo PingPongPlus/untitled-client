@@ -17,6 +17,12 @@ import pingplus.voicechat.client.hud.ScoreboardHud;
 public final class GlassRenderingTest implements FabricClientGameTest {
     @Override
     public void runTest(ClientGameTestContext context) {
+        if (Boolean.getBoolean("voicechat.forceSneakTest")) {
+            ForceSneakGameTest.run(context);
+            if (Boolean.getBoolean("voicechat.crosshairTest")) CustomCrosshairGameTest.run(context);
+            if (Boolean.getBoolean("voicechat.legitTest")) LegitClientGameTest.run(context);
+            return;
+        }
         if (Boolean.getBoolean("voicechat.crosshairTest")) {
             CustomCrosshairGameTest.run(context);
             return;

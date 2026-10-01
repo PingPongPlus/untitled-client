@@ -8,6 +8,7 @@ public final class PlayerSettings {
     public static boolean mainBodyPart = true;
     public static boolean leftArm = true;
     public static boolean rightArm = true;
+    public static boolean forceSneak = false;
     public static boolean hitboxes = false;
     public static boolean direction = false;
     public static boolean dockHotbar = true;

@@ -45,6 +45,7 @@ public final class LegitClientGameTest {
                     check(!labels.contains(removed), "removed menu control: " + removed);
                 check(labels.contains("Ping") && labels.contains("Spotify") && labels.contains("HUD editor: G"), "retained controls");
                 check(labels.contains("All off") && labels.contains("Glass style") && labels.contains("FPS options"), "shared UI controls");
+                check(labels.contains("Crosshair") && labels.contains("Crosshair options") && labels.contains("Force Sneak"), "new shared features");
             });
             context.takeScreenshot("legit-control-center");
             context.runOnClient(client -> {
@@ -68,6 +69,7 @@ public final class LegitClientGameTest {
                 screen.onClose();
             });
             context.waitTicks(5); context.takeScreenshot("legit-gameplay");
+            System.out.println("PASS: legit feature exclusions, shared crosshair/Force Sneak controls and retained HUD editing");
         }
     }
     private static void check(boolean ok, String message) { if (!ok) throw new AssertionError(message); }
