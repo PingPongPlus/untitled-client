@@ -117,6 +117,7 @@ public final class ArraylistHud {
                 new Named("Storage ESP", () -> PlayerSettings.storageEsp),
                 new Named("Zoom", () -> PlayerSettings.zoom),
                 new Named("Body", () -> PlayerSettings.mainBodyPart),
+                new Named("Force Sneak", () -> PlayerSettings.forceSneak),
                 new Named("Left arm", () -> PlayerSettings.leftArm),
                 new Named("Right arm", () -> PlayerSettings.rightArm),
                 new Named("Direction", () -> PlayerSettings.direction),

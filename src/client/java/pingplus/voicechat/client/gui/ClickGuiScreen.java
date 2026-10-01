@@ -271,6 +271,7 @@ public final class ClickGuiScreen extends Screen {
             },38);
         });
         Category player = category("PLAYER", "Shape your presence");
+        toggle(player,"Force Sneak",()->PlayerSettings.forceSneak,()->PlayerSettings.forceSneak=!PlayerSettings.forceSneak);
         toggle(player,"Body",()->PlayerSettings.mainBodyPart,()->PlayerSettings.mainBodyPart=!PlayerSettings.mainBodyPart);
         toggle(player,"Left arm",()->PlayerSettings.leftArm,()->PlayerSettings.leftArm=!PlayerSettings.leftArm);
         toggle(player,"Right arm",()->PlayerSettings.rightArm,()->PlayerSettings.rightArm=!PlayerSettings.rightArm);

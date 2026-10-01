@@ -38,3 +38,4 @@ HUD edge toggles, the Arraylist, CPS, Speed, and Keystrokes start off. Existing 
 
 For HUD widgets and their separate layout editor, see [WIDGETS.md](WIDGETS.md).
 For the fixed-center reticle and its live preview, see [CROSSHAIR.md](CROSSHAIR.md).
+For sneaking while inventories and other screens are open, see [FORCE_SNEAK.md](FORCE_SNEAK.md).
