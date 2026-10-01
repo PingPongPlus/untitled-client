@@ -22,7 +22,7 @@ public final class MetricsHud {
     private MetricsHud(String key, String minimumText) {
         this.key = key;
         this.minimumText = minimumText;
-        enabled = value(key);
+        enabled = Boolean.parseBoolean(PREFERENCES.getProperty(key, "false"));
         glass = value(key + "Glass");
         edges = Boolean.parseBoolean(PREFERENCES.getProperty(key + "Edges", "false"));
     }
