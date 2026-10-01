@@ -16,10 +16,10 @@ import java.util.function.BooleanSupplier;
 public final class ArraylistHud {
     private static final int LINE = 11;
     private static final int PAD = 4;
-    private boolean enabled = true;
+    private boolean enabled = false;
     private boolean glass = true;
     private boolean rectangles;
-    private boolean edges = true;
+    private boolean edges = false;
     private final FpsHud fpsHud;
     private final CoordinatesHud coordinatesHud;
 

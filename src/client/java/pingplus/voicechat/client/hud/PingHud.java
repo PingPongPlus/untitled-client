@@ -12,13 +12,13 @@ import java.util.Properties;
 public final class PingHud {
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("voicechat-info-hud.properties");
     public static final PingHud INSTANCE = new PingHud();
-    private boolean enabled = true, glass = true, edges = true;
+    private boolean enabled = true, glass = true, edges = false;
     private PingHud() {
         try (var reader = Files.newBufferedReader(FILE)) {
             Properties values = new Properties(); values.load(reader);
             enabled = Boolean.parseBoolean(values.getProperty("ping", "true"));
             glass = Boolean.parseBoolean(values.getProperty("pingGlass", "true"));
-            edges = Boolean.parseBoolean(values.getProperty("pingEdges", "true"));
+            edges = Boolean.parseBoolean(values.getProperty("pingEdges", "false"));
         } catch (IOException | IllegalArgumentException ignored) { }
     }
 

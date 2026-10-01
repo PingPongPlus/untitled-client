@@ -34,4 +34,6 @@ invalid numeric input, focus, dragging,
 closing, and scrolling after a resize, and saves screenshots in
 `build/run/clientGameTest/screenshots`.
 
+HUD edge toggles and the Arraylist start off. Existing saved edge preferences are respected.
+
 For HUD widgets and their separate layout editor, see [WIDGETS.md](WIDGETS.md).

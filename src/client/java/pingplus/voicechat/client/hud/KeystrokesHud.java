@@ -21,7 +21,7 @@ public final class KeystrokesHud {
     public static final KeystrokesHud INSTANCE = new KeystrokesHud();
     public enum Key { FORWARD, LEFT, BACKWARD, RIGHT, ATTACK, USE, JUMP }
     private final float[] highlights = new float[Key.values().length];
-    private boolean enabled = true, glass = true, edges = true, mouseButtons = true, spaceBar = true;
+    private boolean enabled = true, glass = true, edges = false, mouseButtons = true, spaceBar = true;
     private long lastFrame;
 
     private KeystrokesHud() {
@@ -30,7 +30,7 @@ public final class KeystrokesHud {
         catch (IOException | IllegalArgumentException ignored) { }
         enabled = value(values, "enabled");
         glass = value(values, "glass");
-        edges = value(values, "edges");
+        edges = Boolean.parseBoolean(values.getProperty("edges", "false"));
         mouseButtons = value(values, "mouseButtons");
         spaceBar = value(values, "spaceBar");
     }

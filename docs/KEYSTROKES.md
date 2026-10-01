@@ -6,5 +6,5 @@
 - Glass uses the existing HUD material, global tint, and corner style. Disable glass for transparent labels.
 - Menus, the HUD editor, pauses, and an unfocused game show idle keys.
 - **G** opens the existing editor for dragging, resizing, and right-click reset.
-- All options start enabled, survive restarts, and are included in **All off**.
+- Edges start off; the other options start enabled. Preferences survive restarts and are included in **All off**.
 - Options: `config/voicechat-keystrokes-hud.properties`; layout: `config/voicechat-hud-layout.properties`.

@@ -23,7 +23,7 @@ public final class FpsHud {
         var client = Minecraft.getInstance();
         if (!enabled || client.player == null) return;
         g.nextStratum();
-        GlassStyle.surface(g, 0, 0, width(), height(), .88f, .08f, true);
+        GlassStyle.surface(g, 0, 0, width(), height(), .88f, .08f, false);
         g.nextStratum();
         g.text(client.font, text(), 8, 5, GlassStyle.TEXT, false);
     }

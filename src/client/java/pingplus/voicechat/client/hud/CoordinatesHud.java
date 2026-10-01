@@ -6,7 +6,7 @@ import pingplus.voicechat.client.gui.glass.GlassStyle;
 
 public class CoordinatesHud {
     private boolean enabled = true;
-    private boolean glass = true, edges = true;
+    private boolean glass = true, edges = false;
 
     public boolean isGlass() { return glass; }
     public void toggleGlass() { glass = !glass; }

@@ -16,7 +16,7 @@ public final class LogoHud {
     public static final LogoHud INSTANCE = new LogoHud();
     public static final int WIDTH = 111, HEIGHT = 58;
     private static final Identifier LOGO = Identifier.fromNamespaceAndPath("voicechat", "textures/gui/air_hud.png");
-    private boolean enabled = true, glass = true, edges = true;
+    private boolean enabled = true, glass = true, edges = false;
 
     private LogoHud() {
         try (var reader = Files.newBufferedReader(FILE)) {
@@ -24,7 +24,7 @@ public final class LogoHud {
             p.load(reader);
             enabled = Boolean.parseBoolean(p.getProperty("enabled", "true"));
             glass = Boolean.parseBoolean(p.getProperty("glass", "true"));
-            edges = Boolean.parseBoolean(p.getProperty("edges", "true"));
+            edges = Boolean.parseBoolean(p.getProperty("edges", "false"));
         } catch (IOException | IllegalArgumentException ignored) { }
     }
     public boolean isEnabled() { return enabled; }

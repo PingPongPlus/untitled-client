@@ -345,6 +345,10 @@ public final class GlassRenderingTest implements FabricClientGameTest {
                         client.gui.screen().width, client.gui.screen().height, 240, 100);
                 pingplus.voicechat.client.spotify.SpotifySettings.save();
             });
+            context.runOnClient(client -> {
+                if (!arraylist.isEnabled()) arraylist.toggle();
+                if (!arraylist.isEdges()) arraylist.toggleEdges();
+            });
             clickCompactButton(context, "Arraylist options");
             clickCompactButton(context, "Per-module boxes");
             clickCompactButton(context, "Edges");

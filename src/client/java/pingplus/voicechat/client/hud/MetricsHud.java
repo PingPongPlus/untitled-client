@@ -24,7 +24,7 @@ public final class MetricsHud {
         this.minimumText = minimumText;
         enabled = value(key);
         glass = value(key + "Glass");
-        edges = value(key + "Edges");
+        edges = Boolean.parseBoolean(PREFERENCES.getProperty(key + "Edges", "false"));
     }
 
     public boolean isEnabled() { return enabled; }
