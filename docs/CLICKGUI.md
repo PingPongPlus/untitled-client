@@ -37,3 +37,4 @@ closing, and scrolling after a resize, and saves screenshots in
 HUD edge toggles, the Arraylist, CPS, Speed, and Keystrokes start off. Existing saved preferences are respected.
 
 For HUD widgets and their separate layout editor, see [WIDGETS.md](WIDGETS.md).
+For the fixed-center reticle and its live preview, see [CROSSHAIR.md](CROSSHAIR.md).

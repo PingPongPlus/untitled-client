@@ -3,6 +3,7 @@ package pingplus.voicechat.client.gui;
 import pingplus.voicechat.client.hud.ArraylistHud;
 import pingplus.voicechat.client.hud.ChatHud;
 import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.CustomCrosshairHud;
 import pingplus.voicechat.client.hud.FpsHud;
 import pingplus.voicechat.client.hud.LogoHud;
 import pingplus.voicechat.client.hud.MetricsHud;
@@ -80,6 +81,43 @@ public final class ClickGuiScreen extends Screen {
         panelWidth = Math.min(140, (canvasWidth-24-(columns-1)*8)/columns);
         int startX = 16;
         Category hud = category("HUD", "On-screen information");
+        var crosshair = CustomCrosshairHud.INSTANCE;
+        toggle(hud,"Crosshair",crosshair::isEnabled,crosshair::toggle);
+        options(hud,"Crosshair options",()-> {
+            add(hud,new Button(0,0,panelWidth-20,110,Component.literal("Crosshair preview"),b->{},supplier->supplier.get()) {
+                { active=false; }
+                @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                    g.fill(getX(),getY(),getRight(),getBottom(),GlassStyle.alpha(0xFF20242C,opacity));
+                    g.nextStratum();
+                    text(g,"Live preview",getX()+4,getY()+4,GlassStyle.MUTED);
+                    crosshair.render(g,getX()+width/2,getY()+64,(System.nanoTime()%1_500_000_000L)/1_500_000_000f);
+                }
+            },110);
+            add(hud,new Button(0,0,panelWidth-20,18,Component.literal("Shape: "+crosshair.shape().label),
+                    b->{crosshair.cycleShape();rebuildWidgets();},supplier->supplier.get()) {
+                @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                    if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
+                    text(g,getMessage().getString(),getX()+4,getY()+4,GlassStyle.MUTED);
+                }
+            },18);
+            add(hud,new CombatSlider(panelWidth-20,"Size",1,24,1,crosshair::size,v->crosshair.setSize((int)v)),26);
+            add(hud,new CombatSlider(panelWidth-20,"Gap",0,12,1,crosshair::gap,v->crosshair.setGap((int)v)),26);
+            add(hud,new CombatSlider(panelWidth-20,"Thickness",1,6,1,crosshair::thickness,v->crosshair.setThickness((int)v)),26);
+            add(hud,new EffectSlider(panelWidth-20,"Red",crosshair::red,crosshair::setRed,255,1,""),26);
+            add(hud,new EffectSlider(panelWidth-20,"Green",crosshair::green,crosshair::setGreen,255,1,""),26);
+            add(hud,new EffectSlider(panelWidth-20,"Blue",crosshair::blue,crosshair::setBlue,255,1,""),26);
+            add(hud,new CombatSlider(panelWidth-20,"Opacity (%)",10,100,1,crosshair::opacity,v->crosshair.setOpacity((int)v)),26);
+            toggle(hud,"Outline",crosshair::isOutline,crosshair::toggleOutline);
+            toggle(hud,"Center dot",crosshair::isCenterDot,crosshair::toggleCenterDot);
+            toggle(hud,"Attack cooldown ring",crosshair::isCooldownRing,crosshair::toggleCooldownRing);
+            add(hud,new Button(0,0,panelWidth-20,18,Component.literal("Reset crosshair"),
+                    b->{crosshair.resetAppearance();rebuildWidgets();},supplier->supplier.get()) {
+                @Override protected void extractContents(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                    if(isHoveredOrFocused()) GlassButtonRenderer.control(g,getX(),getY(),width,height,GlassStyle.alpha(0xFF858585,opacity*.85f));
+                    text(g,"Reset crosshair",getX()+4,getY()+4,GlassStyle.MUTED);
+                }
+            },18);
+        });
         toggle(hud,"Frame rate",fpsHud::isEnabled,fpsHud::toggle);
         options(hud,"FPS options",()-> {
             toggle(hud,"FPS glass",fpsHud::isGlass,fpsHud::toggleGlass);
@@ -672,6 +710,26 @@ public final class ClickGuiScreen extends Screen {
             GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
             g.nextStratum();
             GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(isHoveredOrFocused()?0xFFFFFFFF:GlassStyle.TEXT,opacity));
+        }
+    }
+    private final class CombatSlider extends AbstractSliderButton {
+        private final String label;
+        private final double min,max,step;
+        private final DoubleSupplier getter;
+        private final DoubleConsumer setter;
+        CombatSlider(int w,String label,double min,double max,double step,DoubleSupplier getter,DoubleConsumer setter) {
+            super(0,0,w,26,Component.literal(label),(getter.getAsDouble()-min)/(max-min));
+            this.label=label;this.min=min;this.max=max;this.step=step;this.getter=getter;this.setter=setter;updateMessage();
+        }
+        @Override protected void updateMessage(){setMessage(Component.literal(String.format(Locale.ROOT,"%s   %.1f",label,getter.getAsDouble())));}
+        @Override protected void applyValue(){setter.accept(Math.clamp(min+Math.round(value*(max-min)/step)*step,min,max));updateMessage();}
+        @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt){
+            text(g,getMessage().getString(),getX()+4,getY()+3,GlassStyle.MUTED);
+            int x=getX()+4,y=getY()+19,length=width-8;
+            GlassButtonRenderer.control(g,x,y,length,3,GlassStyle.alpha(0xFF555555,opacity));
+            GlassButtonRenderer.control(g,x,y,Math.max(1,(int)(length*value)),3,GlassStyle.alpha(GlassStyle.ACCENT,opacity));
+            g.nextStratum();
+            GlassButtonRenderer.control(g,getX()+(int)Math.round((width-8)*value),y-3,8,9,GlassStyle.alpha(GlassStyle.TEXT,opacity));
         }
     }
     private final class DockSizeSlider extends AbstractSliderButton {

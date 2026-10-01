@@ -97,6 +97,7 @@ public final class ArraylistHud {
 
     private List<Named> features() {
         return List.of(
+                new Named("Custom crosshair", CustomCrosshairHud.INSTANCE::isEnabled),
                 new Named("Frame rate", fpsHud::isEnabled),
                 new Named("Ping", PingHud.INSTANCE::isEnabled),
                 new Named("CPS", MetricsHud.CPS::isEnabled),

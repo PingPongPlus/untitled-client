@@ -55,7 +55,7 @@ final class ClickGuiOptionsGameTest {
             context.waitTicks(10);
             context.takeScreenshot("clickgui-gears");
 
-            List<String> groups = List.of("FPS options","Ping options","CPS options","Speed options","Keystrokes options","XYZ options","Spotify options",
+            List<String> groups = List.of("Crosshair options","FPS options","Ping options","CPS options","Speed options","Keystrokes options","XYZ options","Spotify options",
                     "Arraylist options","Scoreboard options","Chat options","Bars","Dock options","Logo options",
                     "Damage glass options","Zoom options","Glass style","Weather Glass options","Player scale");
             for (String name : groups) {

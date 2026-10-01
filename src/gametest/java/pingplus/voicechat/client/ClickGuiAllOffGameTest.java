@@ -3,6 +3,7 @@ package pingplus.voicechat.client;
 import pingplus.voicechat.client.hud.ArraylistHud;
 import pingplus.voicechat.client.hud.ChatHud;
 import pingplus.voicechat.client.hud.CoordinatesHud;
+import pingplus.voicechat.client.hud.CustomCrosshairHud;
 import pingplus.voicechat.client.hud.FpsHud;
 import pingplus.voicechat.client.hud.LogoHud;
 import pingplus.voicechat.client.hud.MetricsHud;
@@ -37,6 +38,11 @@ final class ClickGuiAllOffGameTest {
         Map<Field,Boolean> player = new LinkedHashMap<>();
         boolean rain = GlassRainSettings.isEnabled();
         context.runOnClient(client -> {
+            var crosshair = CustomCrosshairHud.INSTANCE;
+            toggles.add(saved(crosshair::isEnabled,crosshair::toggle));
+            toggles.add(saved(crosshair::isOutline,crosshair::toggleOutline));
+            toggles.add(saved(crosshair::isCenterDot,crosshair::toggleCenterDot));
+            toggles.add(saved(crosshair::isCooldownRing,crosshair::toggleCooldownRing));
             toggles.add(saved(fps::isEnabled,fps::toggle));
             toggles.add(saved(fps::isGlass,fps::toggleGlass));
             toggles.add(saved(fps::isEdges,fps::toggleEdges));
@@ -111,6 +117,7 @@ final class ClickGuiAllOffGameTest {
                 checkSavedOff("voicechat-logo-hud.properties","enabled","glass","edges");
                 checkSavedOff("voicechat-metrics-hud.properties","cps","cpsGlass","cpsEdges","speed","speedGlass","speedEdges");
                 checkSavedOff("voicechat-keystrokes-hud.properties","enabled","glass","edges","mouseButtons","spaceBar");
+                checkSavedOff("voicechat-crosshair.properties","enabled","outline","centerDot","cooldownRing");
                 check(!VoiceSettings.load().middleClickVolume,"All off must save the middle-click volume setting");
                 checkSavedOff("voicechat-glass-effects.properties","customTint");
             });
