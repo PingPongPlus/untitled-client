@@ -21,14 +21,14 @@ public final class KeystrokesHud {
     public static final KeystrokesHud INSTANCE = new KeystrokesHud();
     public enum Key { FORWARD, LEFT, BACKWARD, RIGHT, ATTACK, USE, JUMP }
     private final float[] highlights = new float[Key.values().length];
-    private boolean enabled = true, glass = true, edges = false, mouseButtons = true, spaceBar = true;
+    private boolean enabled = false, glass = true, edges = false, mouseButtons = true, spaceBar = true;
     private long lastFrame;
 
     private KeystrokesHud() {
         Properties values = new Properties();
         try (var reader = Files.newBufferedReader(FILE)) { values.load(reader); }
         catch (IOException | IllegalArgumentException ignored) { }
-        enabled = value(values, "enabled");
+        enabled = Boolean.parseBoolean(values.getProperty("enabled", "false"));
         glass = value(values, "glass");
         edges = Boolean.parseBoolean(values.getProperty("edges", "false"));
         mouseButtons = value(values, "mouseButtons");
