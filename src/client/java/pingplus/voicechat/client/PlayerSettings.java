@@ -59,6 +59,8 @@ public final class PlayerSettings {
     public static boolean killAuraMobs = true;
     public static float killAuraRange = 3f;
     public static float killAuraTurnSpeed = 170f;
+    public static String followTarget = "";
+    public static boolean followLookAtNearbyPlayers = false;
 
 }
 

@@ -307,6 +307,9 @@ public final class ClickGuiScreen extends Screen {
             add(automation,new CombatSlider(panelWidth-20,"Range",1,4,.1,()->PlayerSettings.killAuraRange,v->PlayerSettings.killAuraRange=(float)v),26);
             add(automation,new CombatSlider(panelWidth-20,"Turn speed",45,540,15,()->PlayerSettings.killAuraTurnSpeed,v->PlayerSettings.killAuraTurnSpeed=(float)v),26);
         });
+        nameBox(automation,"Follow",()->PlayerSettings.followTarget,v->PlayerSettings.followTarget=v);
+        toggle(automation,"Look at nearby players",()->PlayerSettings.followLookAtNearbyPlayers,
+            ()->PlayerSettings.followLookAtNearbyPlayers=!PlayerSettings.followLookAtNearbyPlayers);
         toggle(automation,"Hand swap",()->PlayerSettings.handSwap,()->PlayerSettings.handSwap=!PlayerSettings.handSwap);
         options(automation,"Swap interval",()-> {
             add(automation,new SpeedSlider(panelWidth-20),26);
@@ -519,6 +522,19 @@ public final class ClickGuiScreen extends Screen {
                 box.setTextColor(valid?GlassStyle.TEXT:0xFFFF9B99);if(valid)setter.accept(n);
             }catch(NumberFormatException ignored){box.setTextColor(0xFFFF9B99);}
         });
+        add(c,box,20);
+    }
+    private void nameBox(Category c,String label,Supplier<String> getter,Consumer<String> setter) {
+        EditBox box=new EditBox(font,0,0,55,14,Component.literal(label)) {
+            @Override public void extractWidgetRenderState(GuiGraphicsExtractor g,int mx,int my,float dt) {
+                text(g,label,getX()-(optionsWidth-80),getY()+3,GlassStyle.MUTED);
+                GlassButtonRenderer.control(g,getX()-5,getY()-2,getWidth()+10,18,GlassStyle.alpha(isFocused()?0xFF555555:0xFF303030,opacity));
+                g.nextStratum();super.extractWidgetRenderState(g,mx,my,dt);
+            }
+        };
+        box.addFormatter((text,index)->net.minecraft.util.FormattedCharSequence.forward(text,GlassStyle.FONT));
+        box.setBordered(false);box.setTextShadow(false);box.setTextColor(GlassStyle.TEXT);box.setMaxLength(16);box.setValue(getter.get());
+        box.setResponder(setter);
         add(c,box,20);
     }
     private void keyButton(Category c, String name, KeyMapping mapping) {

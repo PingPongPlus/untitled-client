@@ -198,6 +198,7 @@ public class VoicechatClient implements ClientModInitializer {
             AutoToolsFeature.tick(client);
             StorageEspFeature.tick(client);
             KillAuraFeature.tick(client);
+            pingplus.voicechat.client.FollowFeature.tick(client);
             while (killauraKey != null && killauraKey.consumeClick()) {
                 PlayerSettings.killAura = !PlayerSettings.killAura;
                 if (!PlayerSettings.killAura) KillAuraFeature.clear();

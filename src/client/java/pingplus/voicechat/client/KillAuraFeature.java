@@ -1,6 +1,8 @@
 package pingplus.voicechat.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -33,11 +35,13 @@ public final class KillAuraFeature {
 
     /** Check the player and game state before accessing world data or taking control. */
     private static boolean active(Minecraft client) {
+        var screen = client.gui.screen();
         // The toggle must be on, and the player, world and interaction controller must exist.
         // Those objects can be absent during startup, disconnects and world changes.
         return PlayerSettings.killAura && client.player != null && client.level != null && client.gameMode != null
-                // Do not move the camera or attack while a menu/loading overlay is open or the game is paused.
-                && client.gui.screen() == null && client.gui.overlay() == null && !client.isPaused()
+            // Chat and the player inventory do not suspend gameplay for KillAura.
+            && (screen == null || screen instanceof ChatScreen || screen instanceof InventoryScreen)
+            && client.gui.overlay() == null && !client.isPaused()
                 // Dead players and spectators cannot fight. Keep aiming and attacking while blocking,
                 // but pause for other item use so eating, drinking or charging a bow is not interrupted.
                 && client.player.isAlive() && !client.player.isSpectator()
